@@ -1,4 +1,5 @@
 import Swal from 'sweetalert2';
+import { playConfirmBeep, playCriticalBeep, playValveBeep } from './sound.js';
 
 /**
  * Custom-styled SweetAlert2 instance tailored to the SUOWMRS design system.
@@ -40,11 +41,45 @@ export const confirmSosDispatch = async ({ location, waterLevel, status }) => {
 };
 
 /**
+ * Emergency Flood Diversion confirmation dialog.
+ */
+export const confirmDiversion = async ({ systemId, ward, location, waterLevel, storageLevel }) => {
+  playCriticalBeep();
+  const result = await customSwal.fire({
+    icon: 'warning',
+    iconColor: '#EF4444',
+    title: `Initiate Emergency Water Diversion?`,
+    html: `
+      <div class="text-left bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50 rounded-xl p-3.5 my-3 text-rose-950 dark:text-rose-200 text-xs">
+        <p class="font-bold mb-1">Critical Storm Drainage Action</p>
+        <p>Actuating the underground solenoid diverter valve will instantly channel excess stormwater from <strong>${systemId}</strong> into the underground cistern buffer.</p>
+        <div class="mt-2.5 pt-2 border-t border-rose-200/80 dark:border-rose-800/60 text-slate-700 dark:text-slate-300 space-y-1">
+          <div><strong>Location:</strong> ${location || 'Municipal Ward'} (${ward || 'Zone'})</div>
+          <div><strong>Current Water Level:</strong> <span class="font-mono text-rose-600 font-bold">${parseFloat(waterLevel).toFixed(1)}% (CRITICAL)</span></div>
+          <div><strong>Storage Cistern:</strong> <span class="font-mono text-emerald-600 font-bold">${parseFloat(storageLevel).toFixed(1)}% (Capacity Available)</span></div>
+        </div>
+      </div>
+    `,
+    showCancelButton: true,
+    confirmButtonText: 'Yes, Divert Water Now',
+    cancelButtonText: 'Cancel',
+    confirmButtonClass: 'bg-rose-600 hover:bg-rose-700 text-white shadow-md shadow-rose-600/30 focus:ring-rose-500',
+  });
+
+  if (result.isConfirmed) {
+    playConfirmBeep();
+    playValveBeep('open');
+  }
+  return result;
+};
+
+/**
  * Manual Valve Override confirmation dialog.
  */
 export const confirmValveToggle = async (currentStatus) => {
   const isOpening = currentStatus !== 'OPEN';
-  return await customSwal.fire({
+  playCriticalBeep();
+  const result = await customSwal.fire({
     icon: 'question',
     iconColor: '#0F4C5C',
     title: `${isOpening ? 'Open' : 'Close'} Solenoid Diverter Valve?`,
@@ -58,13 +93,20 @@ export const confirmValveToggle = async (currentStatus) => {
       ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-md focus:ring-emerald-500'
       : 'bg-amber-600 hover:bg-amber-700 text-white shadow-md focus:ring-amber-500',
   });
+
+  if (result.isConfirmed) {
+    playConfirmBeep();
+    playValveBeep(isOpening ? 'open' : 'close');
+  }
+  return result;
 };
 
 /**
  * General dangerous or critical action confirmation.
  */
 export const confirmAction = async ({ title, text, confirmText = 'Confirm', isDanger = false }) => {
-  return await customSwal.fire({
+  if (isDanger) playCriticalBeep();
+  const result = await customSwal.fire({
     icon: isDanger ? 'warning' : 'info',
     iconColor: isDanger ? '#EF4444' : '#0F4C5C',
     title,
@@ -76,4 +118,10 @@ export const confirmAction = async ({ title, text, confirmText = 'Confirm', isDa
       ? 'bg-rose-600 hover:bg-rose-700 text-white shadow-md'
       : 'bg-brand-deep hover:bg-brand-dark text-white shadow-md',
   });
+
+  if (result.isConfirmed) {
+    playConfirmBeep();
+  }
+  return result;
 };
+

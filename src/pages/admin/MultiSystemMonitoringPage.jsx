@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   Layers, Search, Filter, RefreshCw, ChevronLeft, ChevronRight,
-  CheckCircle2, AlertTriangle, AlertOctagon, Wifi, WifiOff, Clock
+  CheckCircle2, AlertTriangle, AlertOctagon, Wifi, WifiOff, Clock, Zap
 } from 'lucide-react';
 import Badge from '../../components/common/Badge';
 import Button from '../../components/common/Button';
 import Input from '../../components/common/Input';
-import { getMunicipalitySystems } from '../../services/municipalityService';
+import { getMunicipalitySystems, triggerFloodDiversion } from '../../services/municipalityService';
+import { confirmDiversion, customSwal } from '../../utils/swal';
 
 export default function MultiSystemMonitoringPage() {
   const [systems, setSystems] = useState([]);
@@ -17,6 +18,7 @@ export default function MultiSystemMonitoringPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(128);
+  const [divertingId, setDivertingId] = useState(null);
 
   const fetchSystemsData = async () => {
     try {
@@ -42,6 +44,63 @@ export default function MultiSystemMonitoringPage() {
     e.preventDefault();
     setPage(1);
     fetchSystemsData();
+  };
+
+  const handleDivert = async (sys) => {
+    if (!sys) return;
+
+    if (parseFloat(sys.storageLevel) >= 95) {
+      return customSwal.fire({
+        icon: 'error',
+        title: 'Diversion Rejected: Cistern Full',
+        text: `Underground cistern at ${sys.systemId} is at capacity (${parseFloat(sys.storageLevel).toFixed(0)}%). Cannot accept diversion.`,
+      });
+    }
+
+    const confirmRes = await confirmDiversion({
+      systemId: sys.systemId,
+      ward: sys.ward,
+      location: sys.location,
+      waterLevel: sys.waterLevel,
+      storageLevel: sys.storageLevel,
+    });
+
+    if (!confirmRes.isConfirmed) return;
+
+    setDivertingId(sys.systemId);
+    try {
+      const res = await triggerFloodDiversion(sys.systemId);
+      if (res && res.success) {
+        setSystems((prev) =>
+          prev.map((s) =>
+            s.systemId === sys.systemId
+              ? {
+                  ...s,
+                  waterLevel: res.node?.waterLevel ?? Math.max(30, s.waterLevel - 20),
+                  storageLevel: res.node?.storageLevel ?? Math.min(94, s.storageLevel + 16),
+                  status: res.node?.status ?? 'Warning',
+                }
+              : s
+          )
+        );
+
+        customSwal.fire({
+          icon: 'success',
+          title: 'Flood Diversion Activated',
+          text: `Underground diverter valve engaged for ${sys.systemId} (${sys.location}). Flood stress relieved.`,
+          timer: 3500,
+        });
+      }
+    } catch (err) {
+      console.error('Failed to divert water:', err);
+      customSwal.fire({
+        icon: 'error',
+        title: 'Diversion Action Failed',
+        text: err.response?.data?.error || 'Could not communicate with drainage telemetry node.',
+      });
+    } finally {
+      setDivertingId(null);
+    }
   };
 
   const getStatusBadge = (status) => {
@@ -140,6 +199,26 @@ export default function MultiSystemMonitoringPage() {
         </form>
       </div>
 
+      {/* Emergency Alert Banner if any critical systems exist */}
+      {systems.some(s => s.status === 'Critical' || s.waterLevel >= 75) && (
+        <div className="bg-rose-500/10 border border-rose-500/25 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-rose-700 dark:text-rose-300">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-rose-500/20 text-rose-600 flex items-center justify-center flex-shrink-0">
+              <AlertOctagon className="w-5 h-5 animate-pulse" />
+            </div>
+            <div>
+              <h4 className="text-xs font-black uppercase tracking-wider">Critical Sump Saturation Detected</h4>
+              <p className="text-xs opacity-90">
+                {systems.filter(s => s.status === 'Critical' || s.waterLevel >= 75).length} ward(s) currently exceed 75% overflow threshold. Admin flood diversion available below.
+              </p>
+            </div>
+          </div>
+          <span className="text-[11px] font-mono font-bold bg-rose-500/20 px-2.5 py-1 rounded-lg self-start sm:self-auto">
+            Direct Action Enabled
+          </span>
+        </div>
+      )}
+
       {/* Data Table */}
       <div className="dark:bg-[#0F172A] bg-white border dark:border-white/10 border-slate-200 shadow-lg rounded-2xl overflow-hidden">
         <div className="overflow-x-auto">
@@ -153,19 +232,20 @@ export default function MultiSystemMonitoringPage() {
                 <th className="py-3.5 px-4">Storage Level</th>
                 <th className="py-3.5 px-4">Device</th>
                 <th className="py-3.5 px-4 text-right">Last Updated</th>
+                <th className="py-3.5 px-4 text-center">Flood Action</th>
               </tr>
             </thead>
             <tbody className="divide-y dark:divide-white/5 divide-slate-100 text-xs font-semibold">
               {loading ? (
                 <tr>
-                  <td colSpan="7" className="py-12 text-center text-slate-400">
+                  <td colSpan="8" className="py-12 text-center text-slate-400">
                     <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-[#0EA5E9]" />
                     Loading system grid data...
                   </td>
                 </tr>
               ) : systems.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="py-12 text-center text-slate-400">
+                  <td colSpan="8" className="py-12 text-center text-slate-400">
                     No system installations found matching filters.
                   </td>
                 </tr>
@@ -203,6 +283,22 @@ export default function MultiSystemMonitoringPage() {
                     </td>
                     <td className="py-3.5 px-4 text-right text-slate-500 dark:text-slate-400 text-[11px] font-mono">
                       {new Date(sys.lastUpdated).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </td>
+                    <td className="py-3.5 px-4 text-center">
+                      {sys.status === 'Critical' || sys.waterLevel >= 75 ? (
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          className="bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs py-1 px-3 shadow-md shadow-rose-600/25 whitespace-nowrap"
+                          disabled={sys.storageLevel >= 95 || divertingId === sys.systemId}
+                          isLoading={divertingId === sys.systemId}
+                          onClick={() => handleDivert(sys)}
+                        >
+                          {sys.storageLevel >= 95 ? 'Cistern Full' : '⚡ Divert Water'}
+                        </Button>
+                      ) : (
+                        <span className="text-[11px] text-slate-400 font-mono">Nominal Flow</span>
+                      )}
                     </td>
                   </tr>
                 ))

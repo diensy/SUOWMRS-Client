@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import SystemMarker from './SystemMarker';
 import SystemMapPopup from './SystemMapPopup';
 
-export default function SystemMap({ systems = [], onSelectSystem }) {
+export default function SystemMap({ systems = [], onSelectSystem, onDivert }) {
   const [selectedSystem, setSelectedSystem] = useState(null);
 
   const handleMarkerClick = (sys) => {
@@ -71,6 +71,10 @@ export default function SystemMap({ systems = [], onSelectSystem }) {
             onViewSystem={(sys) => {
               setSelectedSystem(null);
               onSelectSystem?.(sys);
+            }}
+            onDivert={(sys) => {
+              setSelectedSystem(null);
+              onDivert?.(sys);
             }}
           />
         </div>

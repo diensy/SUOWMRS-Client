@@ -16,6 +16,7 @@ import {
 import Button from '../../components/common/Button';
 import Badge from '../../components/common/Badge';
 import StatusIndicator from '../../components/common/StatusIndicator';
+import VoiceSpeakerButton from '../../components/common/VoiceSpeakerButton';
 import { useSocket } from '../../hooks/useSocket';
 import { getLatestWaterLevel, getWaterLevelHistory, getWaterLevelStats } from '../../services/waterLevelService';
 import { getMunicipalityMapNodes } from '../../services/municipalityService';
@@ -142,6 +143,14 @@ export default function WaterMonitoringPage() {
             <span className={`w-2 h-2 rounded-full ${isConnected ? 'bg-emerald-400 animate-ping' : 'bg-amber-400'}`} />
             <span className="font-semibold text-white">{isConnected ? 'Live Telemetry Active' : 'Polling Backend'}</span>
           </div>
+          <VoiceSpeakerButton
+            text={`Live water telemetry report: Primary sump water level is ${currentLevel.toFixed(1)} percent, with a depth of ${depthCm} centimeters. Current threshold condition is ${currentThresh.label}. Flow velocity is 4.8 meters per second. Line power is stable.`}
+            label="Listen Telemetry"
+            size="sm"
+            variant="subtle"
+            className="bg-white/10 hover:bg-white/20 text-white border-white/20"
+            id="water-telemetry-header-voice"
+          />
           <Button
             variant="secondary"
             size="sm"
@@ -163,7 +172,14 @@ export default function WaterMonitoringPage() {
           className="dark:bg-[#0F172A] bg-white border dark:border-white/10 border-slate-200 rounded-2xl p-4 shadow-sm flex items-center justify-between"
         >
           <div>
-            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Primary Sump Level</span>
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Primary Sump Level</span>
+              <VoiceSpeakerButton
+                text={`Primary sump level is ${currentLevel.toFixed(1)} percent (${depthCm} cm). Threshold is ${currentThresh.label}.`}
+                size="xs"
+                id="sump-primary-voice"
+              />
+            </div>
             <div className="flex items-baseline gap-2 mt-1">
               <span className={`text-2xl font-black font-mono ${currentThresh.textClass}`}>
                 <CountUp end={currentLevel} decimals={1} duration={0.8} />%

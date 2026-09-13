@@ -3,8 +3,11 @@ import { X, Layers, MapPin, Activity, Clock, CheckCircle2, AlertTriangle, AlertO
 import Badge from '../common/Badge';
 import Button from '../common/Button';
 
-export default function SystemMapPopup({ system, onClose, onViewSystem }) {
+export default function SystemMapPopup({ system, onClose, onViewSystem, onDivert }) {
   if (!system) return null;
+
+  const isCritical = system.status === 'Critical' || (parseFloat(system.waterLevel) >= 75);
+  const canDivert = isCritical && (parseFloat(system.storageLevel) < 95);
 
   return (
     <div className="dark:bg-[#1E293B] bg-white border dark:border-white/10 border-slate-200 rounded-2xl shadow-2xl p-4 w-72 sm:w-80 text-slate-800 dark:text-slate-100 z-50">
@@ -52,14 +55,34 @@ export default function SystemMapPopup({ system, onClose, onViewSystem }) {
         </div>
       </div>
 
-      <div className="mt-3.5 pt-2.5 border-t dark:border-white/10 border-slate-100">
+      {/* ── Emergency Flood Diversion Control ── */}
+      {isCritical && (
+        <div className="mt-3 pt-2.5 border-t border-rose-200/50 dark:border-rose-900/30">
+          <Button
+            variant="danger"
+            size="sm"
+            className="w-full bg-rose-600 hover:bg-rose-700 text-white font-black shadow-md shadow-rose-600/30"
+            disabled={!canDivert}
+            onClick={() => onDivert?.(system)}
+          >
+            {canDivert ? '⚡ Divert Water Now' : '⚠️ Storage Cistern Full (≥95%)'}
+          </Button>
+          <p className="text-[10px] text-rose-500 font-medium text-center mt-1">
+            {canDivert
+              ? 'Imminent flood risk — Divert into underground cistern'
+              : 'Reservoir buffer unavailable. Mobile dewatering dispatch needed.'}
+          </p>
+        </div>
+      )}
+
+      <div className="mt-2.5 pt-2 border-t dark:border-white/10 border-slate-100 flex gap-2">
         <Button
-          variant="primary"
+          variant="outline"
           size="sm"
-          className="w-full"
+          className="w-full text-xs"
           onClick={() => onViewSystem?.(system)}
         >
-          View System Details
+          View in Table
         </Button>
       </div>
     </div>

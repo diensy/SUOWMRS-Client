@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 import { getWeatherTelemetry } from '../../services/predictionService';
+import VoiceSpeakerButton from '../../components/common/VoiceSpeakerButton';
 
 const INTENSITY_CONFIG = {
   None:     { color: '#10B981', icon: Sun,      label: 'Clear'      },
@@ -168,27 +169,47 @@ export default function WeatherPage() {
                 <span className="text-sm text-teal-200">{w.rainfallIntensity} intensity</span>
               </div>
             </div>
-            <div className="text-right">
-              <p className="text-4xl font-black text-white">{w.temperatureC?.toFixed(1)}°C</p>
-              <p className="text-xs text-teal-300">{w.humidityPct}% humidity</p>
+            <div className="flex flex-col items-end gap-2">
+              <div className="text-right">
+                <p className="text-4xl font-black text-white">{w.temperatureC?.toFixed(1)}°C</p>
+                <p className="text-xs text-teal-300">{w.humidityPct}% humidity</p>
+              </div>
+              <VoiceSpeakerButton
+                text={`Weather report for ${w.city || 'Bhubaneswar'}. Current condition: ${w.weatherCondition || 'Monsoon'}. Rainfall intensity is ${w.rainfallIntensity} at ${w.currentRainfallMmPerHour?.toFixed(1)} mm per hour. Temperature is ${w.temperatureC?.toFixed(1)} degrees Celsius. Flood risk level is ${riskLevel}.`}
+                size="xs"
+                label="Listen Weather"
+                variant="subtle"
+                id="weather-voice-report"
+                className="bg-white/10 hover:bg-white/20 text-white border-white/20"
+              />
             </div>
           </div>
 
           {/* Risk alert */}
-          <div className={`flex items-center gap-3 p-4 rounded-xl border ${rCfg.bg} ${rCfg.border}`}>
-            <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${rCfg.dot} ${riskLevel !== 'NONE' ? 'animate-pulse' : ''}`} />
-            <div className="flex-1">
-              <p className={`text-sm font-black ${rCfg.text}`}>
-                Flood Risk Level: <span className="uppercase">{riskLevel}</span>
-              </p>
-              <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
-                {riskLevel === 'HIGH'     && 'Heavy rainfall detected. Drainage systems under stress. Flood risk elevated.'}
-                {riskLevel === 'MODERATE' && 'Moderate rainfall. Monitor water levels. Review drainage capacity.'}
-                {riskLevel === 'LOW'      && 'Light rainfall. Systems operating normally. No immediate risk.'}
-                {riskLevel === 'NONE'     && 'No rainfall detected. Clear conditions. All systems green.'}
-              </p>
+          <div className={`flex items-center justify-between gap-3 p-4 rounded-xl border ${rCfg.bg} ${rCfg.border}`}>
+            <div className="flex items-center gap-3 flex-1">
+              <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${rCfg.dot} ${riskLevel !== 'NONE' ? 'animate-pulse' : ''}`} />
+              <div className="flex-1">
+                <p className={`text-sm font-black ${rCfg.text}`}>
+                  Flood Risk Level: <span className="uppercase">{riskLevel}</span>
+                </p>
+                <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
+                  {riskLevel === 'HIGH'     && 'Heavy rainfall detected. Drainage systems under stress. Flood risk elevated.'}
+                  {riskLevel === 'MODERATE' && 'Moderate rainfall. Monitor water levels. Review drainage capacity.'}
+                  {riskLevel === 'LOW'      && 'Light rainfall. Systems operating normally. No immediate risk.'}
+                  {riskLevel === 'NONE'     && 'No rainfall detected. Clear conditions. All systems green.'}
+                </p>
+              </div>
             </div>
-            {riskLevel !== 'NONE' && <AlertTriangle className={`w-4 h-4 flex-shrink-0 ${rCfg.text}`} />}
+            <div className="flex items-center gap-2">
+              <VoiceSpeakerButton
+                text={`Flood Risk Alert: Level is ${riskLevel}. ${riskLevel === 'HIGH' ? 'Heavy rainfall detected. Drainage systems under stress. Flood risk elevated.' : 'Systems operating normally.'}`}
+                size="xs"
+                variant={riskLevel === 'HIGH' ? 'emergency' : 'pill'}
+                id="weather-risk-voice"
+              />
+              {riskLevel !== 'NONE' && <AlertTriangle className={`w-4 h-4 flex-shrink-0 ${rCfg.text}`} />}
+            </div>
           </div>
 
           {/* Metric grid */}

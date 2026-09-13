@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 import { getAlerts, markAllAlertsRead, markAlertRead, getUnreadCount } from '../../services/alertService';
+import VoiceSpeakerButton from '../../components/common/VoiceSpeakerButton';
 
 const SEVERITY_CONFIG = {
   normal:   { color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/20', dot: 'bg-emerald-500', icon: Info,          label: 'Normal'   },
@@ -58,13 +59,22 @@ function AlertCard({ alert, onRead }) {
             {cfg.label}
           </span>
           <span className="text-[10px] font-mono text-slate-400 dark:text-slate-500">{alert.sensorId}</span>
-          <span className="text-[10px] text-slate-400 dark:text-slate-500 ml-auto pr-5">{timeAgo}</span>
+          <div className="ml-auto flex items-center gap-2">
+            <VoiceSpeakerButton
+              text={alert.message}
+              size="xs"
+              label="Listen"
+              variant={alert.type === 'critical' || alert.type === 'danger' ? 'emergency' : 'subtle'}
+              id={`alert-${alert._id}`}
+            />
+            <span className="text-[10px] text-slate-400 dark:text-slate-500">{timeAgo}</span>
+          </div>
         </div>
-        <p className={`text-sm font-medium leading-snug ${isUnread ? 'text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-400'}`}>
+        <p className={`text-sm font-medium leading-snug mt-1 ${isUnread ? 'text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-400'}`}>
           {alert.message}
         </p>
         {alert.location && (
-          <p className="text-[11px] text-slate-500 dark:text-slate-500 mt-0.5 flex items-center gap-1">
+          <p className="text-[11px] text-slate-500 dark:text-slate-500 mt-1 flex items-center gap-1">
             <Circle className="w-1.5 h-1.5 fill-current" />
             {alert.location}
           </p>

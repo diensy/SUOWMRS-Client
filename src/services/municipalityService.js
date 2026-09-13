@@ -23,3 +23,9 @@ export async function getEmergencyData() {
   const res = await axios.get(`${API_BASE}/emergency`);
   return res.data;
 }
+
+export async function triggerFloodDiversion(systemId) {
+  const res = await axios.post(`${API_BASE}/divert`, { systemId });
+  return res.data;
+}
+

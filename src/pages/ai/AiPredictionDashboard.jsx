@@ -13,6 +13,7 @@ import {
 import Card from '../../components/common/Card';
 import Badge from '../../components/common/Badge';
 import Button from '../../components/common/Button';
+import VoiceSpeakerButton from '../../components/common/VoiceSpeakerButton';
 import {
   getLivePrediction,
   getForecastTrend,
@@ -180,10 +181,19 @@ export default function AiPredictionDashboard() {
             <span className="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
               AI Flood Risk Assessment
             </span>
-            <span className="inline-flex items-center gap-1 text-[11px] font-mono text-slate-500 dark:text-slate-400">
-              <Clock className="w-3 h-3" />
-              Live Inference
-            </span>
+            <div className="flex items-center gap-2">
+              <VoiceSpeakerButton
+                text={`AI Hydrological Prediction. Flood probability is ${prediction?.floodProbability || 78} percent. Risk level is ${prediction?.riskLevel || 'High'}. Expected risk window: ${prediction?.riskWindow || 'next 30 to 60 minutes'}. Drainage Saturation Index is ${prediction?.dsiScore || 76} percent.`}
+                label="Listen Summary"
+                size="xs"
+                variant="pill"
+                id="ai-risk-summary"
+              />
+              <span className="inline-flex items-center gap-1 text-[11px] font-mono text-slate-500 dark:text-slate-400">
+                <Clock className="w-3 h-3" />
+                Live Inference
+              </span>
+            </div>
           </div>
 
           {/* Probability Hero */}

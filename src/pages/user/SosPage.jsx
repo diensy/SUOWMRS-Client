@@ -5,6 +5,7 @@ import {
   CheckCircle2, Clock, User, MessageSquare, ChevronRight, Zap
 } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
+import VoiceSpeakerButton from '../../components/common/VoiceSpeakerButton';
 
 const EMERGENCY_TYPES = [
   { id: 'flood',     icon: AlertOctagon, label: 'Active Flooding',       color: '#EF4444', desc: 'Water entering homes or streets' },
@@ -137,11 +138,20 @@ export default function SosPage() {
         {step === 'select' && (
           <motion.div key="select" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-4">
             {/* Warning banner */}
-            <div className="bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 rounded-xl p-3 flex items-center gap-2">
-              <Shield className="w-4 h-4 text-rose-600 dark:text-rose-400 flex-shrink-0" />
-              <p className="text-xs text-rose-700 dark:text-rose-300 font-medium">
-                Use this only for genuine emergencies. False alerts may delay response to real emergencies.
-              </p>
+            <div className="bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 rounded-xl p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+              <div className="flex items-center gap-2">
+                <Shield className="w-4 h-4 text-rose-600 dark:text-rose-400 flex-shrink-0" />
+                <p className="text-xs text-rose-700 dark:text-rose-300 font-medium">
+                  Use this only for genuine emergencies. False alerts may delay response to real emergencies.
+                </p>
+              </div>
+              <VoiceSpeakerButton
+                text="Emergency SOS Dispatch. In active flooding, drain blockage, or structural hazard emergencies, select the emergency type, transmit your geolocation, or dial helpline 1 0 7 0."
+                label="Listen Guide"
+                size="xs"
+                variant="emergency"
+                id="sos-guide-audio"
+              />
             </div>
 
             {/* Emergency type selection */}

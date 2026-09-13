@@ -9,6 +9,8 @@ import Swal from 'sweetalert2';
 import Badge from '../../components/common/Badge';
 import Button from '../../components/common/Button';
 import { getComponentsDiagnostics } from '../../services/diagnosticsService';
+import { getTreatmentCurrent, toggleFiltration } from '../../services/treatmentService';
+import { confirmAction, customSwal } from '../../utils/swal';
 import { useSocket } from '../../hooks/useSocket';
 import { useTheme } from '../../context/ThemeContext';
 import { useLanguage } from '../../context/LanguageContext';
@@ -20,12 +22,20 @@ export default function ComponentsHealth() {
 
   const [components, setComponents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [filtrationStatus, setFiltrationStatus] = useState('ACTIVE');
+  const [filtrationLoading, setFiltrationLoading] = useState(false);
 
   const fetchComponents = async () => {
     try {
       setLoading(true);
-      const data = await getComponentsDiagnostics();
+      const [data, treat] = await Promise.all([
+        getComponentsDiagnostics(),
+        getTreatmentCurrent().catch(() => null),
+      ]);
       setComponents(data || []);
+      if (treat?.filtrationStatus) {
+        setFiltrationStatus(treat.filtrationStatus);
+      }
     } catch (err) {
       console.error('Failed to load components health:', err);
     } finally {
@@ -53,9 +63,55 @@ export default function ComponentsHealth() {
         }
       }
     };
+    const handleFiltrationUpdate = (payload) => {
+      if (payload.filtrationStatus) {
+        setFiltrationStatus(payload.filtrationStatus);
+      }
+    };
     socket.on('diagnostics:update', handleUpdate);
-    return () => socket.off('diagnostics:update', handleUpdate);
+    socket.on('treatment:filtration', handleFiltrationUpdate);
+    return () => {
+      socket.off('diagnostics:update', handleUpdate);
+      socket.off('treatment:filtration', handleFiltrationUpdate);
+    };
   }, [socket]);
+
+  const handleToggleFiltration = async () => {
+    const isCurrentlyActive = filtrationStatus === 'ACTIVE';
+    const nextStatus = isCurrentlyActive ? 'MAINTENANCE_PAUSED' : 'ACTIVE';
+
+    const confirmRes = await confirmAction({
+      title: isCurrentlyActive ? 'Pause Water Filtration for Maintenance?' : 'Resume Water Filtration?',
+      text: isCurrentlyActive
+        ? 'Purification pumps, sand bed filters, and UV sterilization will be placed in Maintenance Mode.'
+        : 'Purification pipeline will re-engage all 4 treatment stages.',
+      confirmText: isCurrentlyActive ? 'Enter Maintenance Mode' : 'Resume Filtration',
+      isDanger: isCurrentlyActive,
+    });
+
+    if (!confirmRes.isConfirmed) return;
+
+    setFiltrationLoading(true);
+    try {
+      const res = await toggleFiltration(nextStatus, 'Technician');
+      setFiltrationStatus(nextStatus);
+      customSwal.fire({
+        icon: 'success',
+        title: isCurrentlyActive ? 'MAINTENANCE MODE — Filtration Paused' : 'FILTRATION ACTIVE — System Healthy',
+        text: res?.message || 'Filtration status updated successfully.',
+        timer: 3000,
+      });
+    } catch (err) {
+      console.error('Failed to toggle filtration mode:', err);
+      customSwal.fire({
+        icon: 'error',
+        title: 'Filtration Control Failed',
+        text: err.response?.data?.error || 'Failed to update filtration state.',
+      });
+    } finally {
+      setFiltrationLoading(false);
+    }
+  };
 
   // Extract specific components for tailored cards
   const pump = components.find((c) => c.name?.toLowerCase().includes('pump')) || {
@@ -353,6 +409,93 @@ export default function ComponentsHealth() {
           </div>
         </motion.div>
       </div>
+
+      {/* 4. Multi-Stage Water Filtration & Purification System (Technician Control) */}
+      <motion.div
+        whileHover={{ y: -2 }}
+        className={`p-6 rounded-2xl border shadow-md transition-all duration-300 ${
+          filtrationStatus === 'ACTIVE'
+            ? 'bg-white dark:bg-slate-900/70 border-emerald-500/30'
+            : 'bg-white dark:bg-slate-900/70 border-amber-500/30'
+        }`}
+      >
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-100 dark:border-white/5">
+          <div className="flex items-center gap-3.5">
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-white shadow-md ${
+              filtrationStatus === 'ACTIVE'
+                ? 'bg-emerald-500 shadow-emerald-500/30'
+                : 'bg-amber-500 shadow-amber-500/30'
+            }`}>
+              <Shield className="w-6 h-6" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2.5">
+                <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                  Multi-Stage Water Filtration & Purification Suite
+                </h3>
+                <span className={`text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full border ${
+                  filtrationStatus === 'ACTIVE'
+                    ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30'
+                    : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30'
+                }`}>
+                  {filtrationStatus === 'ACTIVE' ? '● FILTRATION ACTIVE — System Healthy' : '▲ MAINTENANCE MODE — Filtration Paused'}
+                </span>
+              </div>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Rapid Sand Filter Bed ➔ Activated Carbon Adsorption ➔ UV-C Germicidal Reactor ➔ Residual Chlorination
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 self-start md:self-auto">
+            <Button
+              variant={filtrationStatus === 'ACTIVE' ? 'warning' : 'success'}
+              size="sm"
+              isLoading={filtrationLoading}
+              onClick={handleToggleFiltration}
+              className={filtrationStatus === 'ACTIVE' ? 'bg-amber-600 hover:bg-amber-700 text-white font-bold' : 'bg-emerald-600 hover:bg-emerald-700 text-white font-bold'}
+              icon={filtrationStatus === 'ACTIVE' ? <Wrench className="w-4 h-4" /> : <CheckCircle2 className="w-4 h-4" />}
+            >
+              {filtrationStatus === 'ACTIVE' ? 'Pause for Maintenance' : 'Resume Filtration (System Healthy)'}
+            </Button>
+          </div>
+        </div>
+
+        {/* 4-Stage Diagnostic Readouts */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4 text-xs">
+          <div className="p-3 rounded-xl bg-slate-50 dark:bg-white/[0.02] border border-slate-100 dark:border-white/5">
+            <span className="text-[10px] font-bold text-slate-400 uppercase">Stage 1: Sand Bed Filter</span>
+            <div className="font-mono font-bold text-slate-900 dark:text-white mt-1 text-sm">
+              {filtrationStatus === 'ACTIVE' ? '1.2 Bar (Nominal)' : 'BACKWASH MODE'}
+            </div>
+            <span className="text-[10px] text-emerald-500">Differential normal</span>
+          </div>
+
+          <div className="p-3 rounded-xl bg-slate-50 dark:bg-white/[0.02] border border-slate-100 dark:border-white/5">
+            <span className="text-[10px] font-bold text-slate-400 uppercase">Stage 2: Activated Carbon</span>
+            <div className="font-mono font-bold text-slate-900 dark:text-white mt-1 text-sm">
+              {filtrationStatus === 'ACTIVE' ? '92% Clean' : 'FLUSHING'}
+            </div>
+            <span className="text-[10px] text-emerald-500">Adsorption capacity OK</span>
+          </div>
+
+          <div className="p-3 rounded-xl bg-slate-50 dark:bg-white/[0.02] border border-slate-100 dark:border-white/5">
+            <span className="text-[10px] font-bold text-slate-400 uppercase">Stage 3: UV-C Sterilizer</span>
+            <div className="font-mono font-bold text-slate-900 dark:text-white mt-1 text-sm">
+              {filtrationStatus === 'ACTIVE' ? '254 nm · 99.8%' : 'STANDBY (0W)'}
+            </div>
+            <span className="text-[10px] text-emerald-500">Germicidal dose verified</span>
+          </div>
+
+          <div className="p-3 rounded-xl bg-slate-50 dark:bg-white/[0.02] border border-slate-100 dark:border-white/5">
+            <span className="text-[10px] font-bold text-slate-400 uppercase">Stage 4: Chlorination</span>
+            <div className="font-mono font-bold text-slate-900 dark:text-white mt-1 text-sm">
+              {filtrationStatus === 'ACTIVE' ? '0.8 ppm Dosed' : 'ISOLATED'}
+            </div>
+            <span className="text-[10px] text-emerald-500">Residual pathogen defense</span>
+          </div>
+        </div>
+      </motion.div>
 
       {/* Secondary Infrastructure: Power & Network */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

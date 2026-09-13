@@ -7,6 +7,7 @@ import {
 import { useLanguage } from '../../context/LanguageContext';
 import { useSocket } from '../../hooks/useSocket';
 import { getStorageCurrent, toggleValve } from '../../services/storageService';
+import { confirmValveToggle } from '../../utils/swal';
 
 function CircularGauge({ percentage, size = 160, label, sublabel, color = '#0EA5E9' }) {
   const r = (size / 2) - 12;
@@ -214,6 +215,10 @@ export default function StoragePage() {
   }, [socketStorage]);
 
   const handleValveToggle = async (action) => {
+    // Show confirmation modal before toggling
+    const res = await confirmValveToggle(action === 'OPEN' ? 'STANDBY' : 'OPEN');
+    if (!res.isConfirmed) return;
+
     setValveLoading(true);
     try {
       const result = await toggleValve(action);

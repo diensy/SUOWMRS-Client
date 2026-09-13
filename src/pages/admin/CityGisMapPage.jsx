@@ -5,7 +5,8 @@ import { MapPin, RefreshCw, Layers, Search, Filter, Shield } from 'lucide-react'
 import Button from '../../components/common/Button';
 import Input from '../../components/common/Input';
 import SystemMap from '../../components/maps/SystemMap';
-import { getMunicipalityMapNodes } from '../../services/municipalityService';
+import { getMunicipalityMapNodes, triggerFloodDiversion } from '../../services/municipalityService';
+import { confirmDiversion, customSwal } from '../../utils/swal';
 
 export default function CityGisMapPage() {
   const navigate = useNavigate();
@@ -14,6 +15,7 @@ export default function CityGisMapPage() {
   const [statusFilter, setStatusFilter] = useState('All');
   const [search, setSearch] = useState('');
   const [selectedNodeDetails, setSelectedNodeDetails] = useState(null);
+  const [divertingId, setDivertingId] = useState(null);
 
   const fetchMapNodes = async () => {
     try {
@@ -30,6 +32,75 @@ export default function CityGisMapPage() {
   useEffect(() => {
     fetchMapNodes();
   }, []);
+
+  const handleDivert = async (sys) => {
+    if (!sys) return;
+
+    // Check if cistern has capacity
+    if (parseFloat(sys.storageLevel) >= 95) {
+      return customSwal.fire({
+        icon: 'error',
+        title: 'Diversion Rejected: Cistern Full',
+        text: `The underground cistern buffer at ${sys.systemId} is at ${parseFloat(sys.storageLevel).toFixed(0)}% capacity. Cannot divert more water.`,
+      });
+    }
+
+    // Require explicit operator confirmation before executing
+    const confirmRes = await confirmDiversion({
+      systemId: sys.systemId,
+      ward: sys.ward,
+      location: sys.location,
+      waterLevel: sys.waterLevel,
+      storageLevel: sys.storageLevel,
+    });
+
+    if (!confirmRes.isConfirmed) return;
+
+    setDivertingId(sys.systemId);
+    try {
+      const res = await triggerFloodDiversion(sys.systemId);
+      if (res && res.success) {
+        // Update local nodes list immediately
+        setNodes((prev) =>
+          prev.map((n) =>
+            n.systemId === sys.systemId
+              ? {
+                  ...n,
+                  waterLevel: res.node?.waterLevel ?? Math.max(30, n.waterLevel - 20),
+                  storageLevel: res.node?.storageLevel ?? Math.min(94, n.storageLevel + 16),
+                  status: res.node?.status ?? 'Warning',
+                }
+              : n
+          )
+        );
+
+        if (selectedNodeDetails?.systemId === sys.systemId) {
+          setSelectedNodeDetails((prev) => ({
+            ...prev,
+            waterLevel: res.node?.waterLevel ?? Math.max(30, prev.waterLevel - 20),
+            storageLevel: res.node?.storageLevel ?? Math.min(94, prev.storageLevel + 16),
+            status: res.node?.status ?? 'Warning',
+          }));
+        }
+
+        customSwal.fire({
+          icon: 'success',
+          title: 'Flood Diversion Activated',
+          text: `Underground solenoid diverter valve opened for ${sys.systemId}. Flood pressure reduced.`,
+          timer: 3500,
+        });
+      }
+    } catch (err) {
+      console.error('Failed to divert water:', err);
+      customSwal.fire({
+        icon: 'error',
+        title: 'Diversion Failed',
+        text: err.response?.data?.error || 'Could not communicate with drainage telemetry node.',
+      });
+    } finally {
+      setDivertingId(null);
+    }
+  };
 
   // Filter nodes
   const filteredNodes = nodes.filter((n) => {
@@ -108,6 +179,7 @@ export default function CityGisMapPage() {
       <SystemMap
         systems={filteredNodes}
         onSelectSystem={(sys) => setSelectedNodeDetails(sys)}
+        onDivert={handleDivert}
       />
 
       {/* Selected Node Details Card */}
@@ -117,13 +189,38 @@ export default function CityGisMapPage() {
             <div className="flex items-center gap-2">
               <span className="font-mono font-black text-sky-500 text-base">{selectedNodeDetails.systemId}</span>
               <span className="text-xs font-bold text-slate-900 dark:text-white">— {selectedNodeDetails.location}</span>
+              <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-md ${
+                selectedNodeDetails.status === 'Critical'
+                  ? 'bg-rose-500/10 text-rose-500 border border-rose-500/20'
+                  : selectedNodeDetails.status === 'Warning'
+                  ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20'
+                  : 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20'
+              }`}>
+                {selectedNodeDetails.status}
+              </span>
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
               Water Level: <strong className="text-slate-900 dark:text-white font-mono">{parseFloat(selectedNodeDetails.waterLevel).toFixed(1)}%</strong> | Storage Level: <strong className="text-slate-900 dark:text-white font-mono">{parseFloat(selectedNodeDetails.storageLevel).toFixed(1)}%</strong>
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Show Divert Water button if Red/Critical and diversion appropriate */}
+            {(selectedNodeDetails.status === 'Critical' || parseFloat(selectedNodeDetails.waterLevel) >= 75) && (
+              <Button
+                variant="danger"
+                size="sm"
+                className="bg-rose-600 hover:bg-rose-700 text-white font-black shadow-md shadow-rose-600/30"
+                disabled={parseFloat(selectedNodeDetails.storageLevel) >= 95 || divertingId === selectedNodeDetails.systemId}
+                isLoading={divertingId === selectedNodeDetails.systemId}
+                onClick={() => handleDivert(selectedNodeDetails)}
+              >
+                {parseFloat(selectedNodeDetails.storageLevel) >= 95
+                  ? '⚠️ Cistern Full (≥95%)'
+                  : '⚡ Divert Water'}
+              </Button>
+            )}
+
             <Button variant="secondary" size="sm" onClick={() => setSelectedNodeDetails(null)}>
               Close Panel
             </Button>

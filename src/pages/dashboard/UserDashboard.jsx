@@ -27,6 +27,7 @@ import { getLatestWaterLevel, getWaterLevelHistory, getWaterLevelStats } from '.
 import { getAlerts } from '../../services/alertService';
 import { getStorageCurrent, toggleValve } from '../../services/storageService';
 import { getTreatmentCurrent } from '../../services/treatmentService';
+import VoiceSpeakerButton from '../../components/common/VoiceSpeakerButton';
 
 // ───────── Threshold Helper ─────────
 const getThreshold = (level) => {
@@ -310,7 +311,16 @@ export default function UserDashboard() {
                 </p>
               </div>
             </div>
-            <Badge variant={threshold.status} size="sm" dot>{t(threshold.statusKey)}</Badge>
+            <div className="flex items-center gap-2">
+              <VoiceSpeakerButton
+                text={`${level >= 90 ? 'Critical Flood Threshold Exceeded.' : 'Elevated Water Level Detected.'} Drainage level is ${level.toFixed(1)} percent. Underground diverter valve is ${storage.valveStatus}.`}
+                variant="emergency"
+                size="xs"
+                label="Audio Alert"
+                id="dash-flood-banner"
+              />
+              <Badge variant={threshold.status} size="sm" dot>{t(threshold.statusKey)}</Badge>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -329,7 +339,14 @@ export default function UserDashboard() {
               </div>
               <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t('waterLevel')}</span>
             </div>
-            <StatusIndicator status={threshold.status} size="sm" />
+            <div className="flex items-center gap-2">
+              <VoiceSpeakerButton
+                text={`Live drainage water level is ${safeLevel.toFixed(1)} percent. System condition is ${threshold.status}.`}
+                size="xs"
+                id="dash-gauge-audio"
+              />
+              <StatusIndicator status={threshold.status} size="sm" />
+            </div>
           </div>
 
           {/* Circular gauge */}
