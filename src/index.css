@@ -71,3 +71,119 @@
     background: #94A3B8;
   }
 }
+
+/* ==========================================================================
+   SWEETALERT2 DARK MODE & ALERT THEMING
+   Ensures all confirmation modals, alert dialogs & popups go dark in dark mode
+   ========================================================================== */
+html.dark .swal2-container,
+.dark .swal2-container {
+  backdrop-filter: blur(6px) !important;
+  -webkit-backdrop-filter: blur(6px) !important;
+}
+
+html.dark .swal2-container.swal2-backdrop-show,
+.dark .swal2-container.swal2-backdrop-show {
+  background: rgba(3, 7, 18, 0.78) !important;
+}
+
+html.dark .swal2-popup,
+.dark .swal2-popup {
+  background: #0F172A !important;
+  background-color: #0F172A !important;
+  color: #F8FAFC !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.06) !important;
+  border-radius: 1.25rem !important;
+}
+
+html.dark .swal2-title,
+.dark .swal2-title {
+  color: #FFFFFF !important;
+}
+
+html.dark .swal2-html-container,
+.dark .swal2-html-container {
+  color: #CBD5E1 !important;
+}
+
+html.dark .swal2-content,
+.dark .swal2-content {
+  color: #CBD5E1 !important;
+}
+
+html.dark .swal2-close,
+.dark .swal2-close {
+  color: #94A3B8 !important;
+}
+
+html.dark .swal2-close:hover,
+.dark .swal2-close:hover {
+  color: #FFFFFF !important;
+}
+
+html.dark .swal2-cancel,
+.dark .swal2-cancel {
+  background-color: #1E293B !important;
+  color: #E2E8F0 !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+html.dark .swal2-cancel:hover,
+.dark .swal2-cancel:hover {
+  background-color: #334155 !important;
+  color: #FFFFFF !important;
+}
+
+html.dark .swal2-input,
+html.dark .swal2-file,
+html.dark .swal2-textarea,
+html.dark .swal2-select,
+.dark .swal2-input,
+.dark .swal2-file,
+.dark .swal2-textarea,
+.dark .swal2-select {
+  background: #1E293B !important;
+  background-color: #1E293B !important;
+  color: #F8FAFC !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border-radius: 0.75rem !important;
+}
+
+html.dark .swal2-input:focus,
+html.dark .swal2-textarea:focus,
+.dark .swal2-input:focus,
+.dark .swal2-textarea:focus {
+  border-color: #10B981 !important;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25) !important;
+}
+
+html.dark .swal2-validation-message,
+.dark .swal2-validation-message {
+  background: #450A0A !important;
+  color: #FECDD3 !important;
+  border: 1px solid #991B1B !important;
+}
+
+html.dark .swal2-footer,
+.dark .swal2-footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: #94A3B8 !important;
+}
+
+/* SweetAlert icon background fixes in dark mode */
+html.dark .swal2-icon.swal2-success [class^='swal2-success-circular-line'],
+.dark .swal2-icon.swal2-success [class^='swal2-success-circular-line'] {
+  background: transparent !important;
+}
+
+html.dark .swal2-icon.swal2-success .swal2-success-fix,
+.dark .swal2-icon.swal2-success .swal2-success-fix {
+  background: transparent !important;
+}
+
+html.dark .swal2-icon,
+.dark .swal2-icon {
+  background-color: transparent !important;
+}
+

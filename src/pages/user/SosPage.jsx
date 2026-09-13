@@ -145,13 +145,13 @@ export default function SosPage() {
                   Use this only for genuine emergencies. False alerts may delay response to real emergencies.
                 </p>
               </div>
-              <VoiceSpeakerButton
+              {/* <VoiceSpeakerButton
                 text="Emergency SOS Dispatch. In active flooding, drain blockage, or structural hazard emergencies, select the emergency type, transmit your geolocation, or dial helpline 1 0 7 0."
                 label="Listen Guide"
                 size="xs"
                 variant="emergency"
                 id="sos-guide-audio"
-              />
+              /> */}
             </div>
 
             {/* Emergency type selection */}

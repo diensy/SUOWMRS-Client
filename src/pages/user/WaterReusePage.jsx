@@ -24,19 +24,19 @@ import { confirmAction, customSwal } from '../../utils/swal';
 import Button from '../../components/common/Button';
 
 const ALLOCATION_CONFIG = {
-  gardening:    { icon: Leaf,      color: '#10B981', label: 'Gardening & Parks' },
-  cleaning:     { icon: Sparkles,  color: '#0EA5E9', label: 'Street Cleaning' },
-  irrigation:   { icon: Droplets,  color: '#6366F1', label: 'Crop Irrigation' },
-  construction: { icon: Building2, color: '#F59E0B', label: 'Construction Sites' },
-  industrial:   { icon: Factory,   color: '#8B5CF6', label: 'Industrial Use' },
+  gardening:    { icon: Leaf,      color: '#10B981', label: 'Gardening & Parks', transKey: 'gardening' },
+  cleaning:     { icon: Sparkles,  color: '#0EA5E9', label: 'Street Cleaning', transKey: 'cleaning' },
+  irrigation:   { icon: Droplets,  color: '#6366F1', label: 'Crop Irrigation', transKey: 'irrigation' },
+  construction: { icon: Building2, color: '#F59E0B', label: 'Construction Sites', transKey: 'construction' },
+  industrial:   { icon: Factory,   color: '#8B5CF6', label: 'Industrial Use', transKey: 'industrial' },
 };
 
-function QualityBadge({ status }) {
+function QualityBadge({ status, t }) {
   const cfg = {
-    good:      { label: 'Good',      bg: 'bg-emerald-500/10', text: 'text-emerald-600 dark:text-emerald-400', border: 'border-emerald-500/30' },
-    excellent: { label: 'Excellent', bg: 'bg-sky-500/10',     text: 'text-sky-600 dark:text-sky-400',         border: 'border-sky-500/30'     },
-    moderate:  { label: 'Moderate',  bg: 'bg-amber-500/10',   text: 'text-amber-600 dark:text-amber-400',     border: 'border-amber-500/30'   },
-    poor:      { label: 'Poor',      bg: 'bg-rose-500/10',    text: 'text-rose-600 dark:text-rose-400',       border: 'border-rose-500/30'    },
+    good:      { label: t ? (t('quality_good') || 'Good') : 'Good',           bg: 'bg-emerald-500/10', text: 'text-emerald-600 dark:text-emerald-400', border: 'border-emerald-500/30' },
+    excellent: { label: t ? (t('quality_excellent') || 'Excellent') : 'Excellent', bg: 'bg-sky-500/10',     text: 'text-sky-600 dark:text-sky-400',         border: 'border-sky-500/30'     },
+    moderate:  { label: t ? (t('quality_moderate') || 'Moderate') : 'Moderate',   bg: 'bg-amber-500/10',   text: 'text-amber-600 dark:text-amber-400',     border: 'border-amber-500/30'   },
+    poor:      { label: t ? (t('quality_poor') || 'Poor') : 'Poor',           bg: 'bg-rose-500/10',    text: 'text-rose-600 dark:text-rose-400',       border: 'border-rose-500/30'    },
   };
   const c = cfg[status] || cfg.good;
   return (
@@ -46,7 +46,7 @@ function QualityBadge({ status }) {
   );
 }
 
-function PipelineStep({ step, value, label, active, color }) {
+function PipelineStep({ step, value, label, active, color, localizeNumber }) {
   return (
     <div className="flex flex-col items-center gap-2">
       <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg border-2 transition-all duration-700 ${
@@ -55,20 +55,23 @@ function PipelineStep({ step, value, label, active, color }) {
           : 'border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/[0.03]'
       }`} style={active ? { background: color + '20', borderColor: color + '40', boxShadow: `0 4px 24px ${color}30` } : {}}>
         <span className={`text-xs font-black ${active ? '' : 'text-slate-400 dark:text-slate-500'}`} style={{ color: active ? color : undefined }}>
-          {step}
+          {localizeNumber ? localizeNumber(step) : step}
         </span>
       </div>
       <div className="text-center">
-        <p className="text-sm font-black text-slate-900 dark:text-white">{(value / 1000).toFixed(1)}kL</p>
+        <p className="text-sm font-black text-slate-900 dark:text-white">
+          {localizeNumber ? localizeNumber((value / 1000).toFixed(1)) : (value / 1000).toFixed(1)}kL
+        </p>
         <p className="text-[10px] text-slate-500 dark:text-slate-400">{label}</p>
       </div>
     </div>
   );
 }
 
-function AllocationBar({ value, total, cfg }) {
+function AllocationBar({ value, total, cfg, t, localizeNumber }) {
   const pct = total > 0 ? (value / total) * 100 : 0;
   const Icon = cfg.icon;
+  const label = (t && cfg.transKey) ? t(cfg.transKey) : cfg.label;
   return (
     <div className="flex items-center gap-3">
       <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: cfg.color + '20' }}>
@@ -76,8 +79,10 @@ function AllocationBar({ value, total, cfg }) {
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between mb-1">
-          <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{cfg.label}</span>
-          <span className="text-xs font-mono text-slate-500 dark:text-slate-400">{value.toLocaleString()}L</span>
+          <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{label}</span>
+          <span className="text-xs font-mono text-slate-500 dark:text-slate-400">
+            {localizeNumber ? localizeNumber(value.toLocaleString()) : value.toLocaleString()}L
+          </span>
         </div>
         <div className="h-2 rounded-full bg-slate-100 dark:bg-white/[0.06] overflow-hidden">
           <motion.div
@@ -88,14 +93,16 @@ function AllocationBar({ value, total, cfg }) {
             style={{ background: cfg.color }}
           />
         </div>
-        <span className="text-[10px] text-slate-400 dark:text-slate-500">{pct.toFixed(1)}% of allocated</span>
+        <span className="text-[10px] text-slate-400 dark:text-slate-500">
+          {localizeNumber ? localizeNumber(pct.toFixed(1)) : pct.toFixed(1)}% {t ? (t('allocatedSuffix') || 'of allocated') : 'of allocated'}
+        </span>
       </div>
     </div>
   );
 }
 
 export default function WaterReusePage() {
-  const { t } = useLanguage();
+  const { t, localizeNumber } = useLanguage();
   const { userRole = 'Resident' } = useOutletContext() || {};
   const { socket } = useSocket();
 
@@ -342,10 +349,10 @@ export default function WaterReusePage() {
           {/* Summary KPIs */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
-              { label: 'Collected',        value: (storedWater / 1000).toFixed(1),   unit: 'kL', icon: Droplets,     color: 'text-sky-500',     bg: 'bg-sky-500/10'     },
-              { label: 'Treated',          value: (treatedWater / 1000).toFixed(1),  unit: 'kL', icon: FlaskConical, color: 'text-violet-500',  bg: 'bg-violet-500/10'  },
-              { label: 'Available Reuse',  value: (availableReuse / 1000).toFixed(1),unit: 'kL', icon: Recycle,      color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
-              { label: 'Efficiency',       value: isFiltrationActive ? efficiency : 0, unit: '%',  icon: TrendingUp,   color: 'text-amber-500',   bg: 'bg-amber-500/10'   },
+              { label: t('totalStored'),        value: localizeNumber((storedWater / 1000).toFixed(1)),   unit: 'kL', icon: Droplets,     color: 'text-sky-500',     bg: 'bg-sky-500/10'     },
+              { label: t('treatedWater'),       value: localizeNumber((treatedWater / 1000).toFixed(1)),  unit: 'kL', icon: FlaskConical, color: 'text-violet-500',  bg: 'bg-violet-500/10'  },
+              { label: t('availableReuse'),     value: localizeNumber((availableReuse / 1000).toFixed(1)),unit: 'kL', icon: Recycle,      color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+              { label: t('efficiency') || 'Efficiency', value: localizeNumber(isFiltrationActive ? efficiency : 0), unit: '%',  icon: TrendingUp,   color: 'text-amber-500',   bg: 'bg-amber-500/10'   },
             ].map(m => (
               <div key={m.label} className="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-white/10 rounded-xl p-4 shadow-sm">
                 <div className="flex items-center gap-2 mb-2">
@@ -492,11 +499,11 @@ export default function WaterReusePage() {
             <div className="flex items-center justify-between mb-5 flex-wrap gap-2">
               <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
                 <FlaskConical className="w-4 h-4 text-violet-500" />
-                Treatment Pipeline
+                {t('pipeline') || 'Treatment Pipeline'}
               </h3>
               <div className="flex items-center gap-2">
-                <span className="text-xs text-slate-500 dark:text-slate-400">Water Quality:</span>
-                <QualityBadge status={qualityStatus} />
+                <span className="text-xs text-slate-500 dark:text-slate-400">{t('waterQuality') || 'Water Quality'}:</span>
+                <QualityBadge status={qualityStatus} t={t} />
               </div>
             </div>
 
@@ -504,7 +511,7 @@ export default function WaterReusePage() {
             <div className="flex items-center justify-between gap-2 overflow-x-auto pb-2">
               {pipelineSteps.map((step, idx) => (
                 <React.Fragment key={step.step}>
-                  <PipelineStep {...step} />
+                  <PipelineStep {...step} localizeNumber={localizeNumber} />
                   {idx < pipelineSteps.length - 1 && (
                     <div className="flex-1 h-0.5 min-w-8 bg-gradient-to-r from-slate-200 dark:from-white/10 to-slate-300 dark:to-white/10 rounded-full" />
                   )}
@@ -515,9 +522,9 @@ export default function WaterReusePage() {
             {/* Efficiency bar */}
             <div className="mt-5 pt-4 border-t border-slate-100 dark:border-white/[0.06]">
               <div className="flex items-center justify-between mb-1.5">
-                <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Purification Efficiency</span>
+                <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{t('purificationEfficiency') || 'Purification Efficiency'}</span>
                 <span className="text-xs font-black text-emerald-600 dark:text-emerald-400">
-                  {isFiltrationActive ? `${efficiency}%` : 'PAUSED (0%)'}
+                  {isFiltrationActive ? `${localizeNumber(efficiency)}%` : 'PAUSED (0%)'}
                 </span>
               </div>
               <div className="h-3 rounded-full bg-slate-100 dark:bg-white/[0.06] overflow-hidden">
@@ -540,17 +547,17 @@ export default function WaterReusePage() {
             <div className="flex items-center justify-between mb-5">
               <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                Approved Reuse Channels
+                {t('approvedReuseChannels') || 'Approved Reuse Channels'}
               </h3>
               <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">
-                {(totalAllocated / 1000).toFixed(1)}kL distributed
+                {localizeNumber((totalAllocated / 1000).toFixed(1))}kL {t('distributed') || 'distributed'}
               </span>
             </div>
             <div className="space-y-4">
               {Object.entries(allocations).map(([key, value]) => {
-                const cfg = ALLOCATION_CONFIG[key] || { icon: Droplets, color: '#0EA5E9', label: key };
+                const cfg = ALLOCATION_CONFIG[key] || { icon: Droplets, color: '#0EA5E9', label: key, transKey: key };
                 return (
-                  <AllocationBar key={key} value={value} total={totalAllocated} cfg={cfg} />
+                  <AllocationBar key={key} value={value} total={totalAllocated} cfg={cfg} t={t} localizeNumber={localizeNumber} />
                 );
               })}
             </div>

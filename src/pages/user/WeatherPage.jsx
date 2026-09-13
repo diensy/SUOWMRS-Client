@@ -32,14 +32,16 @@ function WeatherCard({ icon: Icon, label, value, unit, color = 'text-sky-500', b
   );
 }
 
-function HourlyBar({ hour, rainfall, probability, condition }) {
+function HourlyBar({ hour, rainfall, probability, condition, t, localizeNumber }) {
   const maxRain = 40;
   const heightPct = Math.min(100, (rainfall / maxRain) * 100);
   const cfg = INTENSITY_CONFIG[condition] || INTENSITY_CONFIG.None;
 
   return (
     <div className="flex flex-col items-center gap-1 flex-1 min-w-0">
-      <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">{probability}%</span>
+      <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">
+        {localizeNumber ? localizeNumber(probability) : probability}%
+      </span>
       <div className="w-full flex flex-col justify-end" style={{ height: 60 }}>
         <motion.div
           initial={{ height: 0 }}
@@ -49,16 +51,18 @@ function HourlyBar({ hour, rainfall, probability, condition }) {
           style={{ background: cfg.color, opacity: 0.7 + probability / 300 }}
         />
       </div>
-      <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">{rainfall.toFixed(1)}</span>
-      <span className="text-[10px] text-slate-400 dark:text-slate-500">
-        {hour === 0 ? 'Now' : `+${hour}h`}
+      <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">
+        {localizeNumber ? localizeNumber(rainfall.toFixed(1)) : rainfall.toFixed(1)}
+      </span>
+      <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">
+        {hour === 0 ? (t ? t('now') : 'Now') : `+${localizeNumber ? localizeNumber(hour) : hour}h`}
       </span>
     </div>
   );
 }
 
 export default function WeatherPage() {
-  const { t } = useLanguage();
+  const { t, localizeNumber } = useLanguage();
   const [weather, setWeather] = useState(null);
   const [loading, setLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState(null);
@@ -81,7 +85,7 @@ export default function WeatherPage() {
         humidityPct: 89,
         windSpeedKmh: 24,
         cloudCoverPct: 95,
-        weatherCondition: 'Heavy Monsoon Showers',
+        weatherCondition: 'Monsoon Thunderstorm with Active Inundation Alert',
         hourlyForecast: Array.from({ length: 8 }, (_, i) => ({
           hourOffset: i,
           rainfallMm: Math.max(0, 28.5 - i * 2 + (Math.random() * 8 - 4)),
@@ -105,6 +109,29 @@ export default function WeatherPage() {
   const intensityCfg = INTENSITY_CONFIG[w.rainfallIntensity] || INTENSITY_CONFIG.None;
   const IntensityIcon = intensityCfg.icon;
 
+  // Helper for localized condition text
+  const getWeatherConditionText = () => {
+    const cond = (w.weatherCondition || '').toLowerCase();
+    if (cond.includes('inundation') || cond.includes('thunderstorm') || cond.includes('monsoon')) {
+      return t('cond_heavy_monsoon');
+    }
+    if (cond.includes('light')) {
+      return t('cond_light_rain');
+    }
+    if (cond.includes('moderate')) {
+      return t('cond_moderate_rain');
+    }
+    if (cond.includes('clear')) {
+      return t('cond_clear');
+    }
+    return t('cond_heavy_monsoon') || w.weatherCondition || 'Monsoon Thunderstorm with Active Inundation Alert';
+  };
+
+  const getIntensityLabel = (intensity) => {
+    const key = `intensity_${(intensity || 'heavy').toLowerCase()}`;
+    return t(key) || intensityCfg.label;
+  };
+
   // Risk level based on rainfall
   const riskLevel = w.currentRainfallMmPerHour > 30 ? 'HIGH'
     : w.currentRainfallMmPerHour > 15 ? 'MODERATE'
@@ -118,6 +145,10 @@ export default function WeatherPage() {
   };
   const rCfg = riskConfig[riskLevel];
 
+  const localizedSubtitle = (t('weatherSubtitle') || '{city}, {state} · Hydrological risk integration · Auto-refresh 60s')
+    .replace('{city}', w.city || 'Bhubaneswar')
+    .replace('{state}', w.state || 'Odisha');
+
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
       {/* Header */}
@@ -128,17 +159,18 @@ export default function WeatherPage() {
             {t('weather')}
           </h1>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            {w.city || 'Bhubaneswar'}, {w.state || 'Odisha'} · Hydrological risk integration · Auto-refresh 60s
+            {localizedSubtitle}
           </p>
         </div>
         <div className="flex items-center gap-2">
           {lastUpdated && (
             <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">
-              {lastUpdated.toLocaleTimeString()}
+              {localizeNumber(lastUpdated.toLocaleTimeString())}
             </span>
           )}
           <button
             onClick={fetchWeather}
+            title={t('refresh') || 'Refresh'}
             className="p-2 rounded-xl border border-slate-200 dark:border-white/10 text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-all"
           >
             <RefreshCw className="w-4 h-4" />
@@ -161,27 +193,31 @@ export default function WeatherPage() {
               <IntensityIcon className="w-10 h-10" style={{ color: intensityCfg.color }} />
             </div>
             <div className="flex-1">
-              <p className="text-[11px] font-black tracking-widest text-teal-400 uppercase">Current Conditions</p>
-              <h2 className="text-2xl font-black text-white mt-0.5">{w.weatherCondition || 'Heavy Monsoon Showers'}</h2>
+              <p className="text-[11px] font-black tracking-widest text-teal-400 uppercase">
+                {t('currentConditions')}
+              </p>
+              <h2 className="text-2xl font-black text-white mt-0.5">
+                {getWeatherConditionText()}
+              </h2>
               <div className="flex items-center gap-3 mt-1 flex-wrap">
-                <span className="text-sm text-teal-200">{w.currentRainfallMmPerHour?.toFixed(1)} mm/hr rainfall</span>
+                <span className="text-sm text-teal-200">
+                  {localizeNumber(w.currentRainfallMmPerHour?.toFixed(1))} {t('rainfallSuffix')}
+                </span>
                 <span className="text-teal-400">·</span>
-                <span className="text-sm text-teal-200">{w.rainfallIntensity} intensity</span>
+                <span className="text-sm text-teal-200">
+                  {getIntensityLabel(w.rainfallIntensity)} {t('intensitySuffix')}
+                </span>
               </div>
             </div>
             <div className="flex flex-col items-end gap-2">
               <div className="text-right">
-                <p className="text-4xl font-black text-white">{w.temperatureC?.toFixed(1)}°C</p>
-                <p className="text-xs text-teal-300">{w.humidityPct}% humidity</p>
+                <p className="text-4xl font-black text-white">
+                  {localizeNumber(w.temperatureC?.toFixed(1))}°C
+                </p>
+                <p className="text-xs text-teal-300">
+                  {localizeNumber(w.humidityPct)}% {t('humiditySuffix')}
+                </p>
               </div>
-              <VoiceSpeakerButton
-                text={`Weather report for ${w.city || 'Bhubaneswar'}. Current condition: ${w.weatherCondition || 'Monsoon'}. Rainfall intensity is ${w.rainfallIntensity} at ${w.currentRainfallMmPerHour?.toFixed(1)} mm per hour. Temperature is ${w.temperatureC?.toFixed(1)} degrees Celsius. Flood risk level is ${riskLevel}.`}
-                size="xs"
-                label="Listen Weather"
-                variant="subtle"
-                id="weather-voice-report"
-                className="bg-white/10 hover:bg-white/20 text-white border-white/20"
-              />
             </div>
           </div>
 
@@ -191,33 +227,52 @@ export default function WeatherPage() {
               <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${rCfg.dot} ${riskLevel !== 'NONE' ? 'animate-pulse' : ''}`} />
               <div className="flex-1">
                 <p className={`text-sm font-black ${rCfg.text}`}>
-                  Flood Risk Level: <span className="uppercase">{riskLevel}</span>
+                  {t('floodRiskLevel')}: <span className="uppercase">{t(`status_${riskLevel.toLowerCase()}`) || riskLevel}</span>
                 </p>
                 <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
-                  {riskLevel === 'HIGH'     && 'Heavy rainfall detected. Drainage systems under stress. Flood risk elevated.'}
-                  {riskLevel === 'MODERATE' && 'Moderate rainfall. Monitor water levels. Review drainage capacity.'}
-                  {riskLevel === 'LOW'      && 'Light rainfall. Systems operating normally. No immediate risk.'}
-                  {riskLevel === 'NONE'     && 'No rainfall detected. Clear conditions. All systems green.'}
+                  {t(`risk_${riskLevel.toLowerCase()}_desc`)}
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <VoiceSpeakerButton
-                text={`Flood Risk Alert: Level is ${riskLevel}. ${riskLevel === 'HIGH' ? 'Heavy rainfall detected. Drainage systems under stress. Flood risk elevated.' : 'Systems operating normally.'}`}
-                size="xs"
-                variant={riskLevel === 'HIGH' ? 'emergency' : 'pill'}
-                id="weather-risk-voice"
-              />
               {riskLevel !== 'NONE' && <AlertTriangle className={`w-4 h-4 flex-shrink-0 ${rCfg.text}`} />}
             </div>
           </div>
 
           {/* Metric grid */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <WeatherCard icon={Thermometer}  label="Temperature"    value={w.temperatureC?.toFixed(1)} unit="°C"   color="text-rose-500"    bg="bg-rose-500/10"    />
-            <WeatherCard icon={Droplets}     label="Humidity"       value={w.humidityPct}               unit="%"    color="text-sky-500"     bg="bg-sky-500/10"     />
-            <WeatherCard icon={Wind}         label="Wind Speed"     value={w.windSpeedKmh}              unit="km/h" color="text-slate-500"   bg="bg-slate-100 dark:bg-white/[0.06]" />
-            <WeatherCard icon={Cloud}        label="Cloud Cover"    value={w.cloudCoverPct}             unit="%"    color="text-indigo-500"  bg="bg-indigo-500/10"  />
+            <WeatherCard
+              icon={Thermometer}
+              label={t('temperature')}
+              value={localizeNumber(w.temperatureC?.toFixed(1))}
+              unit="°C"
+              color="text-rose-500"
+              bg="bg-rose-500/10"
+            />
+            <WeatherCard
+              icon={Droplets}
+              label={t('humidity')}
+              value={localizeNumber(w.humidityPct)}
+              unit="%"
+              color="text-sky-500"
+              bg="bg-sky-500/10"
+            />
+            <WeatherCard
+              icon={Wind}
+              label={t('windSpeed')}
+              value={localizeNumber(w.windSpeedKmh)}
+              unit="km/h"
+              color="text-slate-500"
+              bg="bg-slate-100 dark:bg-white/[0.06]"
+            />
+            <WeatherCard
+              icon={Cloud}
+              label={t('cloudCover')}
+              value={localizeNumber(w.cloudCoverPct)}
+              unit="%"
+              color="text-indigo-500"
+              bg="bg-indigo-500/10"
+            />
           </div>
 
           {/* Forecast section */}
@@ -226,7 +281,9 @@ export default function WeatherPage() {
             <div className="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-white/10 rounded-2xl p-5 shadow-sm">
               <div className="flex items-center gap-2 mb-4">
                 <TrendingUp className="w-4 h-4 text-sky-500" />
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white">Hourly Rainfall Forecast</h3>
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                  {t('hourlyRainfallForecast')}
+                </h3>
                 <span className="text-[10px] text-slate-400 dark:text-slate-500 ml-auto font-mono">mm/hr</span>
               </div>
               {w.hourlyForecast && w.hourlyForecast.length > 0 ? (
@@ -238,11 +295,15 @@ export default function WeatherPage() {
                       rainfall={hour.rainfallMm}
                       probability={hour.probabilityPct}
                       condition={hour.condition}
+                      t={t}
+                      localizeNumber={localizeNumber}
                     />
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8 text-xs text-slate-400">No hourly data available</div>
+                <div className="text-center py-8 text-xs text-slate-400">
+                  {t('noAlertsFilter') || 'No hourly data available'}
+                </div>
               )}
             </div>
 
@@ -250,32 +311,34 @@ export default function WeatherPage() {
             <div className="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-white/10 rounded-2xl p-5 shadow-sm">
               <div className="flex items-center gap-2 mb-4">
                 <Clock className="w-4 h-4 text-violet-500" />
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white">Forecast Summary</h3>
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                  {t('forecastSummary')}
+                </h3>
               </div>
               <div className="space-y-3">
                 {[
                   {
-                    label: 'Expected Total Rainfall',
-                    value: `${w.forecastRainfallMm?.toFixed(1)} mm`,
-                    sub: `over next ${w.forecastDurationHours}h`,
+                    label: t('expectedTotalRainfall'),
+                    value: `${localizeNumber(w.forecastRainfallMm?.toFixed(1))} mm`,
+                    sub: (t('overNextHours') || 'over next {hours}h').replace('{hours}', localizeNumber(w.forecastDurationHours || 6)),
                     color: '#0EA5E9',
                   },
                   {
-                    label: 'Current Intensity',
-                    value: intensityCfg.label,
-                    sub: `${w.currentRainfallMmPerHour?.toFixed(1)} mm/hr`,
+                    label: t('currentIntensity'),
+                    value: getIntensityLabel(w.rainfallIntensity),
+                    sub: `${localizeNumber(w.currentRainfallMmPerHour?.toFixed(1))} mm/hr`,
                     color: intensityCfg.color,
                   },
                   {
-                    label: 'Forecast Duration',
-                    value: `${w.forecastDurationHours}h`,
-                    sub: 'until conditions clear',
+                    label: t('forecastDuration'),
+                    value: `${localizeNumber(w.forecastDurationHours)}h`,
+                    sub: t('untilConditionsClear'),
                     color: '#6366F1',
                   },
                   {
-                    label: 'Drainage Impact',
-                    value: riskLevel === 'HIGH' ? 'Critical' : riskLevel === 'MODERATE' ? 'Elevated' : 'Normal',
-                    sub: 'estimated drainage load',
+                    label: t('drainageImpact'),
+                    value: riskLevel === 'HIGH' ? t('impact_critical') : riskLevel === 'MODERATE' ? t('impact_elevated') : t('impact_normal'),
+                    sub: t('estimatedDrainageLoad'),
                     color: rCfg.dot.replace('bg-', '#').replace('rose-500', 'EF4444').replace('amber-500', 'F59E0B').replace('sky-500', '0EA5E9').replace('emerald-500', '10B981'),
                   },
                 ].map(item => (
@@ -291,7 +354,7 @@ export default function WeatherPage() {
 
               <div className="mt-3 pt-3 border-t border-slate-100 dark:border-white/[0.06]">
                 <p className="text-[10px] text-slate-400 dark:text-slate-500">
-                  Weather data feeds directly into the AI Flood Prediction Engine (Phase 7) for real-time risk calculation.
+                  {t('weatherEngineNote')}
                 </p>
               </div>
             </div>

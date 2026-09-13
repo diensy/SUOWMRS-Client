@@ -182,13 +182,13 @@ export default function AiPredictionDashboard() {
               AI Flood Risk Assessment
             </span>
             <div className="flex items-center gap-2">
-              <VoiceSpeakerButton
+              {/* <VoiceSpeakerButton
                 text={`AI Hydrological Prediction. Flood probability is ${prediction?.floodProbability || 78} percent. Risk level is ${prediction?.riskLevel || 'High'}. Expected risk window: ${prediction?.riskWindow || 'next 30 to 60 minutes'}. Drainage Saturation Index is ${prediction?.dsiScore || 76} percent.`}
                 label="Listen Summary"
                 size="xs"
                 variant="pill"
                 id="ai-risk-summary"
-              />
+              /> */}
               <span className="inline-flex items-center gap-1 text-[11px] font-mono text-slate-500 dark:text-slate-400">
                 <Clock className="w-3 h-3" />
                 Live Inference

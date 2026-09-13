@@ -13,7 +13,7 @@ import {
   Droplets, Database, Radio, AlertOctagon, MessageSquareWarning,
   History, Flower2, Car, Wheat, Building, Factory,
   TrendingUp, Wifi, WifiOff, CheckCircle2, AlertTriangle,
-  Settings2, ArrowRightLeft, Gauge, FlaskConical, Recycle,
+  Settings2, ArrowRightLeft, Gauge, FlaskConical, Recycle, Volume2,
 } from 'lucide-react';
 
 import Button from '../../components/common/Button';
@@ -28,6 +28,8 @@ import { getAlerts } from '../../services/alertService';
 import { getStorageCurrent, toggleValve } from '../../services/storageService';
 import { getTreatmentCurrent } from '../../services/treatmentService';
 import VoiceSpeakerButton from '../../components/common/VoiceSpeakerButton';
+import { useTextToSpeech } from '../../hooks/useTextToSpeech';
+import { playSirenSound, playValveBeep } from '../../utils/sound';
 
 // ───────── Threshold Helper ─────────
 const getThreshold = (level) => {
@@ -113,6 +115,17 @@ export default function UserDashboard() {
 
   const { t, formatAlert } = useLanguage();
   const { isDark } = useTheme();
+  const { toggle: toggleDashTTS, isSpeaking: isDashSpeaking } = useTextToSpeech('dash-summary-all');
+
+  // ── Helper: Interpolate TTS template strings ──
+  const ttsText = (key, vars = {}) => {
+    let tmpl = t(key);
+    Object.entries(vars).forEach(([k, v]) => {
+      tmpl = tmpl.replace(new RegExp(`\\{${k}\\}`, 'g'), String(v));
+    });
+    return tmpl;
+  };
+
   const getNumericLevel = (val) => {
     if (typeof val === 'number' && !isNaN(val)) return val;
     if (typeof val === 'object' && val !== null) {
@@ -224,6 +237,11 @@ export default function UserDashboard() {
       const action = storage.valveStatus === 'OPEN' ? 'STANDBY' : 'OPEN';
       const res = await toggleValve(action);
       setStorage(prev => ({ ...prev, valveStatus: res.storage.valveStatus, inFlowRate: res.storage.inFlowRate }));
+      // Play valve beep + siren on OPEN
+      playValveBeep(action);
+      if (action === 'OPEN') {
+        playSirenSound();
+      }
       showSnackbar(`Solenoid valve set to ${action} (Manual Override)`, action === 'OPEN' ? 'success' : 'info', 3000);
     } catch {
       showSnackbar('Failed to update valve status. Check API connection.', 'error');
@@ -283,6 +301,48 @@ export default function UserDashboard() {
           <Button variant="primary" size="sm" icon={MessageSquareWarning} onClick={() => setIsComplaintOpen(true)}>
             {t('reportIssue')}
           </Button>
+          {/* 🔊 LISTEN DASHBOARD (temporarily commented out)
+          <button
+            type="button"
+            onClick={() => {
+              const alertText = alertFeed.length > 0
+                ? ttsText('tts_alertCount', { count: alertFeed.length })
+                : t('tts_noAlerts');
+              const summaryText = ttsText('tts_dashSummary', {
+                level: safeLevel.toFixed(1),
+                status: t(threshold.statusKey),
+                fill: storage.fillPercentage,
+                volume: storage.currentVolume?.toLocaleString(),
+                valve: storage.valveStatus,
+                alert: alertText,
+              });
+              toggleDashTTS(summaryText);
+            }}
+            className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-xl transition-all duration-200 select-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#0EA5E9]/50 ${
+              isDashSpeaking
+                ? 'bg-rose-500 text-white border-rose-600 shadow-md shadow-rose-500/25 animate-pulse'
+                : 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25'
+            }`}
+            aria-label={isDashSpeaking ? t('tts_stop') : t('tts_listenAll')}
+            title={isDashSpeaking ? t('tts_stop') : t('tts_listenAll')}
+          >
+            {isDashSpeaking ? (
+              <>
+                <div className="flex items-center gap-0.5 h-3">
+                  <span className="w-0.5 h-2 bg-current animate-bounce rounded-full" style={{ animationDelay: '0ms' }} />
+                  <span className="w-0.5 h-3 bg-current animate-bounce rounded-full" style={{ animationDelay: '150ms' }} />
+                  <span className="w-0.5 h-1.5 bg-current animate-bounce rounded-full" style={{ animationDelay: '300ms' }} />
+                </div>
+                {t('tts_stop')}
+              </>
+            ) : (
+              <>
+                <Volume2 className="w-3.5 h-3.5" />
+                {t('tts_listenAll')}
+              </>
+            )}
+          </button>
+          */}
         </div>
       </div>
 
@@ -303,22 +363,25 @@ export default function UserDashboard() {
               <AlertTriangle className={`w-5 h-5 flex-shrink-0 animate-bounce ${level >= 90 ? 'text-rose-600 dark:text-rose-400' : 'text-amber-600 dark:text-amber-400'}`} />
               <div>
                 <p className={`text-sm font-extrabold ${level >= 90 ? 'text-rose-900 dark:text-rose-100' : 'text-amber-900 dark:text-amber-100'}`}>
-                  {level >= 90 ? '🚨 Critical Flood Threshold Exceeded!' : '⚠️ Elevated Water Level Detected'}
+                  {level >= 90 ? t('criticalFloodBanner') : t('elevatedWaterBanner')}
                 </p>
                 <p className={`text-xs mt-0.5 ${level >= 90 ? 'text-rose-700 dark:text-rose-300' : 'text-amber-800 dark:text-amber-300'}`}>
-                  Drainage level at <strong>{level.toFixed(1)}%</strong>. Underground diverter valve is{' '}
-                  <strong className="underline decoration-current">{storage.valveStatus}</strong>. Excess inflow: {storage.inFlowRate > 0 ? `+${storage.inFlowRate} L/min` : 'Standby'}.
+                  {t('waterLevel')}: <strong>{level.toFixed(1)}%</strong>. {t('solenoidValve')}:{' '}
+                  <strong className="underline decoration-current">{storage.valveStatus}</strong>. {t('excessInflow')}: {storage.inFlowRate > 0 ? `+${storage.inFlowRate} L/min` : t('valve_standby')}.
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <VoiceSpeakerButton
-                text={`${level >= 90 ? 'Critical Flood Threshold Exceeded.' : 'Elevated Water Level Detected.'} Drainage level is ${level.toFixed(1)} percent. Underground diverter valve is ${storage.valveStatus}.`}
+              {/* <VoiceSpeakerButton
+                text={level >= 90
+                  ? ttsText('tts_floodBannerCritical', { level: level.toFixed(1), valve: storage.valveStatus })
+                  : ttsText('tts_floodBannerWarning', { level: level.toFixed(1), valve: storage.valveStatus })
+                }
                 variant="emergency"
                 size="xs"
-                label="Audio Alert"
+                label={t('tts_listen')}
                 id="dash-flood-banner"
-              />
+              /> */}
               <Badge variant={threshold.status} size="sm" dot>{t(threshold.statusKey)}</Badge>
             </div>
           </motion.div>
@@ -340,11 +403,12 @@ export default function UserDashboard() {
               <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t('waterLevel')}</span>
             </div>
             <div className="flex items-center gap-2">
-              <VoiceSpeakerButton
-                text={`Live drainage water level is ${safeLevel.toFixed(1)} percent. System condition is ${threshold.status}.`}
+              {/* <VoiceSpeakerButton
+                text={ttsText('tts_waterLevel', { level: safeLevel.toFixed(1), status: t(threshold.statusKey) })}
                 size="xs"
+                label={t('tts_listen')}
                 id="dash-gauge-audio"
-              />
+              /> */}
               <StatusIndicator status={threshold.status} size="sm" />
             </div>
           </div>
@@ -366,19 +430,19 @@ export default function UserDashboard() {
             </div>
             <div className="flex-1 space-y-2">
               <div className="flex justify-between text-xs text-slate-600 dark:text-slate-300">
-                <span className="text-slate-400">Depth</span>
+                <span className="text-slate-400">{t('depth')}</span>
                 <span className="font-bold font-mono text-slate-900 dark:text-white">{depthMeters}m / 4.0m</span>
               </div>
               <div className="flex justify-between text-xs text-slate-600 dark:text-slate-300">
-                <span className="text-slate-400">Status</span>
+                <span className="text-slate-400">{t('status')}</span>
                 <Badge variant={threshold.status} size="sm">{t(threshold.statusKey)}</Badge>
               </div>
               <div className="flex justify-between text-xs text-slate-600 dark:text-slate-300">
-                <span className="text-slate-400">Today Peak</span>
+                <span className="text-slate-400">{t('todayPeak')}</span>
                 <span className="font-bold font-mono text-orange-500 dark:text-orange-400">{stats.max}%</span>
               </div>
               <div className="flex justify-between text-xs text-slate-600 dark:text-slate-300">
-                <span className="text-slate-400">Today Avg</span>
+                <span className="text-slate-400">{t('todayAvg')}</span>
                 <span className="font-bold font-mono text-sky-600 dark:text-sky-400">{stats.avg}%</span>
               </div>
             </div>
@@ -502,21 +566,21 @@ export default function UserDashboard() {
 
             <div className="flex-1 space-y-2">
               <div className="flex justify-between text-xs text-slate-600 dark:text-slate-300">
-                <span className="text-slate-400">State</span>
+                <span className="text-slate-400">{t('state')}</span>
                 <span className={`font-black text-sm ${storage.valveStatus === 'OPEN' ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-700 dark:text-slate-400'}`}>
                   {storage.valveStatus}
                 </span>
               </div>
               <div className="flex justify-between text-xs text-slate-600 dark:text-slate-300">
-                <span className="text-slate-400">Trigger Level</span>
+                <span className="text-slate-400">{t('triggerLevel')}</span>
                 <span className="font-bold font-mono text-amber-500 dark:text-amber-400">≥ 75%</span>
               </div>
               <div className="flex justify-between text-xs text-slate-600 dark:text-slate-300">
-                <span className="text-slate-400">Mode</span>
+                <span className="text-slate-400">{t('mode')}</span>
                 <span className="font-semibold text-sky-600 dark:text-sky-400">{t('valve_auto')}</span>
               </div>
               <div className="flex justify-between text-xs text-slate-600 dark:text-slate-300">
-                <span className="text-slate-400">Relay</span>
+                <span className="text-slate-400">{t('relay')}</span>
                 <span className="font-mono text-slate-500 dark:text-slate-400">ESP32 #R01</span>
               </div>
             </div>
@@ -534,7 +598,7 @@ export default function UserDashboard() {
             icon={Settings2}
             className="w-full"
           >
-            Manual Override: {storage.valveStatus === 'OPEN' ? t('closeValve') : t('openValve')}
+            {t('manualOverride')}: {storage.valveStatus === 'OPEN' ? t('closeValve') : t('openValve')}
           </Button>
         </motion.div>
       </div>

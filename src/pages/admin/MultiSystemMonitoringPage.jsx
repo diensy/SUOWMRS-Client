@@ -7,10 +7,12 @@ import {
 import Badge from '../../components/common/Badge';
 import Button from '../../components/common/Button';
 import Input from '../../components/common/Input';
+import { useLanguage } from '../../context/LanguageContext';
 import { getMunicipalitySystems, triggerFloodDiversion } from '../../services/municipalityService';
 import { confirmDiversion, customSwal } from '../../utils/swal';
 
 export default function MultiSystemMonitoringPage() {
+  const { t, localizeNumber } = useLanguage();
   const [systems, setSystems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('All'); // 'All', 'Normal', 'Warning', 'Critical', 'Offline'
@@ -309,7 +311,13 @@ export default function MultiSystemMonitoringPage() {
 
         {/* Pagination Footer */}
         <div className="p-4 border-t dark:border-white/10 border-slate-200 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-          <span>Showing Page <strong className="text-slate-900 dark:text-white">{page}</strong> of <strong className="text-slate-900 dark:text-white">{totalPages}</strong> ({totalCount} total systems)</span>
+          <span>
+            {t('showingPage')
+              ?.replace('{page}', localizeNumber(page))
+              ?.replace('{pages}', localizeNumber(totalPages))
+              ?.replace('{total}', localizeNumber(totalCount))
+              || `Showing Page ${page} of ${totalPages} (${totalCount} total systems)`}
+          </span>
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
@@ -318,7 +326,7 @@ export default function MultiSystemMonitoringPage() {
               onClick={() => setPage(p => Math.max(1, p - 1))}
               icon={<ChevronLeft className="w-4 h-4" />}
             >
-              Previous
+              {t('previous')}
             </Button>
             <Button
               variant="outline"
@@ -327,7 +335,7 @@ export default function MultiSystemMonitoringPage() {
               onClick={() => setPage(p => Math.min(totalPages, p + 1))}
               icon={<ChevronRight className="w-4 h-4" />}
             >
-              Next
+              {t('next')}
             </Button>
           </div>
         </div>

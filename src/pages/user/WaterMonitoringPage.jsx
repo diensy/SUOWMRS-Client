@@ -141,16 +141,16 @@ export default function WaterMonitoringPage() {
         <div className="flex items-center gap-3 relative z-10">
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/10 backdrop-blur-md border border-white/10 text-xs">
             <span className={`w-2 h-2 rounded-full ${isConnected ? 'bg-emerald-400 animate-ping' : 'bg-amber-400'}`} />
-            <span className="font-semibold text-white">{isConnected ? 'Live Telemetry Active' : 'Polling Backend'}</span>
+            <span className="font-semibold text-white">{isConnected ? `${t('live')} ${t('sensorTelemetry')}` : t('offline')}</span>
           </div>
-          <VoiceSpeakerButton
+          {/* <VoiceSpeakerButton
             text={`Live water telemetry report: Primary sump water level is ${currentLevel.toFixed(1)} percent, with a depth of ${depthCm} centimeters. Current threshold condition is ${currentThresh.label}. Flow velocity is 4.8 meters per second. Line power is stable.`}
             label="Listen Telemetry"
             size="sm"
             variant="subtle"
             className="bg-white/10 hover:bg-white/20 text-white border-white/20"
             id="water-telemetry-header-voice"
-          />
+          /> */}
           <Button
             variant="secondary"
             size="sm"
@@ -159,7 +159,7 @@ export default function WaterMonitoringPage() {
             icon={RefreshCw}
             className="bg-white/10 hover:bg-white/20 text-white border-white/20"
           >
-            Refresh
+            {t('refresh')}
           </Button>
         </div>
       </div>
@@ -173,12 +173,12 @@ export default function WaterMonitoringPage() {
         >
           <div>
             <div className="flex items-center justify-between gap-2">
-              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Primary Sump Level</span>
-              <VoiceSpeakerButton
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">{t('primarySumpLevel')}</span>
+              {/* <VoiceSpeakerButton
                 text={`Primary sump level is ${currentLevel.toFixed(1)} percent (${depthCm} cm). Threshold is ${currentThresh.label}.`}
                 size="xs"
                 id="sump-primary-voice"
-              />
+              /> */}
             </div>
             <div className="flex items-baseline gap-2 mt-1">
               <span className={`text-2xl font-black font-mono ${currentThresh.textClass}`}>
@@ -188,7 +188,7 @@ export default function WaterMonitoringPage() {
             </div>
             <div className="mt-2 inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-bold border" style={{ color: currentThresh.color, borderColor: `${currentThresh.color}40`, backgroundColor: `${currentThresh.color}15` }}>
               <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: currentThresh.color }} />
-              {currentThresh.label}
+              {t(currentThresh.statusKey) || currentThresh.label}
             </div>
           </div>
           <div className="w-16 h-16 flex-shrink-0">
@@ -212,12 +212,12 @@ export default function WaterMonitoringPage() {
           className="dark:bg-[#0F172A] bg-white border dark:border-white/10 border-slate-200 rounded-2xl p-4 shadow-sm flex items-center justify-between"
         >
           <div>
-            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">24h Peak Water Level</span>
+            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">{t('peak24hWaterLevel')}</span>
             <div className="text-2xl font-black font-mono text-slate-900 dark:text-white mt-1">
               {stats.max.toFixed(1)}%
             </div>
             <p className="text-[10px] text-rose-500 font-semibold mt-2 flex items-center gap-1">
-              <ArrowUpRight className="w-3 h-3" /> Max recorded today
+              <ArrowUpRight className="w-3 h-3" /> {t('maxRecordedToday')}
             </p>
           </div>
           <div className="p-3 rounded-2xl bg-rose-500/10 text-rose-500 border border-rose-500/20">
@@ -231,12 +231,12 @@ export default function WaterMonitoringPage() {
           className="dark:bg-[#0F172A] bg-white border dark:border-white/10 border-slate-200 rounded-2xl p-4 shadow-sm flex items-center justify-between"
         >
           <div>
-            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Drainage Flow Velocity</span>
+            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">{t('flowVelocity')}</span>
             <div className="text-2xl font-black font-mono text-slate-900 dark:text-white mt-1">
               4.8 <span className="text-xs text-slate-400">m/s</span>
             </div>
             <p className="text-[10px] text-emerald-500 font-semibold mt-2 flex items-center gap-1">
-              <CheckCircle2 className="w-3 h-3" /> Normal Discharge Speed
+              <CheckCircle2 className="w-3 h-3" /> {t('normalDischargeSpeed')}
             </p>
           </div>
           <div className="p-3 rounded-2xl bg-sky-500/10 text-sky-500 border border-sky-500/20">
@@ -250,12 +250,12 @@ export default function WaterMonitoringPage() {
           className="dark:bg-[#0F172A] bg-white border dark:border-white/10 border-slate-200 rounded-2xl p-4 shadow-sm flex items-center justify-between"
         >
           <div>
-            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">IoT Sensor Telemetry</span>
+            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">{t('sensorTelemetry')}</span>
             <div className="text-2xl font-black font-mono text-slate-900 dark:text-white mt-1">
               -64 <span className="text-xs text-slate-400">dBm</span>
             </div>
             <p className="text-[10px] text-sky-500 font-semibold mt-2 flex items-center gap-1">
-              <Zap className="w-3 h-3" /> 3.3V Line Power Stable
+              <Zap className="w-3 h-3" /> {t('linePowerStable')}
             </p>
           </div>
           <div className="p-3 rounded-2xl bg-teal-500/10 text-teal-500 border border-teal-500/20">

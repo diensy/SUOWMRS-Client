@@ -8,9 +8,11 @@ import {
 import Card from '../../components/common/Card';
 import Badge from '../../components/common/Badge';
 import Button from '../../components/common/Button';
+import { useLanguage } from '../../context/LanguageContext';
 import { getAccuracyMetrics, getPredictionHistory } from '../../services/predictionService';
 
 export default function PredictionHistoryPage() {
+  const { t, localizeNumber } = useLanguage();
   const [metrics, setMetrics] = useState(null);
   const [historyData, setHistoryData] = useState({ records: [], total: 0, page: 1, totalPages: 1 });
   const [loading, setLoading] = useState(true);
@@ -256,10 +258,10 @@ export default function PredictionHistoryPage() {
           </table>
         </div>
 
-        {/* Pagination */}
+        {/* Pagination Footer */}
         <div className="mt-4 pt-4 border-t border-slate-200 dark:border-white/10 flex items-center justify-between">
           <span className="text-xs text-slate-500">
-            Page {historyData.page} of {historyData.totalPages || 1} ({historyData.total} total audits)
+            {t('page')} {localizeNumber(historyData.page)} {t('of')} {localizeNumber(historyData.totalPages || 1)} ({localizeNumber(historyData.total)} total audits)
           </span>
           <div className="flex items-center gap-2">
             <Button
@@ -268,7 +270,7 @@ export default function PredictionHistoryPage() {
               disabled={page <= 1}
               onClick={() => setPage((p) => Math.max(1, p - 1))}
             >
-              Previous
+              {t('previous')}
             </Button>
             <Button
               variant="outline"
@@ -276,7 +278,7 @@ export default function PredictionHistoryPage() {
               disabled={page >= historyData.totalPages}
               onClick={() => setPage((p) => p + 1)}
             >
-              Next
+              {t('next')}
             </Button>
           </div>
         </div>

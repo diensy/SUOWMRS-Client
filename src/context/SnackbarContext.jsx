@@ -31,10 +31,10 @@ export function SnackbarProvider({ children }) {
   };
 
   const borderMap = {
-    success: 'border-emerald-200 bg-emerald-50/95 text-emerald-900',
-    warning: 'border-amber-200 bg-amber-50/95 text-amber-900',
-    error: 'border-rose-200 bg-rose-50/95 text-rose-900',
-    info: 'border-sky-200 bg-sky-50/95 text-sky-900',
+    success: 'border-emerald-200 dark:border-emerald-500/30 bg-emerald-50/95 dark:bg-[#0F172A] text-emerald-900 dark:text-emerald-300 dark:shadow-emerald-950/40',
+    warning: 'border-amber-200 dark:border-amber-500/30 bg-amber-50/95 dark:bg-[#0F172A] text-amber-900 dark:text-amber-300 dark:shadow-amber-950/40',
+    error: 'border-rose-200 dark:border-rose-500/30 bg-rose-50/95 dark:bg-[#0F172A] text-rose-900 dark:text-rose-300 dark:shadow-rose-950/40',
+    info: 'border-sky-200 dark:border-sky-500/30 bg-sky-50/95 dark:bg-[#0F172A] text-sky-900 dark:text-sky-300 dark:shadow-sky-950/40',
   };
 
   return (
@@ -46,7 +46,7 @@ export function SnackbarProvider({ children }) {
         {toasts.map((toast) => (
           <div
             key={toast.id}
-            className={`pointer-events-auto flex items-center justify-between gap-3 p-3.5 rounded-xl border shadow-lg backdrop-blur-md transition-all duration-300 transform translate-y-0 ${
+            className={`pointer-events-auto flex items-center justify-between gap-3 p-3.5 rounded-xl border shadow-xl backdrop-blur-md transition-all duration-300 transform translate-y-0 ${
               borderMap[toast.type] || borderMap.info
             }`}
           >
@@ -56,7 +56,7 @@ export function SnackbarProvider({ children }) {
             </div>
             <button
               onClick={() => removeToast(toast.id)}
-              className="p-1 rounded-lg text-slate-400 hover:text-slate-700 transition"
+              className="p-1 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-white transition"
               aria-label="Close notification"
             >
               <X className="w-3.5 h-3.5" />

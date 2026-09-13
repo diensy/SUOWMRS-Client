@@ -19,10 +19,10 @@ export default function Button({
   const baseStyles = "inline-flex items-center justify-center font-medium rounded-lg whitespace-nowrap transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer select-none active:scale-[0.98]";
 
   const variants = {
-    primary: "bg-brand-deep hover:bg-brand-dark text-white shadow-sm hover:shadow focus:ring-brand-deep",
-    secondary: "bg-brand-accent hover:bg-sky-600 text-white shadow-sm hover:shadow focus:ring-brand-accent",
-    outline: "border border-slate-300 dark:border-white/20 hover:border-brand-deep dark:hover:border-sky-400 text-slate-700 dark:text-slate-200 hover:text-brand-deep dark:hover:text-white bg-white/70 dark:bg-white/5 hover:bg-slate-50 dark:hover:bg-white/10 focus:ring-brand-deep",
-    ghost: "text-slate-600 dark:text-slate-400 hover:text-brand-deep dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 focus:ring-slate-300",
+    primary: "bg-emerald-800 hover:bg-emerald-900 text-white shadow-sm hover:shadow focus:ring-emerald-600 active:bg-emerald-950",
+    secondary: "bg-brand-water hover:bg-sky-600 text-white shadow-sm hover:shadow focus:ring-sky-500",
+    outline: "border border-slate-300 dark:border-white/20 hover:border-emerald-700 dark:hover:border-emerald-400 text-slate-700 dark:text-slate-200 hover:text-emerald-800 dark:hover:text-white bg-white/70 dark:bg-white/5 hover:bg-slate-50 dark:hover:bg-white/10 focus:ring-emerald-700",
+    ghost: "text-slate-600 dark:text-slate-400 hover:text-emerald-800 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 focus:ring-slate-300",
     danger: "bg-status-critical hover:bg-red-700 text-white shadow-sm hover:shadow focus:ring-status-critical",
     success: "bg-status-normal hover:bg-emerald-600 text-white shadow-sm hover:shadow focus:ring-status-normal",
   };

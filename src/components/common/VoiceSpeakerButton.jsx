@@ -17,6 +17,8 @@ export default function VoiceSpeakerButton({
   id,
   className = '',
 }) {
+  // Voice listen feature temporarily commented out
+  return null;
   const speakerId = id || (typeof text === 'string' ? text.slice(0, 32) : 'tts-btn');
   const { isSpeaking, toggle, currentLang } = useTextToSpeech(speakerId);
   const { LANGUAGES } = useLanguage();

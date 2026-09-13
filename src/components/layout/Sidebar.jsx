@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { useLanguage, LANGUAGES } from '../../context/LanguageContext';
 import { getCurrentUser, logoutUser } from '../../services/authService';
+import Logo from '../common/Logo';
 
 export default function Sidebar({ isOpen, onClose, userRole = 'Resident', onRoleChange }) {
   const { lang, setLang, t } = useLanguage();
@@ -60,7 +61,7 @@ export default function Sidebar({ isOpen, onClose, userRole = 'Resident', onRole
                 ? 'bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/30'
                 : 'text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 hover:bg-rose-50 dark:hover:bg-rose-500/10'
               : isActive
-              ? 'bg-[#0F4C5C] text-white shadow-lg shadow-teal-900/30 border border-teal-600/30'
+              ? 'bg-emerald-800 text-white shadow-lg shadow-emerald-950/25 border border-emerald-600/30'
               : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10'
           }`
         }
@@ -98,10 +99,8 @@ export default function Sidebar({ isOpen, onClose, userRole = 'Resident', onRole
         {/* Mobile brand + close */}
         <div className="flex items-center justify-between px-4 py-3 border-b dark:border-white/[0.06] border-slate-200 lg:hidden">
           <div className="flex items-center gap-2.5">
-            <div className="h-8 w-8 rounded-xl bg-white p-0.5 shadow-sm border border-slate-200 dark:border-white/20 flex items-center justify-center flex-shrink-0 overflow-hidden">
-              <img src="/logo.png" alt="SUOWMRS Logo" className="w-full h-full object-contain" />
-            </div>
-            <span className="font-black text-slate-900 dark:text-white text-sm font-display">SUOW<span className="text-[#0EA5E9]">MRS</span></span>
+            <Logo size="sm" />
+            <span className="font-black text-slate-900 dark:text-white text-sm font-display">SUOW<span className="text-amber-500">MRS</span></span>
           </div>
           <button onClick={onClose} className="p-1 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10">
             <X className="w-4 h-4" />
@@ -141,8 +140,8 @@ export default function Sidebar({ isOpen, onClose, userRole = 'Resident', onRole
           <div className="p-3 border-t dark:border-white/[0.06] border-slate-200 lg:hidden">
             <div className="flex items-center justify-between gap-2 p-2 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/10">
               <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#0F4C5C] to-[#0EA5E9] flex items-center justify-center text-white font-bold text-xs flex-shrink-0 shadow-sm">
-                  {(currentUser.fullName || userRole).charAt(0).toUpperCase()}
+                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-700 to-amber-500 flex items-center justify-center text-white font-bold text-xs flex-shrink-0 shadow-sm">
+                  {currentUser?.fullName?.charAt(0).toUpperCase() || 'U'}
                 </div>
                 <div className="truncate">
                   <p className="text-xs font-bold text-slate-900 dark:text-white truncate">{currentUser.fullName || t('demoUser')}</p>

@@ -101,3 +101,49 @@ export function playCriticalBeep() {
 export function playActionBeep() {
   playTone({ frequency: 920, type: 'sine', duration: 0.05, volume: 0.15 });
 }
+
+/**
+ * Emergency Siren — rising-falling wail pattern (3 cycles, ~2.4 seconds total).
+ * Mimics industrial flood-diversion alarm. Uses oscillators only — no mp3/wav.
+ * Call ONLY on manual valve OPEN or critical flood diversion actions.
+ */
+export function playSirenSound() {
+  try {
+    const ctx = getAudioContext();
+    if (!ctx) return;
+
+    const CYCLES = 3;
+    const CYCLE_DURATION = 0.8; // seconds per hi-lo sweep
+    const LO = 440;
+    const HI = 880;
+    const VOLUME = 0.18;
+
+    for (let i = 0; i < CYCLES; i++) {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = 'sawtooth';
+      const start = ctx.currentTime + i * CYCLE_DURATION;
+
+      // Rising phase (lo → hi)
+      osc.frequency.setValueAtTime(LO, start);
+      osc.frequency.linearRampToValueAtTime(HI, start + CYCLE_DURATION * 0.5);
+      // Falling phase (hi → lo)
+      osc.frequency.linearRampToValueAtTime(LO, start + CYCLE_DURATION);
+
+      // Envelope: fade in → sustain → fade out
+      gain.gain.setValueAtTime(0.001, start);
+      gain.gain.linearRampToValueAtTime(VOLUME, start + 0.05);
+      gain.gain.setValueAtTime(VOLUME, start + CYCLE_DURATION - 0.05);
+      gain.gain.linearRampToValueAtTime(0.001, start + CYCLE_DURATION);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(start);
+      osc.stop(start + CYCLE_DURATION);
+    }
+  } catch (e) {
+    console.warn('[Audio] Siren sound failed:', e);
+  }
+}

@@ -9,18 +9,22 @@ export default {
     extend: {
       colors: {
         brand: {
-          deep: '#0F4C5C',       // Primary Deep Water Blue
-          accent: '#0EA5E9',     // Secondary Water Cyan/Blue
-          light: '#E0F2FE',
-          dark: '#0A333E',
+          deep: '#064E3B',       // Primary Deep Sustainable Green
+          emerald: '#059669',     // Eco Green Accent
+          yellow: '#EAB308',      // Eco Yellow / Solar Amber
+          amber: '#F59E0B',       // Action Amber
+          accent: '#10B981',      // Primary sustainability accent
+          water: '#0EA5E9',       // Supporting water indicator blue
+          light: '#ECFDF5',       // Mint wash
+          dark: '#022C22',        // Deep forest night
           surface: '#F8FAFC',
           surfaceAlt: '#F1F5F9',
         },
         status: {
-          normal: '#22C55E',     // Success / Normal
-          warning: '#F59E0B',    // Warning
-          danger: '#F97316',     // High Danger
-          critical: '#EF4444',   // Critical / Flood
+          normal: '#22C55E',     // Success / Normal Green
+          warning: '#EAB308',    // Eco Warning Yellow
+          danger: '#F97316',     // High Danger Orange
+          critical: '#EF4444',   // Critical / Flood Red
           dark: '#0F172A',       // Dark Dashboard
         }
       },

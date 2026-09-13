@@ -35,6 +35,8 @@ import Footer from '../components/layout/Footer';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage, LANGUAGES } from '../context/LanguageContext';
 import { getCurrentUser, isAuthenticated, logoutUser } from '../services/authService';
+import Logo from '../components/common/Logo';
+import VoiceSpeakerButton from '../components/common/VoiceSpeakerButton';
 
 export default function LandingPage() {
   const { isDark, toggleTheme } = useTheme();
@@ -142,22 +144,20 @@ export default function LandingPage() {
       <header className="sticky top-0 z-50 w-full bg-white/90 dark:bg-[#0F172A]/90 backdrop-blur-md border-b border-slate-200/80 dark:border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-xl bg-[#0F4C5C] text-white flex items-center justify-center shadow-md">
-              <Droplets className="w-5 h-5" />
-            </div>
+            <Logo size="sm" />
             <span className="font-extrabold text-xl tracking-tight text-slate-900 dark:text-white font-display">
-              SUOW<span className="text-[#0EA5E9]">MRS</span>
+              SUOW<span className="text-amber-500">MRS</span>
             </span>
           </Link>
 
           {/* Desktop Right Nav Controls */}
           <div className="hidden md:flex items-center gap-3">
             <div className="relative flex items-center">
-              <Globe className="w-4 h-4 text-slate-400 absolute left-2.5 pointer-events-none" />
+              <Globe className="w-4 h-4 text-emerald-600 dark:text-emerald-400 absolute left-2.5 pointer-events-none" />
               <select
                 value={language}
                 onChange={(e) => changeLanguage(e.target.value)}
-                className="pl-8 pr-3 py-1.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-xs font-bold text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#0EA5E9] cursor-pointer"
+                className="pl-8 pr-3 py-1.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-xs font-bold text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-600 cursor-pointer"
               >
                 {LANGUAGES.map((lang) => (
                   <option key={lang.code} value={lang.code} className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">
@@ -178,7 +178,7 @@ export default function LandingPage() {
 
             {loggedIn && currentUser ? (
               <Link to={currentUser.role === 'Admin' ? '/admin/dashboard' : currentUser.role === 'Technician' ? '/system-health' : '/dashboard'}>
-                <button className="px-4 py-2 text-xs font-bold rounded-xl text-white bg-[#0F4C5C] hover:bg-[#0A333E] shadow-md flex items-center gap-2 transition">
+                <button className="px-4 py-2 text-xs font-bold rounded-xl text-white bg-emerald-800 hover:bg-emerald-900 shadow-md flex items-center gap-2 transition ring-1 ring-amber-400/30">
                   <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-[10px] font-black">
                     {currentUser.fullName?.charAt(0).toUpperCase() || 'U'}
                   </div>
@@ -187,7 +187,7 @@ export default function LandingPage() {
               </Link>
             ) : (
               <Link to="/login">
-                <button className="px-5 py-2 text-xs font-bold rounded-xl text-white bg-[#0F4C5C] hover:bg-[#0A333E] shadow-md flex items-center gap-1.5 transition">
+                <button className="px-5 py-2 text-xs font-bold rounded-xl text-white bg-emerald-800 hover:bg-emerald-900 shadow-md flex items-center gap-1.5 transition">
                   <LogIn className="w-3.5 h-3.5" /> {t('signIn')}
                 </button>
               </Link>
@@ -234,13 +234,13 @@ export default function LandingPage() {
             <div className="pt-2">
               {loggedIn && currentUser ? (
                 <Link to={currentUser.role === 'Admin' ? '/admin/dashboard' : currentUser.role === 'Technician' ? '/system-health' : '/dashboard'} onClick={() => setMobileMenuOpen(false)}>
-                  <button className="w-full py-2.5 text-xs font-bold rounded-xl text-white bg-[#0F4C5C] text-center shadow-md flex items-center justify-center gap-2">
+                  <button className="w-full py-2.5 text-xs font-bold rounded-xl text-white bg-emerald-800 text-center shadow-md flex items-center justify-center gap-2">
                     <span>My Account ({currentUser.fullName})</span>
                   </button>
                 </Link>
               ) : (
                 <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
-                  <button className="w-full py-2.5 text-xs font-bold rounded-xl text-white bg-[#0F4C5C] text-center shadow-md flex items-center justify-center gap-1.5">
+                  <button className="w-full py-2.5 text-xs font-bold rounded-xl text-white bg-emerald-800 text-center shadow-md flex items-center justify-center gap-1.5">
                     <LogIn className="w-4 h-4" /> {t('signIn')}
                   </button>
                 </Link>
@@ -252,17 +252,27 @@ export default function LandingPage() {
 
       {/* Hero Section */}
       <section className="relative pt-10 sm:pt-14 pb-14 sm:pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[320px] sm:w-[600px] h-[250px] sm:h-[350px] bg-gradient-to-tr from-sky-200/40 via-teal-100/30 to-blue-200/20 dark:from-sky-900/20 dark:to-teal-900/10 blur-3xl rounded-full -z-10" />
+        {/* Sustainability Glow Backdrop */}
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[320px] sm:w-[600px] h-[250px] sm:h-[350px] bg-gradient-to-tr from-emerald-300/30 via-amber-200/20 to-sky-200/20 dark:from-emerald-950/40 dark:via-amber-950/15 dark:to-slate-950 blur-3xl rounded-full -z-10" />
 
         <div className="max-w-5xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-teal-50 dark:bg-teal-500/10 border border-teal-200 dark:border-teal-500/20 text-[#0F4C5C] dark:text-teal-300 text-xs font-bold mb-6">
-            <span className="w-2 h-2 rounded-full bg-[#0EA5E9] animate-pulse" />
-            {t('heroBadge')}
+          {/* Sustainability Badge + Voice Readout */}
+          <div className="inline-flex items-center gap-2 p-1 pl-3 pr-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-700/50 text-emerald-800 dark:text-emerald-300 text-xs font-bold mb-6 shadow-sm">
+            <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse" />
+            <span className="hidden sm:inline">{t('heroBadge')}</span>
+            <span className="sm:hidden">SUOWMRS Platform</span>
+            {/* <VoiceSpeakerButton
+              text={`${t('heroTitle1')} ${t('heroTitle2')}. ${t('heroDesc')}`}
+              label="Listen Overview"
+              size="xs"
+              variant="pill"
+              id="landing-hero-speech"
+            /> */}
           </div>
 
           <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-slate-900 dark:text-white tracking-tight leading-[1.15] font-display">
             {t('heroTitle1')} <br className="hidden sm:inline" />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#0F4C5C] via-[#0EA5E9] to-teal-400">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-700 via-teal-600 to-amber-500 dark:from-emerald-400 dark:via-teal-300 dark:to-amber-400">
               {t('heroTitle2')}
             </span>
           </h1>
@@ -271,15 +281,28 @@ export default function LandingPage() {
             {t('heroDesc')}
           </p>
 
+          {/* Positioning Cues: Water Management • Sustainability • Smart Infrastructure */}
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-2 sm:gap-3 text-xs font-bold">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-50 dark:bg-sky-950/30 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800/40">
+              <Droplets className="w-3.5 h-3.5 text-sky-500" /> Water Management
+            </span>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/30 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/40">
+              <Recycle className="w-3.5 h-3.5 text-emerald-600" /> Sustainability & Reuse
+            </span>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 dark:bg-amber-950/30 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800/40">
+              <Cpu className="w-3.5 h-3.5 text-amber-500" /> Smart Infrastructure
+            </span>
+          </div>
+
           <div className="mt-7 sm:mt-8 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
             <Link to="/dashboard" className="w-full sm:w-auto">
-              <button className="w-full sm:w-auto px-6 py-3 text-sm font-bold rounded-2xl text-white bg-[#0F4C5C] hover:bg-[#0A333E] shadow-lg flex items-center justify-center gap-2.5 transition">
-                <Waves className="w-4 h-4" /> {t('residentOps')}
+              <button className="w-full sm:w-auto px-6 py-3 text-sm font-bold rounded-2xl text-white bg-emerald-800 hover:bg-emerald-900 shadow-lg shadow-emerald-950/25 flex items-center justify-center gap-2.5 transition active:scale-95">
+                <Waves className="w-4 h-4 text-amber-300" /> {t('residentOps')}
               </button>
             </Link>
             <Link to="/admin/dashboard" className="w-full sm:w-auto">
-              <button className="w-full sm:w-auto px-6 py-3 text-sm font-bold rounded-2xl text-[#0F4C5C] dark:text-sky-300 bg-white dark:bg-white/10 border-2 border-[#0F4C5C] dark:border-sky-400 hover:bg-teal-50 dark:hover:bg-white/20 shadow-md flex items-center justify-center gap-2.5 transition">
-                <Building2 className="w-4 h-4" /> {t('adminDashboard')}
+              <button className="w-full sm:w-auto px-6 py-3 text-sm font-bold rounded-2xl text-emerald-900 dark:text-emerald-300 bg-white dark:bg-white/10 border-2 border-emerald-700 dark:border-emerald-500 hover:bg-emerald-50 dark:hover:bg-white/20 shadow-md flex items-center justify-center gap-2.5 transition active:scale-95">
+                <Building2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" /> {t('adminDashboard')}
               </button>
             </Link>
           </div>
@@ -288,7 +311,7 @@ export default function LandingPage() {
           <div className="mt-10 sm:mt-12 grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 max-w-4xl mx-auto">
             <div className="p-3.5 sm:p-4 rounded-2xl bg-white dark:bg-[#0F172A] border border-slate-200 dark:border-white/10 shadow-md text-left">
               <div className="text-[10px] sm:text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t('sensorsMonitored')}</div>
-              <div className="text-xl sm:text-2xl font-black text-[#0F4C5C] dark:text-sky-400 mt-1 font-display">128 Nodes</div>
+              <div className="text-xl sm:text-2xl font-black text-emerald-800 dark:text-emerald-400 mt-1 font-display">128 Nodes</div>
               <div className="mt-1 flex items-center gap-1 text-[11px] sm:text-xs text-emerald-600 dark:text-emerald-400 font-semibold">
                 <CheckCircle2 className="w-3.5 h-3.5" /> 98.4% Active
               </div>
@@ -311,7 +334,7 @@ export default function LandingPage() {
             <div className="p-3.5 sm:p-4 rounded-2xl bg-white dark:bg-[#0F172A] border border-slate-200 dark:border-white/10 shadow-md text-left">
               <div className="text-[10px] sm:text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t('autoValveStatus')}</div>
               <div className="text-xl sm:text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1 font-display">READY</div>
-              <div className="mt-1 text-[11px] sm:text-xs text-[#0F4C5C] dark:text-sky-300 font-bold">ESP32 Sim Active</div>
+              <div className="mt-1 text-[11px] sm:text-xs text-emerald-700 dark:text-emerald-400 font-bold">ESP32 Sim Active</div>
             </div>
           </div>
         </div>
@@ -325,7 +348,7 @@ export default function LandingPage() {
               <Droplets className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <div>
-              <p className="text-2xl sm:text-3xl font-black font-display text-[#0F4C5C] dark:text-sky-400">48,500 L</p>
+              <p className="text-2xl sm:text-3xl font-black font-display text-sky-600 dark:text-sky-400">48,500 L</p>
               <p className="text-[11px] sm:text-xs text-slate-600 dark:text-slate-300 mt-1 font-bold">{t('totalFloodPrevented')}</p>
             </div>
           </div>
@@ -507,7 +530,7 @@ export default function LandingPage() {
                     </p>
                   </div>
 
-                  <div className="mt-4 pt-3 border-t border-slate-200 dark:border-white/10 flex items-center text-xs font-semibold text-[#0F4C5C] dark:text-sky-400 group-hover:text-[#0EA5E9] transition">
+                  <div className="mt-4 pt-3 border-t border-slate-200 dark:border-white/10 flex items-center text-xs font-semibold text-emerald-800 dark:text-emerald-400 group-hover:text-amber-500 transition">
                     <span>{t('explorePhase')}</span>
                     <ArrowRight className="w-3.5 h-3.5 ml-1 group-hover:translate-x-1 transition-transform" />
                   </div>
@@ -521,7 +544,7 @@ export default function LandingPage() {
       {/* Role Profiles Section */}
       <section className="py-14 sm:py-16 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto w-full">
         <div className="text-center mb-10 sm:mb-12">
-          <h2 className="text-xs font-bold text-[#0F4C5C] dark:text-sky-400 uppercase tracking-wider">
+          <h2 className="text-xs font-bold text-emerald-800 dark:text-emerald-400 uppercase tracking-wider">
             Tailored Experience
           </h2>
           <p className="mt-1 text-2xl sm:text-3xl font-black text-slate-900 dark:text-white font-display">
@@ -570,7 +593,7 @@ export default function LandingPage() {
 
           <div className="p-6 rounded-2xl bg-white dark:bg-[#0F172A] border border-slate-200 dark:border-white/10 shadow-md flex flex-col justify-between">
             <div>
-              <div className="w-10 h-10 rounded-xl bg-teal-100 dark:bg-teal-500/20 text-[#0F4C5C] dark:text-teal-300 flex items-center justify-center font-bold mb-4">
+              <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 flex items-center justify-center font-bold mb-4">
                 03
               </div>
               <h3 className="text-lg font-bold text-slate-900 dark:text-white">{t('role3Title')}</h3>
@@ -580,7 +603,7 @@ export default function LandingPage() {
             </div>
             <div className="mt-6">
               <Link to="/admin/dashboard">
-                <button className="w-full py-2.5 text-xs font-bold rounded-xl text-white bg-[#0F4C5C] hover:bg-[#0A333E] transition shadow-md">
+                <button className="w-full py-2.5 text-xs font-bold rounded-xl text-white bg-emerald-800 hover:bg-emerald-900 transition shadow-md">
                   {t('adminDashboard')}
                 </button>
               </Link>
