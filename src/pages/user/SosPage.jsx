@@ -7,6 +7,7 @@ import {
 import { useLanguage } from '../../context/LanguageContext';
 import VoiceSpeakerButton from '../../components/common/VoiceSpeakerButton';
 import { playCriticalBeep, playSirenSound, playConfirmBeep, playActionBeep } from '../../utils/sound';
+import { submitComplaint } from '../../services/complaintService';
 
 const EMERGENCY_TYPES = [
   { id: 'flood',     icon: AlertOctagon, label: 'Active Flooding',       color: '#EF4444', desc: 'Water entering homes or streets' },
@@ -93,6 +94,17 @@ export default function SosPage() {
       const updated = [newEntry, ...dispatched].slice(0, 10);
       setDispatched(updated);
       localStorage.setItem('sos_history', JSON.stringify(updated));
+
+      // Persist to MongoDB backend complaints collection
+      submitComplaint({
+        issueType: selectedType.id === 'blockage' ? 'Drainage Blockage' : 'Flooding',
+        title: `EMERGENCY ALERT: ${selectedType.label}`,
+        description: description ? `${description} (${selectedType.desc})` : selectedType.desc,
+        location: location || 'Ward 12 - Zone 4 Riverbed',
+        ward: 'Ward 12',
+        priority: 'Urgent',
+      }).catch(err => console.warn('[SOS] Could not record emergency complaint to backend:', err));
+
       setStep('sent');
       setCountdown(null);
       return;

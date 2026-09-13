@@ -30,6 +30,7 @@ import { getTreatmentCurrent } from '../../services/treatmentService';
 import VoiceSpeakerButton from '../../components/common/VoiceSpeakerButton';
 import { useTextToSpeech } from '../../hooks/useTextToSpeech';
 import { playSirenSound, playValveBeep } from '../../utils/sound';
+import { submitComplaint } from '../../services/complaintService';
 
 // ───────── Threshold Helper ─────────
 const getThreshold = (level) => {
@@ -110,6 +111,9 @@ export default function UserDashboard() {
   const [stats, setStats] = useState({ min: 0, max: 0, avg: 0 });
   const [chartData, setChartData] = useState([]);
   const [isComplaintOpen, setIsComplaintOpen] = useState(false);
+  const [complaintCategory, setComplaintCategory] = useState('Foul odour near drain sump');
+  const [complaintText, setComplaintText] = useState('');
+  const [submittingComplaint, setSubmittingComplaint] = useState(false);
   const [valveLoading, setValveLoading] = useState(false);
   const prevStatusRef = useRef('normal');
 
@@ -244,10 +248,39 @@ export default function UserDashboard() {
   };
 
   // ── Complaint Submit ──
-  const handleComplaintSubmit = (e) => {
+  const handleComplaintSubmit = async (e) => {
     e.preventDefault();
-    setIsComplaintOpen(false);
-    showSnackbar('Report #SR-8921 submitted to Ward Engineers!', 'success');
+    if (!complaintText.trim()) return;
+
+    setSubmittingComplaint(true);
+    try {
+      const issueTypeMap = {
+        'Drain blockage / debris clogged': 'Drainage Blockage',
+        'Water level sensor offline': 'System Damage',
+        'Solenoid valve leakage': 'Water Leakage',
+        'Foul odour near drain sump': 'Other',
+        'Water reuse quality concern': 'Other',
+      };
+      const issueType = issueTypeMap[complaintCategory] || 'Other';
+
+      const res = await submitComplaint({
+        issueType,
+        title: complaintCategory,
+        description: complaintText.trim(),
+        location: 'Zone 4 - Ward 12 Riverbed Sector',
+        ward: 'Ward 12',
+        priority: complaintCategory.includes('blockage') || complaintCategory.includes('leakage') ? 'High' : 'Medium',
+      });
+
+      setIsComplaintOpen(false);
+      setComplaintText('');
+      showSnackbar(res.message || `Report #${res.complaint?.complaintId || 'CMP-2026'} submitted to Ward Engineers!`, 'success', 5000);
+    } catch (err) {
+      console.error('Failed to submit report:', err);
+      showSnackbar(err.response?.data?.error || 'Failed to submit report. Please check API connection.', 'error', 4000);
+    } finally {
+      setSubmittingComplaint(false);
+    }
   };
 
   // ── Reuse allocations ──
@@ -784,21 +817,35 @@ export default function UserDashboard() {
         <form onSubmit={handleComplaintSubmit} className="space-y-4 text-left">
           <div>
             <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Issue Category</label>
-            <select required className="w-full rounded-xl border border-slate-200 dark:border-white/10 dark:bg-[#0F172A] p-2.5 text-xs text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-deep">
-              <option className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">Drain blockage / debris clogged</option>
-              <option className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">Water level sensor offline</option>
-              <option className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">Solenoid valve leakage</option>
-              <option className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">Foul odour near drain sump</option>
-              <option className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">Water reuse quality concern</option>
+            <select
+              value={complaintCategory}
+              onChange={(e) => setComplaintCategory(e.target.value)}
+              required
+              className="w-full rounded-xl border border-slate-200 dark:border-white/10 dark:bg-[#0F172A] p-2.5 text-xs text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-deep cursor-pointer"
+            >
+              <option value="Drain blockage / debris clogged" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">Drain blockage / debris clogged</option>
+              <option value="Water level sensor offline" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">Water level sensor offline</option>
+              <option value="Solenoid valve leakage" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">Solenoid valve leakage</option>
+              <option value="Foul odour near drain sump" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">Foul odour near drain sump</option>
+              <option value="Water reuse quality concern" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">Water reuse quality concern</option>
             </select>
           </div>
           <div>
             <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Description & Location</label>
-            <textarea rows={3} required placeholder="Describe the issue and exact location near the drain node..." className="w-full rounded-xl border border-slate-200 dark:border-white/10 dark:bg-[#0F172A] p-2.5 text-xs text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-deep resize-none" />
+            <textarea
+              rows={3}
+              value={complaintText}
+              onChange={(e) => setComplaintText(e.target.value)}
+              required
+              placeholder="Describe the issue and exact location near the drain node..."
+              className="w-full rounded-xl border border-slate-200 dark:border-white/10 dark:bg-[#0F172A] p-2.5 text-xs text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-deep resize-none"
+            />
           </div>
           <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100 dark:border-white/10">
-            <Button variant="ghost" size="sm" onClick={() => setIsComplaintOpen(false)} type="button">Cancel</Button>
-            <Button type="submit" variant="primary" size="sm">Submit Report</Button>
+            <Button variant="ghost" size="sm" onClick={() => setIsComplaintOpen(false)} type="button" disabled={submittingComplaint}>Cancel</Button>
+            <Button type="submit" variant="primary" size="sm" isLoading={submittingComplaint} disabled={submittingComplaint}>
+              {submittingComplaint ? 'Submitting...' : 'Submit Report'}
+            </Button>
           </div>
         </form>
       </Modal>
