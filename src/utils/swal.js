@@ -1,5 +1,5 @@
 import Swal from 'sweetalert2';
-import { playConfirmBeep, playCriticalBeep, playValveBeep } from './sound.js';
+import { playConfirmBeep, playCriticalBeep, playValveBeep, playSirenSound } from './sound.js';
 import { getTranslation } from '../context/LanguageContext';
 
 /**
@@ -21,7 +21,8 @@ export const customSwal = Swal.mixin({
  */
 export const confirmSosDispatch = async ({ location, waterLevel, status }, customT) => {
   const tr = customT || getTranslation;
-  return await customSwal.fire({
+  playCriticalBeep();
+  const result = await customSwal.fire({
     icon: 'warning',
     iconColor: '#EF4444',
     title: tr('swal_sos_title'),
@@ -40,6 +41,12 @@ export const confirmSosDispatch = async ({ location, waterLevel, status }, custo
     cancelButtonText: tr('swal_cancel'),
     confirmButtonClass: 'bg-rose-600 hover:bg-rose-700 text-white shadow-md shadow-rose-600/30 focus:ring-rose-500',
   });
+
+  if (result.isConfirmed) {
+    playConfirmBeep();
+    playSirenSound();
+  }
+  return result;
 };
 
 /**
@@ -75,6 +82,7 @@ export const confirmDiversion = async ({ systemId, ward, location, waterLevel, s
   if (result.isConfirmed) {
     playConfirmBeep();
     playValveBeep('open');
+    playSirenSound();
   }
   return result;
 };
@@ -102,6 +110,9 @@ export const confirmValveToggle = async (currentStatus, customT) => {
   if (result.isConfirmed) {
     playConfirmBeep();
     playValveBeep(isOpening ? 'open' : 'close');
+    if (isOpening) {
+      playSirenSound();
+    }
   }
   return result;
 };

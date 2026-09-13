@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 import VoiceSpeakerButton from '../../components/common/VoiceSpeakerButton';
+import { playCriticalBeep, playSirenSound, playConfirmBeep, playActionBeep } from '../../utils/sound';
 
 const EMERGENCY_TYPES = [
   { id: 'flood',     icon: AlertOctagon, label: 'Active Flooding',       color: '#EF4444', desc: 'Water entering homes or streets' },
@@ -68,6 +69,7 @@ export default function SosPage() {
   };
 
   const handleConfirm = () => {
+    playCriticalBeep();
     setStep('confirm');
     setCountdown(5);
   };
@@ -76,6 +78,8 @@ export default function SosPage() {
     if (countdown === null) return;
     if (countdown === 0) {
       // Dispatch
+      playConfirmBeep();
+      playSirenSound();
       const newEntry = {
         id: Date.now(),
         type: selectedType.label,
@@ -93,16 +97,19 @@ export default function SosPage() {
       setCountdown(null);
       return;
     }
+    playCriticalBeep();
     const t = setTimeout(() => setCountdown(prev => prev - 1), 1000);
     return () => clearTimeout(t);
   }, [countdown]);
 
   const handleCancel = () => {
+    playActionBeep();
     setCountdown(null);
     setStep('select');
   };
 
   const handleReset = () => {
+    playActionBeep();
     setStep('select');
     setSelected(null);
     setLocation('');
@@ -166,7 +173,7 @@ export default function SosPage() {
                   return (
                     <button
                       key={type.id}
-                      onClick={() => setSelected(type)}
+                      onClick={() => { playActionBeep(); setSelected(type); }}
                       className={`flex items-center gap-3 p-4 rounded-xl border text-left transition-all duration-200 ${
                         isSelected
                           ? 'shadow-md'

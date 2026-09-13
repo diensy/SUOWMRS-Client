@@ -237,11 +237,6 @@ export default function UserDashboard() {
       const action = storage.valveStatus === 'OPEN' ? 'STANDBY' : 'OPEN';
       const res = await toggleValve(action);
       setStorage(prev => ({ ...prev, valveStatus: res.storage.valveStatus, inFlowRate: res.storage.inFlowRate }));
-      // Play valve beep + siren on OPEN
-      playValveBeep(action);
-      if (action === 'OPEN') {
-        playSirenSound();
-      }
       showSnackbar(`Solenoid valve set to ${action} (Manual Override)`, action === 'OPEN' ? 'success' : 'info', 3000);
     } catch {
       showSnackbar('Failed to update valve status. Check API connection.', 'error');

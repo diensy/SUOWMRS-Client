@@ -12,6 +12,7 @@ import { getEsp32Diagnostics, rebootEsp32, pingEsp32 } from '../../services/diag
 import { useSocket } from '../../hooks/useSocket';
 import { useTheme } from '../../context/ThemeContext';
 import { useLanguage } from '../../context/LanguageContext';
+import { playCriticalBeep, playConfirmBeep, playActionBeep } from '../../utils/sound';
 
 export default function Esp32Diagnostics() {
   const { isDark } = useTheme();
@@ -78,6 +79,7 @@ export default function Esp32Diagnostics() {
 
   // Handle Reboot
   const handleReboot = async () => {
+    playCriticalBeep();
     const result = await Swal.fire({
       title: t('swal_reboot_title') || 'Reboot ESP32 Controller?',
       text: t('swal_reboot_desc') || 'Telemetry streaming will pause for approximately 3-5 seconds while the microcontroller restarts.',
@@ -92,6 +94,7 @@ export default function Esp32Diagnostics() {
     });
 
     if (result.isConfirmed) {
+      playConfirmBeep();
       setRebooting(true);
       try {
         await rebootEsp32();
@@ -124,6 +127,7 @@ export default function Esp32Diagnostics() {
 
   // Handle Ping
   const handlePing = async () => {
+    playActionBeep();
     setPinging(true);
     try {
       const res = await pingEsp32();
@@ -141,6 +145,7 @@ export default function Esp32Diagnostics() {
   };
 
   const copyIp = () => {
+    playActionBeep();
     navigator.clipboard.writeText(device.ipAddress || '192.168.1.142');
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
