@@ -5,6 +5,7 @@ import {
   ArrowDown, TrendingUp, AlertTriangle, CheckCircle2
 } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
+import { useSocket } from '../../hooks/useSocket';
 import { getStorageCurrent, toggleValve } from '../../services/storageService';
 
 function CircularGauge({ percentage, size = 160, label, sublabel, color = '#0EA5E9' }) {
@@ -180,6 +181,7 @@ function TankVisual({ fillPct }) {
 
 export default function StoragePage() {
   const { t } = useLanguage();
+  const { storageData: socketStorage } = useSocket();
   const [storage, setStorage] = useState(null);
   const [loading, setLoading] = useState(true);
   const [valveLoading, setValveLoading] = useState(false);
@@ -199,15 +201,26 @@ export default function StoragePage() {
 
   useEffect(() => {
     fetchStorage();
-    const interval = setInterval(fetchStorage, 20000);
+    const interval = setInterval(fetchStorage, 10000);
     return () => clearInterval(interval);
   }, [fetchStorage]);
+
+  // Live real-time WebSocket updates
+  useEffect(() => {
+    if (socketStorage) {
+      setStorage(socketStorage);
+      setLastUpdated(new Date());
+    }
+  }, [socketStorage]);
 
   const handleValveToggle = async (action) => {
     setValveLoading(true);
     try {
       const result = await toggleValve(action);
-      setStorage(result.storage);
+      if (result && result.storage) {
+        setStorage(result.storage);
+        setLastUpdated(new Date());
+      }
     } catch (e) {
       console.error('Valve toggle failed', e);
     } finally {
