@@ -79,14 +79,15 @@ export default function Esp32Diagnostics() {
   // Handle Reboot
   const handleReboot = async () => {
     const result = await Swal.fire({
-      title: 'Reboot ESP32 Controller?',
-      text: 'Telemetry streaming will pause for approximately 3-5 seconds while the microcontroller restarts.',
+      title: t('swal_reboot_title') || 'Reboot ESP32 Controller?',
+      text: t('swal_reboot_desc') || 'Telemetry streaming will pause for approximately 3-5 seconds while the microcontroller restarts.',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#EF4444',
       cancelButtonColor: '#6B7280',
-      confirmButtonText: 'Yes, Reboot Node',
-      background: isDark ? '#1E293B' : '#FFFFFF',
+      confirmButtonText: t('swal_reboot_confirm') || 'Yes, Reboot Node',
+      cancelButtonText: t('swal_cancel') || 'Cancel',
+      background: isDark ? '#0F172A' : '#FFFFFF',
       color: isDark ? '#F8FAFC' : '#0F172A',
     });
 
@@ -97,11 +98,11 @@ export default function Esp32Diagnostics() {
         setDevice((prev) => ({ ...prev, status: 'rebooting' }));
         Swal.fire({
           icon: 'success',
-          title: 'Reboot Signal Sent',
-          text: 'The ESP32 controller has been instructed to perform a soft system reset.',
+          title: t('swal_reboot_success_title') || 'Reboot Signal Sent',
+          text: t('swal_reboot_success_desc') || 'The ESP32 controller has been instructed to perform a soft system reset.',
           timer: 2500,
           showConfirmButton: false,
-          background: isDark ? '#1E293B' : '#FFFFFF',
+          background: isDark ? '#0F172A' : '#FFFFFF',
           color: isDark ? '#F8FAFC' : '#0F172A',
         });
         setTimeout(() => {
@@ -112,8 +113,10 @@ export default function Esp32Diagnostics() {
         setRebooting(false);
         Swal.fire({
           icon: 'error',
-          title: 'Command Failed',
-          text: 'Could not send reboot signal to the telemetry node.',
+          title: t('commandFailed') || 'Command Failed',
+          text: err.response?.data?.details || err.response?.data?.error || 'Could not send reboot signal to the telemetry node.',
+          background: isDark ? '#0F172A' : '#FFFFFF',
+          color: isDark ? '#F8FAFC' : '#0F172A',
         });
       }
     }
