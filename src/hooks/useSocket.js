@@ -17,12 +17,21 @@ export function useSocket() {
 
   useEffect(() => {
     if (!socketInstance) {
-      const serverUrl = import.meta.env.VITE_SOCKET_URL || 
-        (import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '') : window.location.origin);
+      const PROD_BACKEND_URL = 'https://suowmrs-server.onrender.com';
+      const serverUrl =
+        import.meta.env.VITE_SOCKET_URL ||
+        (import.meta.env.VITE_API_URL
+          ? import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '')
+          : window.location.hostname === 'localhost'
+          ? window.location.origin
+          : PROD_BACKEND_URL);
 
       socketInstance = socketIO(serverUrl, {
         path: '/socket.io',
         transports: ['websocket', 'polling'],
+        reconnection: true,
+        reconnectionAttempts: 10,
+        reconnectionDelay: 2000,
       });
     }
 
