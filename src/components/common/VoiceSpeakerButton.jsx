@@ -1,49 +1,70 @@
-import React from 'react';
-import { Volume2, VolumeX, Square } from 'lucide-react';
+import React, { useMemo, useEffect, useRef } from 'react';
+import { Volume2, Square } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTextToSpeech } from '../../hooks/useTextToSpeech';
-import { useLanguage } from '../../context/LanguageContext';
+import { useLanguage, LANGUAGES } from '../../context/LanguageContext';
+import { isTTSSupported } from '../../services/ttsService';
+import { useSnackbar } from '../../context/SnackbarContext';
 
 /**
- * Premium VoiceSpeakerButton component for critical alerts, AI predictions,
- * weather reports, water level status, and emergency notices.
+ * VoiceSpeakerButton — reads the supplied text aloud in the active UI language.
+ * Used for critical alerts, AI predictions, weather reports, water level status and SOS notices.
+ *
+ * `text` may be a string or a function returning a string (evaluated at click time so the
+ * spoken text always reflects the latest telemetry).
  */
 export default function VoiceSpeakerButton({
   text,
-  label = 'Listen',
+  label,
   showLabel = true,
   size = 'sm',
   variant = 'subtle', // 'subtle' | 'pill' | 'emergency' | 'ghost'
   id,
   className = '',
 }) {
-  // Voice listen feature temporarily commented out
-  return null;
-  const speakerId = id || (typeof text === 'string' ? text.slice(0, 32) : 'tts-btn');
-  const { isSpeaking, toggle, currentLang } = useTextToSpeech(speakerId);
-  const { LANGUAGES } = useLanguage();
+  const { t, currentLanguage } = useLanguage();
+  const speakerId = useMemo(
+    () => id || (typeof text === 'string' ? `tts-${text.slice(0, 32)}` : 'tts-btn'),
+    [id, text]
+  );
+  const { isSpeaking, toggle, error, errorLang } = useTextToSpeech(speakerId);
+  const { showSnackbar } = useSnackbar();
+  const startedRef = useRef(false);
 
-  const currentLangLabel = LANGUAGES?.find((l) => l.code === currentLang)?.label || 'English';
+  // If this button started speech and the device has no voice for the language, tell the user
+  useEffect(() => {
+    if (error && startedRef.current) {
+      if (error === 'not-allowed') { startedRef.current = false; return; } // autoplay blocked: user just needs to click again
+      startedRef.current = false;
+      const langName = LANGUAGES.find((l) => l.code === errorLang)?.label || errorLang;
+      showSnackbar(t('tts_noVoice', { lang: langName }), 'warning', 5000);
+    }
+  }, [error, errorLang, showSnackbar, t]);
+
+  if (!isTTSSupported()) return null;
+
+  const resolvedLabel = label ?? t('tts_listen');
+  const langLabel = currentLanguage?.native || 'English';
 
   const handleClick = (e) => {
     e.stopPropagation();
-    if (!text) return;
-    toggle(text);
+    e.preventDefault();
+    const value = typeof text === 'function' ? text() : text;
+    if (!value) return;
+    startedRef.current = !isSpeaking;
+    toggle(value);
   };
 
-  // Size styling
   const sizeClasses = {
     xs: 'text-[10px] px-2 py-0.5 rounded-lg gap-1',
     sm: 'text-xs px-2.5 py-1 rounded-xl gap-1.5',
     md: 'text-xs px-3.5 py-1.5 rounded-xl gap-2',
   };
 
-  // Variant styling
   const getVariantClasses = () => {
     if (isSpeaking) {
-      return 'bg-rose-500 text-white border-rose-600 shadow-md shadow-rose-500/25 animate-pulse';
+      return 'bg-rose-500 text-white border border-rose-600 shadow-md shadow-rose-500/25';
     }
-
     switch (variant) {
       case 'emergency':
         return 'bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/30';
@@ -61,11 +82,12 @@ export default function VoiceSpeakerButton({
     <button
       type="button"
       onClick={handleClick}
-      title={isSpeaking ? 'Stop speech' : `Listen in ${currentLangLabel}`}
+      title={isSpeaking ? t('tts_stop') : `${t('tts_listen')} · ${langLabel}`}
       className={`inline-flex items-center font-bold transition-all duration-200 select-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#0EA5E9]/50 ${sizeClasses[size]} ${getVariantClasses()} ${className}`}
-      aria-label={isSpeaking ? 'Stop speaking' : `Read aloud: ${label || 'Listen'}`}
+      aria-label={isSpeaking ? t('tts_stop') : `${t('tts_listen')}: ${resolvedLabel}`}
+      aria-pressed={isSpeaking}
     >
-      <AnimatePresence mode="wait">
+      <AnimatePresence mode="wait" initial={false}>
         {isSpeaking ? (
           <motion.div
             key="speaking"
@@ -74,7 +96,6 @@ export default function VoiceSpeakerButton({
             exit={{ scale: 0.8, opacity: 0 }}
             className="flex items-center gap-1"
           >
-            {/* Animated Sound Wave Bars */}
             <div className="flex items-center gap-0.5 h-3">
               <span className="w-0.5 h-2 bg-current animate-bounce rounded-full" style={{ animationDelay: '0ms' }} />
               <span className="w-0.5 h-3 bg-current animate-bounce rounded-full" style={{ animationDelay: '150ms' }} />
@@ -95,11 +116,7 @@ export default function VoiceSpeakerButton({
         )}
       </AnimatePresence>
 
-      {showLabel && (
-        <span className="tracking-tight">
-          {isSpeaking ? 'Stop' : label}
-        </span>
-      )}
+      {showLabel && <span className="tracking-tight">{isSpeaking ? t('tts_stop') : resolvedLabel}</span>}
     </button>
   );
 }

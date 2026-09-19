@@ -1,6 +1,7 @@
 import axios from 'axios';
+import { API_BASE_URL } from '../config/apiConfig';
 
-const API_BASE = (import.meta.env.VITE_API_URL || '/api') + '/complaints';
+const API_BASE = `${API_BASE_URL}/complaints`;
 
 export async function submitComplaint(complaintData) {
   const token = localStorage.getItem('suowmrs-token');

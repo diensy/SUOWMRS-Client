@@ -21,8 +21,10 @@ import {
   dispatchEarlyAction,
 } from '../../services/predictionService';
 import Swal from 'sweetalert2';
+import { useLanguage } from '../../context/LanguageContext';
 
 export default function AiPredictionDashboard() {
+  const { t, tStatus } = useLanguage();
   const [prediction, setPrediction] = useState(null);
   const [trendData, setTrendData] = useState([]);
   const [wardRisks, setWardRisks] = useState([]);
@@ -60,20 +62,20 @@ export default function AiPredictionDashboard() {
     if (!prediction) return;
 
     const result = await Swal.fire({
-      title: 'Execute AI Recommended Early Action?',
+      title: t('ai_executeQ'),
       html: `
         <div class="text-left text-sm space-y-2 mt-2">
-          <p class="text-slate-600 dark:text-slate-300"><strong>Recommended Action:</strong> ${prediction.recommendedAction}</p>
-          <p class="text-slate-600 dark:text-slate-300"><strong>Target Horizon:</strong> ${prediction.riskWindow}</p>
+          <p class="text-slate-600 dark:text-slate-300"><strong>${t('ai_recommendedAction')}:</strong> ${prediction.recommendedAction}</p>
+          <p class="text-slate-600 dark:text-slate-300"><strong>${t('ai_targetHorizon')}:</strong> ${prediction.riskWindow}</p>
           <div class="p-2.5 rounded bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-xs">
-            ⚠️ <strong>Safety Guardrail:</strong> This action will dispatch a verified high-priority Work Order to field technicians and notify the Municipal Emergency Desk.
+            ⚠️ <strong>${t('ai_safetyGuardrail')}:</strong> ${t('ai_safetyGuardrailDesc')}
           </div>
         </div>
       `,
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonText: 'Confirm & Dispatch Action',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: t('ai_confirmDispatch'),
+      cancelButtonText: t('cancel'),
       confirmButtonColor: '#0F4C5C',
     });
 
@@ -87,13 +89,13 @@ export default function AiPredictionDashboard() {
         });
 
         Swal.fire({
-          title: 'Early Action Dispatched!',
-          text: res.message || 'Mitigation order active in field maintenance suite.',
+          title: t('ai_dispatched'),
+          text: t('ai_dispatchedDesc'),
           icon: 'success',
           confirmButtonColor: '#0F4C5C',
         });
       } catch (err) {
-        Swal.fire('Dispatch Failed', err.message || 'Could not dispatch early action.', 'error');
+        Swal.fire(t('mc_dispatchFailed'), err.message || t('ai_dispatchFailedDesc'), 'error');
       }
     }
   };
@@ -123,14 +125,14 @@ export default function AiPredictionDashboard() {
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-xl font-black text-slate-900 dark:text-white font-display">
-                  AI Flood Prediction Engine
+                  {t('ai_title')}
                 </h1>
                 <Badge variant="purple" className="text-[10px] uppercase tracking-wider py-0.5 px-2 font-mono">
                   SUOWMRS-HydroML v1.4
                 </Badge>
               </div>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                Hydrological risk prediction combining rainfall forecasts, drainage saturation index, and real-time telemetry
+                {t('ai_subtitle')}
               </p>
             </div>
           </div>
@@ -139,7 +141,7 @@ export default function AiPredictionDashboard() {
         <div className="flex items-center gap-2.5">
           <Link to="/ai-prediction/history">
             <Button variant="outline" size="sm" icon={<Activity className="w-3.5 h-3.5" />}>
-              Prediction Audit & Accuracy
+              {t('ai_auditAccuracy')}
             </Button>
           </Link>
           <Button
@@ -149,7 +151,7 @@ export default function AiPredictionDashboard() {
             isLoading={refreshing}
             icon={<RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} />}
           >
-            Refresh Model
+            {t('ai_refreshModel')}
           </Button>
         </div>
       </div>
@@ -159,11 +161,11 @@ export default function AiPredictionDashboard() {
         <div className="flex items-center gap-3 text-xs text-indigo-900 dark:text-indigo-200">
           <Brain className="w-4 h-4 text-indigo-600 dark:text-indigo-400 flex-shrink-0" />
           <span>
-            <strong>Hydrological Prediction Prototype:</strong> Risk probabilities are computed using verified physics-based precipitation inflow, soil catchment absorption rates, and drainage gradient models.
+            <strong>{t('ai_prototype')}:</strong> {t('ai_prototypeDesc')}
           </span>
         </div>
         <Link to="/ai-prediction/history" className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline flex-shrink-0 flex items-center gap-1">
-          <span>Audit Log</span>
+          <span>{t('ai_auditLog')}</span>
           <ArrowUpRight className="w-3.5 h-3.5" />
         </Link>
       </div>
@@ -179,19 +181,19 @@ export default function AiPredictionDashboard() {
 
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
-              AI Flood Risk Assessment
+              {t('ai_riskAssessment')}
             </span>
             <div className="flex items-center gap-2">
-              {/* <VoiceSpeakerButton
-                text={`AI Hydrological Prediction. Flood probability is ${prediction?.floodProbability || 78} percent. Risk level is ${prediction?.riskLevel || 'High'}. Expected risk window: ${prediction?.riskWindow || 'next 30 to 60 minutes'}. Drainage Saturation Index is ${prediction?.dsiScore || 76} percent.`}
-                label="Listen Summary"
+              <VoiceSpeakerButton
+                text={() => t('tts_aiSummary', { prob: prediction?.floodProbability ?? 78, risk: prediction?.riskLevel ?? 'High', window: prediction?.riskWindow ?? 'next 30 to 60 minutes', dsi: prediction?.dsiScore ?? 76 })}
+                label={t('tts_listenSummary')}
                 size="xs"
                 variant="pill"
                 id="ai-risk-summary"
-              /> */}
+              />
               <span className="inline-flex items-center gap-1 text-[11px] font-mono text-slate-500 dark:text-slate-400">
                 <Clock className="w-3 h-3" />
-                Live Inference
+                {t('ai_liveInference')}
               </span>
             </div>
           </div>
@@ -209,7 +211,7 @@ export default function AiPredictionDashboard() {
               <span className={`px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wide border ${
                 getRiskColor(prediction?.floodProbability || 78)
               }`}>
-                {prediction?.riskLevel || 'High'} Risk
+                {tStatus(prediction?.riskLevel || 'High')} {t('ai_risk')}
               </span>
             </div>
           </div>
@@ -218,7 +220,7 @@ export default function AiPredictionDashboard() {
           <div className="mt-4 p-3 rounded-lg bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 flex items-center justify-between">
             <span className="text-xs text-slate-600 dark:text-slate-300 font-medium flex items-center gap-1.5">
               <Clock className="w-3.5 h-3.5 text-sky-500" />
-              Expected Risk Window:
+              {t('ai_expectedWindow')}:
             </span>
             <span className="text-xs font-bold text-slate-900 dark:text-white font-mono">
               {prediction?.riskWindow || 'Next 30–60 minutes'}
@@ -228,7 +230,7 @@ export default function AiPredictionDashboard() {
           {/* Contributing Factors Checklist */}
           <div className="mt-5 space-y-2.5">
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-              Primary Contributing Factors:
+              {t('ai_contributingFactors')}:
             </span>
             <div className="space-y-2">
               {prediction?.mainFactors ? (
@@ -242,19 +244,19 @@ export default function AiPredictionDashboard() {
                 <>
                   <div className="flex items-start gap-2 text-xs text-slate-700 dark:text-slate-300">
                     <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 mt-1.5 flex-shrink-0" />
-                    <span>Heavy rainfall: 34.5 mm/hr (Monsoon Downpour)</span>
+                    <span>{t('ai_factor1')}</span>
                   </div>
                   <div className="flex items-start gap-2 text-xs text-slate-700 dark:text-slate-300">
                     <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 mt-1.5 flex-shrink-0" />
-                    <span>Drainage level at 81% in riverbed culvert</span>
+                    <span>{t('ai_factor2')}</span>
                   </div>
                   <div className="flex items-start gap-2 text-xs text-slate-700 dark:text-slate-300">
                     <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 mt-1.5 flex-shrink-0" />
-                    <span>Storage capacity at 74% (limited buffer remaining)</span>
+                    <span>{t('ai_factor3')}</span>
                   </div>
                   <div className="flex items-start gap-2 text-xs text-slate-700 dark:text-slate-300">
                     <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 mt-1.5 flex-shrink-0" />
-                    <span>Rising water trend (+3.8% / 10 minutes)</span>
+                    <span>{t('ai_factor4')}</span>
                   </div>
                 </>
               )}
@@ -269,10 +271,10 @@ export default function AiPredictionDashboard() {
               onClick={handleExecuteEarlyAction}
               icon={<Zap className="w-4 h-4 text-amber-300" />}
             >
-              Execute Early Action Protocol
+              {t('ai_executeProtocol')}
             </Button>
             <p className="text-[11px] text-center text-slate-400 mt-1.5">
-              Dispatches automated preventative ticket with municipal safety confirmation
+              {t('ai_executeProtocolDesc')}
             </p>
           </div>
         </Card>
@@ -285,7 +287,7 @@ export default function AiPredictionDashboard() {
             {/* Rainfall */}
             <Card className="p-4 border-slate-200 dark:border-white/10">
               <div className="flex items-center justify-between">
-                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Rainfall</span>
+                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">{t('ai_rainfall')}</span>
                 <CloudRain className="w-4 h-4 text-sky-500" />
               </div>
               <div className="mt-2 text-xl font-bold text-slate-900 dark:text-white font-mono">
@@ -299,21 +301,21 @@ export default function AiPredictionDashboard() {
             {/* Water Level */}
             <Card className="p-4 border-slate-200 dark:border-white/10">
               <div className="flex items-center justify-between">
-                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Water Level</span>
+                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">{t('waterLevel')}</span>
                 <Droplets className="w-4 h-4 text-blue-500" />
               </div>
               <div className="mt-2 text-xl font-bold text-slate-900 dark:text-white font-mono">
                 {prediction?.currentConditions?.waterLevelPercentage || 81}%
               </div>
               <Badge variant="danger" className="mt-2 text-[10px]">
-                Culvert Peak
+                {t('ai_culvertPeak')}
               </Badge>
             </Card>
 
             {/* Drainage Saturation Index (DSI) */}
             <Card className="p-4 border-slate-200 dark:border-white/10">
               <div className="flex items-center justify-between">
-                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Drainage Saturation (DSI)</span>
+                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">{t('ai_dsi')}</span>
                 <Gauge className="w-4 h-4 text-purple-500" />
               </div>
               <div className="mt-2 text-xl font-bold text-purple-600 dark:text-purple-400 font-mono">
@@ -327,7 +329,7 @@ export default function AiPredictionDashboard() {
             {/* Storage */}
             <Card className="p-4 border-slate-200 dark:border-white/10">
               <div className="flex items-center justify-between">
-                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Storage Buffer</span>
+                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">{t('ai_storageBuffer')}</span>
                 <Database className="w-4 h-4 text-emerald-500" />
               </div>
               <div className="mt-2 text-xl font-bold text-slate-900 dark:text-white font-mono">
@@ -341,21 +343,21 @@ export default function AiPredictionDashboard() {
             {/* Flow Rate */}
             <Card className="p-4 border-slate-200 dark:border-white/10">
               <div className="flex items-center justify-between">
-                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Drain Flow Rate</span>
+                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">{t('ai_drainFlowRate')}</span>
                 <Activity className="w-4 h-4 text-amber-500" />
               </div>
               <div className="mt-2 text-xl font-bold text-slate-900 dark:text-white font-mono">
                 {prediction?.currentConditions?.drainageFlowRateLpm || 138} <span className="text-xs font-normal text-slate-500">L/min</span>
               </div>
               <Badge variant="blue" className="mt-2 text-[10px]">
-                Inflow Active
+                {t('ai_inflowActive')}
               </Badge>
             </Card>
 
             {/* Temperature */}
             <Card className="p-4 border-slate-200 dark:border-white/10">
               <div className="flex items-center justify-between">
-                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Atmosphere</span>
+                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">{t('ai_atmosphere')}</span>
                 <TrendingUp className="w-4 h-4 text-slate-500" />
               </div>
               <div className="mt-2 text-xl font-bold text-slate-900 dark:text-white font-mono">
@@ -376,7 +378,7 @@ export default function AiPredictionDashboard() {
               </div>
               <div>
                 <h3 className="text-xs font-bold uppercase tracking-wider text-indigo-900 dark:text-indigo-300">
-                  Recommended Preventative Mitigation Protocol
+                  {t('ai_mitigationProtocol')}
                 </h3>
                 <p className="text-xs text-slate-700 dark:text-slate-300 mt-1 leading-relaxed">
                   {prediction?.recommendedAction || 'Pre-divert 500 L/min to Riverbed Sump Tank and dispatch field inspection to Ward 12 & 4 culverts.'}
@@ -395,21 +397,21 @@ export default function AiPredictionDashboard() {
           <div>
             <h2 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
               <TrendingUp className="w-4 h-4 text-indigo-500" />
-              Observed vs. Predicted Drainage Level Curve (8-Hour Horizon)
+              {t('ai_chartTitle')}
             </h2>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              Continuous comparison between sensor-measured historical telemetry (Past 4h) and hydrological ML projection (Next 4h)
+              {t('ai_chartSubtitle')}
             </p>
           </div>
 
           <div className="flex items-center gap-4 text-xs">
             <div className="flex items-center gap-1.5">
               <span className="w-3 h-3 rounded-full bg-[#0EA5E9]" />
-              <span className="text-slate-600 dark:text-slate-300 font-medium">Observed Telemetry</span>
+              <span className="text-slate-600 dark:text-slate-300 font-medium">{t('ai_observedTelemetry')}</span>
             </div>
             <div className="flex items-center gap-1.5">
               <span className="w-3 h-1 border-t-2 border-dashed border-[#D946EF]" />
-              <span className="text-purple-600 dark:text-purple-400 font-medium">ML Prediction Curve</span>
+              <span className="text-purple-600 dark:text-purple-400 font-medium">{t('ai_mlCurve')}</span>
             </div>
           </div>
         </div>
@@ -450,7 +452,7 @@ export default function AiPredictionDashboard() {
                 strokeWidth={2.5}
                 fillOpacity={1}
                 fill="url(#observedGrad)"
-                name="Observed Level (%)"
+                name={t('ai_observedLevel')}
               />
               
               {/* Predicted Curve */}
@@ -462,7 +464,7 @@ export default function AiPredictionDashboard() {
                 strokeDasharray="5 5"
                 fillOpacity={1}
                 fill="url(#predictedGrad)"
-                name="Predicted Risk Level (%)"
+                name={t('ai_predictedLevel')}
               />
             </AreaChart>
           </ResponsiveContainer>
@@ -475,10 +477,10 @@ export default function AiPredictionDashboard() {
           <div>
             <h2 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
               <MapPin className="w-4 h-4 text-rose-500" />
-              Ward-Level Flood Risk Projections (All 25 City Wards)
+              {t('ai_wardProjections')}
             </h2>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              Hydrological risk calculated across all 128 monitoring nodes in the municipal network
+              {t('ai_wardProjectionsDesc')}
             </p>
           </div>
 
@@ -493,13 +495,13 @@ export default function AiPredictionDashboard() {
                     : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10'
                 }`}
               >
-                {tab}
+                {tab === 'All' ? t('all') : tStatus(tab)}
               </button>
             ))}
 
             <Link to="/municipality/map">
               <Button variant="outline" size="sm" icon={<Compass className="w-3.5 h-3.5" />}>
-                View GIS Map
+                {t('ai_viewGisMap')}
               </Button>
             </Link>
           </div>
@@ -537,9 +539,9 @@ export default function AiPredictionDashboard() {
               </div>
 
               <div className="mt-2 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
-                <span>{w.systemsCount} systems</span>
+                <span>{w.systemsCount} {t('ai_systems')}</span>
                 <span className="capitalize font-semibold" style={{ color: w.riskColor }}>
-                  {w.riskTier}
+                  {tStatus(w.riskTier)}
                 </span>
               </div>
             </div>

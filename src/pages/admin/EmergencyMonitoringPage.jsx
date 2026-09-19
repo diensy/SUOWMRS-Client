@@ -7,8 +7,10 @@ import {
 import Badge from '../../components/common/Badge';
 import Button from '../../components/common/Button';
 import { getEmergencyData } from '../../services/municipalityService';
+import { useLanguage } from '../../context/LanguageContext';
 
 export default function EmergencyMonitoringPage() {
+  const { t, tStatus } = useLanguage();
   const [data, setData] = useState({
     criticalNodes: [],
     criticalComplaints: [],
@@ -45,10 +47,10 @@ export default function EmergencyMonitoringPage() {
             </div>
             <div>
               <h1 className="text-xl font-black text-slate-900 dark:text-white font-display">
-                Emergency Monitoring & SOS Dispatch
+                {t('em_title')}
               </h1>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                Priority-sorted flood crisis command center — Critical nodes, severe alerts & emergency contacts
+                {t('em_subtitle')}
               </p>
             </div>
           </div>
@@ -61,7 +63,7 @@ export default function EmergencyMonitoringPage() {
           isLoading={loading}
           icon={<RefreshCw className="w-4 h-4" />}
         >
-          Refresh Feed
+          {t('em_refreshFeed')}
         </Button>
       </div>
 
@@ -70,7 +72,7 @@ export default function EmergencyMonitoringPage() {
         
         <div className="bg-rose-500/10 border border-rose-500/30 p-5 rounded-2xl">
           <div className="flex items-center justify-between text-rose-600 dark:text-rose-400">
-            <span className="text-xs font-bold uppercase tracking-wider">CRITICAL SYSTEMS</span>
+            <span className="text-xs font-bold uppercase tracking-wider">{t('md_criticalSystems')}</span>
             <AlertOctagon className="w-5 h-5 animate-bounce" />
           </div>
           <p className="text-3xl font-black text-rose-600 dark:text-rose-400 font-display mt-2">
@@ -83,40 +85,40 @@ export default function EmergencyMonitoringPage() {
 
         <div className="bg-amber-500/10 border border-amber-500/30 p-5 rounded-2xl">
           <div className="flex items-center justify-between text-amber-600 dark:text-amber-400">
-            <span className="text-xs font-bold uppercase tracking-wider">HIGH RISK WARNINGS</span>
+            <span className="text-xs font-bold uppercase tracking-wider">{t('em_highRiskWarnings')}</span>
             <AlertTriangle className="w-5 h-5" />
           </div>
           <p className="text-3xl font-black text-amber-600 dark:text-amber-400 font-display mt-2">
             {data.criticalNodes?.filter(n => n.status === 'Warning').length || 5}
           </p>
           <p className="text-[11px] text-amber-600 dark:text-amber-300 font-semibold mt-1">
-            Approaching reservoir threshold
+            {t('em_approachingThreshold')}
           </p>
         </div>
 
         <div className="bg-sky-500/10 border border-sky-500/30 p-5 rounded-2xl">
           <div className="flex items-center justify-between text-sky-600 dark:text-sky-400">
-            <span className="text-xs font-bold uppercase tracking-wider">URGENT COMPLAINTS</span>
+            <span className="text-xs font-bold uppercase tracking-wider">{t('em_urgentComplaints')}</span>
             <Flame className="w-5 h-5" />
           </div>
           <p className="text-3xl font-black text-sky-600 dark:text-sky-400 font-display mt-2">
             {data.criticalComplaints?.length || 1}
           </p>
           <p className="text-[11px] text-sky-600 dark:text-sky-300 font-semibold mt-1">
-            Citizen SOS & overflow reports
+            {t('em_sosReports')}
           </p>
         </div>
 
         <div className="bg-emerald-500/10 border border-emerald-500/30 p-5 rounded-2xl">
           <div className="flex items-center justify-between text-emerald-600 dark:text-emerald-400">
-            <span className="text-xs font-bold uppercase tracking-wider">STORAGE CAPACITY</span>
+            <span className="text-xs font-bold uppercase tracking-wider">{t('em_storageCapacity')}</span>
             <Shield className="w-5 h-5" />
           </div>
           <p className="text-3xl font-black text-emerald-600 dark:text-emerald-400 font-display mt-2">
             {data.storageStatus?.fillPercentage || 90.3}%
           </p>
           <p className="text-[11px] text-emerald-600 dark:text-emerald-300 font-semibold mt-1">
-            Auto diverter valve OPEN
+            {t('em_autoDiverterOpen')}
           </p>
         </div>
 
@@ -125,7 +127,7 @@ export default function EmergencyMonitoringPage() {
       {/* ── PRIORITY SORTED CRITICAL NODE FEED ── */}
       <div className="space-y-4">
         <p className="text-xs font-black tracking-widest uppercase text-slate-400 dark:text-slate-500">
-          Priority-Sorted Active Hazards (Critical ➔ High ➔ Medium)
+          {t('em_activeHazards')}
         </p>
 
         {data.criticalNodes?.map((node) => (
@@ -148,11 +150,11 @@ export default function EmergencyMonitoringPage() {
                   <span className="font-mono font-black text-sm text-slate-900 dark:text-white">{node.systemId}</span>
                   <span className="text-xs font-bold text-slate-700 dark:text-slate-200">— {node.location}</span>
                   <Badge variant={node.status === 'Critical' ? 'danger' : 'warning'} size="sm">
-                    {node.status.toUpperCase()}
+                    {tStatus(node.status).toUpperCase()}
                   </Badge>
                 </div>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                  Water Depth Level: <strong className="font-mono text-slate-900 dark:text-white">{node.waterLevel}%</strong> | Solenoid Diverter Valve: <strong className="text-emerald-500">OPEN</strong>
+                  {t('em_waterDepthLevel')}: <strong className="font-mono text-slate-900 dark:text-white">{node.waterLevel}%</strong> | {t('em_solenoidDiverter')}: <strong className="text-emerald-500">{t('status_open').toUpperCase()}</strong>
                 </p>
               </div>
             </div>
@@ -160,7 +162,7 @@ export default function EmergencyMonitoringPage() {
             <div className="flex items-center gap-2">
               <a href="tel:112" className="flex-1 md:flex-none">
                 <Button variant="danger" size="sm" icon={<PhoneCall className="w-4 h-4" />}>
-                  Call Emergency 112
+                  {t('em_call112')}
                 </Button>
               </a>
             </div>
@@ -171,19 +173,19 @@ export default function EmergencyMonitoringPage() {
       {/* Emergency Contact Information */}
       <div className="dark:bg-[#0F172A] bg-white border dark:border-white/10 border-slate-200 shadow-md rounded-2xl p-6 space-y-3">
         <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-          <PhoneCall className="w-4 h-4 text-rose-500" /> Municipal Emergency Dispatch Helpline Contacts
+          <PhoneCall className="w-4 h-4 text-rose-500" /> {t('em_helplineContacts')}
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs font-semibold">
           <div className="p-3 rounded-xl bg-slate-50 dark:bg-white/[0.03] border dark:border-white/5 border-slate-200/60">
-            <p className="text-slate-400 uppercase text-[10px]">National Flood Helpline</p>
+            <p className="text-slate-400 uppercase text-[10px]">{t('em_nationalHelpline')}</p>
             <p className="font-mono font-black text-slate-900 dark:text-white text-base mt-0.5">112 / 1070</p>
           </div>
           <div className="p-3 rounded-xl bg-slate-50 dark:bg-white/[0.03] border dark:border-white/5 border-slate-200/60">
-            <p className="text-slate-400 uppercase text-[10px]">Municipal Control Room</p>
+            <p className="text-slate-400 uppercase text-[10px]">{t('sos_contact_control_room')}</p>
             <p className="font-mono font-black text-slate-900 dark:text-white text-base mt-0.5">+91 674 243 0011</p>
           </div>
           <div className="p-3 rounded-xl bg-slate-50 dark:bg-white/[0.03] border dark:border-white/5 border-slate-200/60">
-            <p className="text-slate-400 uppercase text-[10px]">IoT Disaster Dispatch</p>
+            <p className="text-slate-400 uppercase text-[10px]">{t('em_iotDispatch')}</p>
             <p className="font-mono font-black text-slate-900 dark:text-white text-base mt-0.5">+91 98765 99887</p>
           </div>
         </div>

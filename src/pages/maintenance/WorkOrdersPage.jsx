@@ -15,7 +15,7 @@ import { useLanguage } from '../../context/LanguageContext';
 
 export default function WorkOrdersPage() {
   const { isDark } = useTheme();
-  const { t } = useLanguage();
+  const { t, tStatus, locale } = useLanguage();
 
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -61,8 +61,10 @@ export default function WorkOrdersPage() {
     if (!formData.title || !formData.component) {
       Swal.fire({
         icon: 'error',
-        title: 'Required Fields',
-        text: 'Please enter a title and select a component.',
+        title: t('wo_requiredFields'),
+        text: t('wo_requiredFieldsDesc'),
+        background: isDark ? '#1E293B' : '#FFFFFF',
+        color: isDark ? '#F8FAFC' : '#0F172A',
       });
       return;
     }
@@ -85,8 +87,8 @@ export default function WorkOrdersPage() {
       });
       Swal.fire({
         icon: 'success',
-        title: 'Work Order Created',
-        text: 'Maintenance dispatch ticket logged successfully.',
+        title: t('wo_created'),
+        text: t('wo_createdDesc'),
         timer: 2000,
         showConfirmButton: false,
         background: isDark ? '#1E293B' : '#FFFFFF',
@@ -96,8 +98,10 @@ export default function WorkOrdersPage() {
     } catch (err) {
       Swal.fire({
         icon: 'error',
-        title: 'Creation Failed',
-        text: 'Unable to register work order ticket.',
+        title: t('wo_creationFailed'),
+        text: t('wo_creationFailedDesc'),
+        background: isDark ? '#1E293B' : '#FFFFFF',
+        color: isDark ? '#F8FAFC' : '#0F172A',
       });
     } finally {
       setCreating(false);
@@ -115,7 +119,7 @@ export default function WorkOrdersPage() {
         toast: true,
         position: 'top-end',
         icon: 'success',
-        title: `Work order marked as ${newStatus}`,
+        title: t('wo_markedAs', { status: tStatus(newStatus) }),
         showConfirmButton: false,
         timer: 2000,
         background: isDark ? '#1E293B' : '#FFFFFF',
@@ -130,13 +134,13 @@ export default function WorkOrdersPage() {
   const getPriorityBadge = (priority) => {
     switch (priority?.toLowerCase()) {
       case 'critical':
-        return <Badge variant="danger">CRITICAL</Badge>;
+        return <Badge variant="danger">{t('status_critical').toUpperCase()}</Badge>;
       case 'high':
-        return <Badge variant="warning">HIGH</Badge>;
+        return <Badge variant="warning">{t('status_high').toUpperCase()}</Badge>;
       case 'medium':
-        return <Badge variant="info">MEDIUM</Badge>;
+        return <Badge variant="info">{t('status_medium').toUpperCase()}</Badge>;
       default:
-        return <Badge variant="neutral">LOW</Badge>;
+        return <Badge variant="neutral">{t('status_low').toUpperCase()}</Badge>;
     }
   };
 
@@ -164,14 +168,14 @@ export default function WorkOrdersPage() {
           <div>
             <div className="flex items-center gap-3">
               <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
-                Work Orders & Maintenance Tickets
+                {t('wo_title')}
               </h1>
               <Badge variant="warning" size="md">
-                Maintenance Hub
+                {t('maintenance')}
               </Badge>
             </div>
             <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
-              Dispatch technicians, track actuator replacements, and log service history for water automation infrastructure.
+              {t('wo_subtitle')}
             </p>
           </div>
         </div>
@@ -185,7 +189,7 @@ export default function WorkOrdersPage() {
             className="h-9 px-3.5 rounded-lg border-slate-300 dark:border-white/10"
           >
             <RefreshCw className="w-4 h-4 mr-1.5 flex-shrink-0" />
-            <span>Refresh</span>
+            <span>{t('refresh')}</span>
           </Button>
 
           <Button
@@ -195,7 +199,7 @@ export default function WorkOrdersPage() {
             className="h-9 px-3.5 rounded-lg bg-amber-600 hover:bg-amber-700 shadow-sm"
           >
             <Plus className="w-4 h-4 mr-1.5 flex-shrink-0" />
-            <span>Create Work Order</span>
+            <span>{t('wo_create')}</span>
           </Button>
         </div>
       </div>
@@ -216,7 +220,7 @@ export default function WorkOrdersPage() {
                     : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5'
                 }`}
               >
-                {tab}
+                {tab === 'All' ? t('all') : tStatus(tab)}
               </button>
             );
           })}
@@ -229,18 +233,18 @@ export default function WorkOrdersPage() {
             onChange={(e) => setSelectedPriority(e.target.value)}
             className="px-3 py-2 rounded-xl text-xs font-medium border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500"
           >
-            <option value="All" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">All Priorities</option>
-            <option value="critical" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">Critical</option>
-            <option value="high" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">High</option>
-            <option value="medium" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">Medium</option>
-            <option value="low" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">Low</option>
+            <option value="All" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">{t('wo_allPriorities')}</option>
+            <option value="critical" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">{t('status_critical')}</option>
+            <option value="high" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">{t('status_high')}</option>
+            <option value="medium" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">{t('status_medium')}</option>
+            <option value="low" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">{t('status_low')}</option>
           </select>
 
           <div className="relative flex-1 md:w-64">
             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Search tickets, technician..."
+              placeholder={t('wo_searchPh')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-9 pr-3 py-2 rounded-xl text-xs border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500"
@@ -253,16 +257,16 @@ export default function WorkOrdersPage() {
       {loading ? (
         <div className="flex items-center justify-center py-20 text-slate-500 dark:text-slate-400">
           <RefreshCw className="w-6 h-6 animate-spin mr-3 text-amber-500" />
-          Loading work orders...
+          {t('wo_loading')}
         </div>
       ) : filteredOrders.length === 0 ? (
         <div className="p-12 text-center rounded-xl border bg-white dark:bg-slate-900/60 border-slate-200 dark:border-white/10">
           <FileText className="w-12 h-12 text-slate-400 mx-auto mb-3" />
           <h3 className="text-base font-bold text-slate-900 dark:text-white">
-            No Work Orders Found
+            {t('wo_noneFound')}
           </h3>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto">
-            There are currently no maintenance tickets matching your filters. Click "Create Work Order" to dispatch a technician.
+            {t('wo_noneFoundDesc')}
           </p>
         </div>
       ) : (
@@ -296,15 +300,15 @@ export default function WorkOrdersPage() {
                   <div className="flex items-center gap-4 text-xs text-slate-500 dark:text-slate-400 flex-wrap pt-1">
                     <span className="flex items-center gap-1 font-medium text-slate-700 dark:text-slate-300">
                       <Wrench className="w-3.5 h-3.5 text-blue-500" />
-                      {order.component}
+                      {tStatus(order.component)}
                     </span>
                     <span className="flex items-center gap-1">
                       <User className="w-3.5 h-3.5 text-indigo-500" />
-                      Tech: <span className="font-medium text-slate-700 dark:text-slate-300">{order.assignedTechnician || 'Unassigned'}</span>
+                      {t('wo_tech')}: <span className="font-medium text-slate-700 dark:text-slate-300">{order.assignedTechnician || t('wo_unassigned')}</span>
                     </span>
                     <span className="flex items-center gap-1">
                       <Calendar className="w-3.5 h-3.5 text-amber-500" />
-                      Scheduled: {order.scheduledDate ? new Date(order.scheduledDate).toLocaleDateString() : 'Immediate'}
+                      {t('status_scheduled')}: {order.scheduledDate ? new Date(order.scheduledDate).toLocaleDateString(locale) : t('wo_immediate')}
                     </span>
                   </div>
                 </div>
@@ -322,10 +326,10 @@ export default function WorkOrdersPage() {
                         : 'bg-amber-50 dark:bg-amber-500/10 border-amber-300 dark:border-amber-500/30 text-amber-700 dark:text-amber-400 focus:ring-amber-500/30'
                     }`}
                   >
-                    <option value="Pending" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">Pending</option>
-                    <option value="In Progress" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">In Progress</option>
-                    <option value="Completed" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">Completed</option>
-                    <option value="Cancelled" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">Cancelled</option>
+                    <option value="Pending" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">{t('status_pending')}</option>
+                    <option value="In Progress" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">{t('status_in_progress')}</option>
+                    <option value="Completed" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">{t('status_completed')}</option>
+                    <option value="Cancelled" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">{t('status_cancelled')}</option>
                   </select>
 
                   {order.status?.toLowerCase() !== 'completed' && (
@@ -336,7 +340,7 @@ export default function WorkOrdersPage() {
                       className="h-9 px-3.5 text-xs font-semibold rounded-lg border border-emerald-300 dark:border-emerald-500/30 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-500/20"
                     >
                       <Check className="w-3.5 h-3.5 mr-1 flex-shrink-0" />
-                      <span>Close Ticket</span>
+                      <span>{t('wo_closeTicket')}</span>
                     </Button>
                   )}
                 </div>
@@ -363,7 +367,7 @@ export default function WorkOrdersPage() {
                     <Wrench className="w-5 h-5" />
                   </div>
                   <h3 className="font-bold text-slate-900 dark:text-white text-base">
-                    Create New Work Order
+                    {t('wo_createNew')}
                   </h3>
                 </div>
                 <button
@@ -378,12 +382,12 @@ export default function WorkOrdersPage() {
               <form onSubmit={handleCreateOrder} className="p-5 space-y-4">
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                    Work Order Title *
+                    {t('wo_titleLabel')} *
                   </label>
                   <input
                     type="text"
                     required
-                    placeholder="e.g. Inspect relay overheating on pump panel"
+                    placeholder={t('wo_titlePh')}
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                     className="w-full px-3 py-2 rounded-xl text-xs border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500"
@@ -393,37 +397,37 @@ export default function WorkOrdersPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                      Component Target *
+                      {t('wo_componentTarget')} *
                     </label>
                     <select
                       value={formData.component}
                       onChange={(e) => setFormData({ ...formData, component: e.target.value })}
                       className="w-full px-3 py-2 rounded-xl text-xs border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500"
                     >
-                      <option value="Submersible Pump">Submersible Pump</option>
-                      <option value="Solenoid Valve">Solenoid Valve</option>
-                      <option value="Relay Module">Relay Module</option>
-                      <option value="Ultrasonic Sensor">Ultrasonic Sensor</option>
-                      <option value="Water Level Sensor">Water Level Sensor</option>
-                      <option value="ESP32 Controller">ESP32 Controller</option>
-                      <option value="Power Supply">Power Supply</option>
-                      <option value="Network Gateway">Network Gateway</option>
+                      <option value="Submersible Pump">{t('status_submersible_pump')}</option>
+                      <option value="Solenoid Valve">{t('status_solenoid_valve')}</option>
+                      <option value="Relay Module">{t('status_relay_module')}</option>
+                      <option value="Ultrasonic Sensor">{t('status_ultrasonic_sensor')}</option>
+                      <option value="Water Level Sensor">{t('status_water_level_sensor')}</option>
+                      <option value="ESP32 Controller">{t('status_esp32_controller')}</option>
+                      <option value="Power Supply">{t('status_power_supply')}</option>
+                      <option value="Network Gateway">{t('status_network_gateway')}</option>
                     </select>
                   </div>
 
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                      Priority Level
+                      {t('cp_priorityLevel')}
                     </label>
                     <select
                       value={formData.priority}
                       onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
                       className="w-full px-3 py-2 rounded-xl text-xs border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500"
                     >
-                      <option value="low" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">Low</option>
-                      <option value="medium" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">Medium</option>
-                      <option value="high" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">High</option>
-                      <option value="critical" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">Critical</option>
+                      <option value="low" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">{t('status_low')}</option>
+                      <option value="medium" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">{t('status_medium')}</option>
+                      <option value="high" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">{t('status_high')}</option>
+                      <option value="critical" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">{t('status_critical')}</option>
                     </select>
                   </div>
                 </div>
@@ -431,11 +435,11 @@ export default function WorkOrdersPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                      Assigned Technician
+                      {t('cp_assignedTechnician')}
                     </label>
                     <input
                       type="text"
-                      placeholder="e.g. Ramesh Sahoo"
+                      placeholder={t('wo_technicianPh')}
                       value={formData.assignedTechnician}
                       onChange={(e) => setFormData({ ...formData, assignedTechnician: e.target.value })}
                       className="w-full px-3 py-2 rounded-xl text-xs border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500"
@@ -444,7 +448,7 @@ export default function WorkOrdersPage() {
 
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                      Scheduled Date
+                      {t('wo_scheduledDate')}
                     </label>
                     <input
                       type="date"
@@ -457,11 +461,11 @@ export default function WorkOrdersPage() {
 
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                    Issue Description & Diagnostic Findings
+                    {t('wo_issueDescription')}
                   </label>
                   <textarea
                     rows={3}
-                    placeholder="Describe symptoms, telemetry anomalies, or replacement parts needed..."
+                    placeholder={t('wo_descriptionPh')}
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     className="w-full px-3 py-2 rounded-xl text-xs border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500"
@@ -475,7 +479,7 @@ export default function WorkOrdersPage() {
                     size="sm"
                     onClick={() => setIsModalOpen(false)}
                   >
-                    Cancel
+                    {t('cancel')}
                   </Button>
                   <Button
                     type="submit"
@@ -484,7 +488,7 @@ export default function WorkOrdersPage() {
                     loading={creating}
                     className="bg-amber-600 hover:bg-amber-700"
                   >
-                    Dispatch Work Order
+                    {t('wo_dispatch')}
                   </Button>
                 </div>
               </form>

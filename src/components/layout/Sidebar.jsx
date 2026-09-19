@@ -4,7 +4,7 @@ import {
   LayoutDashboard, Waves, BellRing, Database, Recycle,
   CloudRain, MessageSquareWarning, AlertOctagon, Wrench,
   Activity, Radio, MapPin, BarChart3, Shield, Layers, X, Droplets,
-  Cpu, Zap, UserCheck, Brain, Globe, ShieldCheck, LogOut
+  Cpu, Zap, UserCheck, Brain, Globe, ShieldCheck, LogOut, CreditCard, Tag
 } from 'lucide-react';
 import { useLanguage, LANGUAGES } from '../../context/LanguageContext';
 import { getCurrentUser, logoutUser } from '../../services/authService';
@@ -24,6 +24,7 @@ export default function Sidebar({ isOpen, onClose, userRole = 'Resident', onRole
     { to: '/water-reuse', labelKey: 'waterReuse', icon: Recycle },
     { to: '/weather', labelKey: 'weather', icon: CloudRain },
     { to: '/citizen-portal', labelKey: 'complaints', icon: MessageSquareWarning },
+    { to: '/payments', labelKey: 'paymentsAmc', icon: CreditCard },
     { to: '/sos', labelKey: 'sos', icon: AlertOctagon, danger: true },
   ];
 
@@ -40,6 +41,7 @@ export default function Sidebar({ isOpen, onClose, userRole = 'Resident', onRole
     { to: '/municipality/dashboard', labelKey: 'adminDashboard', icon: Shield },
     { to: '/ai-prediction', labelKey: 'aiPrediction', icon: Brain, badge: 'AI' },
     { to: '/admin/approvals', labelKey: 'userApprovals', icon: UserCheck, badge: 'Live' },
+    { to: '/admin/pricing', labelKey: 'pricingManagement', icon: Tag },
     { to: '/municipality/systems', labelKey: 'adminSystems', icon: Layers },
     { to: '/municipality/map', labelKey: 'adminMap', icon: MapPin },
     { to: '/municipality/complaints', labelKey: 'adminComplaints', icon: MessageSquareWarning },
@@ -68,7 +70,7 @@ export default function Sidebar({ isOpen, onClose, userRole = 'Resident', onRole
       >
         <div className="flex items-center gap-3">
           <Icon className="w-4 h-4 flex-shrink-0" />
-          <span>{t(link.labelKey)}</span>
+          <span>{link.label || t(link.labelKey)}</span>
         </div>
         {link.badge && (
           <span className="text-[10px] font-bold tracking-wider px-1.5 py-0.5 rounded-md bg-sky-500/20 text-sky-500 dark:text-sky-400 border border-sky-500/30">
@@ -145,7 +147,7 @@ export default function Sidebar({ isOpen, onClose, userRole = 'Resident', onRole
                 </div>
                 <div className="truncate">
                   <p className="text-xs font-bold text-slate-900 dark:text-white truncate">{currentUser.fullName || t('demoUser')}</p>
-                  <p className="text-[10px] text-slate-500 dark:text-slate-400 capitalize">{currentUser.role || userRole}</p>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 capitalize">{t(`role_${String(currentUser.role || userRole).toLowerCase()}`)}</p>
                 </div>
               </div>
               <button

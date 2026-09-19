@@ -63,13 +63,13 @@ function AlertCard({ alert, onRead }) {
           </span>
           <span className="text-[10px] font-mono text-slate-400 dark:text-slate-500">{alert.sensorId}</span>
           <div className="ml-auto flex items-center gap-2">
-            {/* <VoiceSpeakerButton
-              text={alert.message}
+            <VoiceSpeakerButton
+              text={formatAlert(alert)}
               size="xs"
-              label="Listen"
+              label={t('tts_listen')}
               variant={alert.type === 'critical' || alert.type === 'danger' ? 'emergency' : 'subtle'}
               id={`alert-${alert._id}`}
-            /> */}
+            />
             <span className="text-[10px] text-slate-400 dark:text-slate-500">{timeAgo}</span>
           </div>
         </div>

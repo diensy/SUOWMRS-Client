@@ -2,8 +2,10 @@ import React from 'react';
 import { X, Layers, MapPin, Activity, Clock, CheckCircle2, AlertTriangle, AlertOctagon } from 'lucide-react';
 import Badge from '../common/Badge';
 import Button from '../common/Button';
+import { useLanguage } from '../../context/LanguageContext';
 
 export default function SystemMapPopup({ system, onClose, onViewSystem, onDivert }) {
+  const { t, locale } = useLanguage();
   if (!system) return null;
 
   const isCritical = system.status === 'Critical' || (parseFloat(system.waterLevel) >= 75);
@@ -32,26 +34,26 @@ export default function SystemMapPopup({ system, onClose, onViewSystem, onDivert
 
         <div className="grid grid-cols-2 gap-2 bg-slate-50 dark:bg-white/[0.03] p-2.5 rounded-xl border dark:border-white/5 border-slate-200/60">
           <div>
-            <span className="text-[10px] font-bold text-slate-400 uppercase">Water Level</span>
+            <span className="text-[10px] font-bold text-slate-400 uppercase">{t('waterLevel')}</span>
             <p className="font-mono font-black text-sm text-slate-900 dark:text-white">{parseFloat(system.waterLevel).toFixed(1)}%</p>
           </div>
           <div>
-            <span className="text-[10px] font-bold text-slate-400 uppercase">Storage</span>
+            <span className="text-[10px] font-bold text-slate-400 uppercase">{t('gis_storage')}</span>
             <p className="font-mono font-black text-sm text-slate-900 dark:text-white">{parseFloat(system.storageLevel).toFixed(1)}%</p>
           </div>
         </div>
 
         <div className="flex items-center justify-between">
-          <span className="text-[11px] text-slate-500 dark:text-slate-400">System Health</span>
-          {system.status === 'Normal' && <Badge variant="success" size="sm">🟢 Normal</Badge>}
-          {system.status === 'Warning' && <Badge variant="warning" size="sm">🟡 Warning</Badge>}
-          {system.status === 'Critical' && <Badge variant="danger" size="sm">🔴 Critical</Badge>}
-          {system.status === 'Offline' && <Badge variant="secondary" size="sm">⚪ Offline</Badge>}
+          <span className="text-[11px] text-slate-500 dark:text-slate-400">{t('systemHealth')}</span>
+          {system.status === 'Normal' && <Badge variant="success" size="sm">🟢 {t('status_normal')}</Badge>}
+          {system.status === 'Warning' && <Badge variant="warning" size="sm">🟡 {t('status_warning')}</Badge>}
+          {system.status === 'Critical' && <Badge variant="danger" size="sm">🔴 {t('status_critical')}</Badge>}
+          {system.status === 'Offline' && <Badge variant="secondary" size="sm">⚪ {t('offline')}</Badge>}
         </div>
 
         <div className="flex items-center justify-between text-[10px] text-slate-400 pt-1">
-          <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> Updated</span>
-          <span className="font-mono">{new Date(system.lastUpdated).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+          <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {t('st_updated')}</span>
+          <span className="font-mono">{new Date(system.lastUpdated).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })}</span>
         </div>
       </div>
 
@@ -65,12 +67,12 @@ export default function SystemMapPopup({ system, onClose, onViewSystem, onDivert
             disabled={!canDivert}
             onClick={() => onDivert?.(system)}
           >
-            {canDivert ? '⚡ Divert Water Now' : '⚠️ Storage Cistern Full (≥95%)'}
+            {canDivert ? `⚡ ${t('gis_divertWaterNow')}` : `⚠️ ${t('gis_cisternFull')} (≥95%)`}
           </Button>
           <p className="text-[10px] text-rose-500 font-medium text-center mt-1">
             {canDivert
-              ? 'Imminent flood risk — Divert into underground cistern'
-              : 'Reservoir buffer unavailable. Mobile dewatering dispatch needed.'}
+              ? t('gis_imminentRisk')
+              : t('gis_reservoirUnavailable')}
           </p>
         </div>
       )}
@@ -82,7 +84,7 @@ export default function SystemMapPopup({ system, onClose, onViewSystem, onDivert
           className="w-full text-xs"
           onClick={() => onViewSystem?.(system)}
         >
-          View in Table
+          {t('gis_viewInTableShort')}
         </Button>
       </div>
     </div>

@@ -160,8 +160,8 @@ export default function WaterReusePage() {
       playCriticalBeep();
       return customSwal.fire({
         icon: 'error',
-        title: 'Access Restricted',
-        text: 'Residents are strictly prohibited from switching off water filtration. Technician or Admin credentials required.',
+        title: t('wr_accessRestricted'),
+        text: t('wr_accessRestrictedDesc'),
       });
     }
 
@@ -169,11 +169,9 @@ export default function WaterReusePage() {
     const isPausing = nextStatus === 'MAINTENANCE_PAUSED';
 
     const confirmRes = await confirmAction({
-      title: isPausing ? 'Pause Water Filtration for Maintenance?' : 'Resume Water Filtration?',
-      text: isPausing
-        ? 'Purification pumps and UV sterilization will be suspended during this maintenance cycle.'
-        : 'All 4 stages of purification will reactivate and resume normal municipal recycling.',
-      confirmText: isPausing ? 'Enter Maintenance Mode' : 'Resume Filtration',
+      title: isPausing ? t('ch_pauseFiltrationQ') : t('ch_resumeFiltrationQ'),
+      text: isPausing ? t('wr_pauseDesc') : t('wr_resumeDesc'),
+      confirmText: isPausing ? t('ch_enterMaintenance') : t('ch_resumeFiltration'),
       isDanger: isPausing,
     });
 
@@ -187,16 +185,16 @@ export default function WaterReusePage() {
       }
       customSwal.fire({
         icon: 'success',
-        title: isPausing ? 'MAINTENANCE MODE Activated' : 'FILTRATION ACTIVE',
-        text: res?.message || 'Filtration status updated.',
+        title: isPausing ? t('ch_maintenanceModeTitle') : t('ch_filtrationActiveTitle'),
+        text: t('ch_filtrationUpdated'),
         timer: 3000,
       });
     } catch (err) {
       console.error('Failed to toggle filtration:', err);
       customSwal.fire({
         icon: 'error',
-        title: 'Filtration Control Failed',
-        text: err.response?.data?.error || 'Failed to update filtration state.',
+        title: t('ch_filtrationFailed'),
+        text: err.response?.data?.error || t('ch_filtrationFailedDesc'),
       });
     } finally {
       setFiltrationLoading(false);
@@ -218,8 +216,8 @@ export default function WaterReusePage() {
         }
         customSwal.fire({
           icon: 'success',
-          title: 'Garden Watering Started',
-          text: `Dispensing ${selectedVolume}L of treated water at 45 L/min for urban greenery & park beds.`,
+          title: t('wr_wateringStarted'),
+          text: t('wr_wateringStartedDesc', { volume: selectedVolume }),
           timer: 3000,
         });
       } catch (err) {
@@ -238,8 +236,8 @@ export default function WaterReusePage() {
         }
         customSwal.fire({
           icon: 'info',
-          title: 'Garden Watering Stopped',
-          text: 'Irrigation valve closed. Water allocation updated.',
+          title: t('wr_wateringStopped'),
+          text: t('wr_wateringStoppedDesc'),
           timer: 2500,
         });
       } catch (err) {
@@ -251,10 +249,10 @@ export default function WaterReusePage() {
   };
 
   const pipelineSteps = [
-    { step: '01', value: storedWater,    label: 'Collected',  color: '#0EA5E9', active: storedWater > 0 },
-    { step: '02', value: treatedWater,   label: 'Treated',    color: '#6366F1', active: treatedWater > 0 && isFiltrationActive },
-    { step: '03', value: availableReuse, label: 'Reusable',   color: '#10B981', active: availableReuse > 0 },
-    { step: '04', value: totalAllocated, label: 'Distributed',color: '#F59E0B', active: totalAllocated > 0 },
+    { step: '01', value: storedWater,    label: t('collected'),  color: '#0EA5E9', active: storedWater > 0 },
+    { step: '02', value: treatedWater,   label: t('wr_treated'),    color: '#6366F1', active: treatedWater > 0 && isFiltrationActive },
+    { step: '03', value: availableReuse, label: t('wr_reusable'),   color: '#10B981', active: availableReuse > 0 },
+    { step: '04', value: totalAllocated, label: t('wr_distributed'),color: '#F59E0B', active: totalAllocated > 0 },
   ];
 
   return (
@@ -268,7 +266,7 @@ export default function WaterReusePage() {
             {t('waterReuse')}
           </h1>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Purification pipeline · Quality monitoring · Gardening & greywater reuse management
+            {t('wr_subtitle')}
           </p>
         </div>
         <button
@@ -303,14 +301,14 @@ export default function WaterReusePage() {
                 <span className={`text-sm sm:text-base font-black tracking-tight font-display ${
                   isFiltrationActive ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'
                 }`}>
-                  {isFiltrationActive ? 'FILTRATION ACTIVE — System Healthy' : 'MAINTENANCE MODE — Filtration Paused'}
+                  {isFiltrationActive ? t('ch_filtrationActiveTitle') : t('ch_maintenanceModeTitle')}
                 </span>
                 <span className={`w-2 h-2 rounded-full ${isFiltrationActive ? 'bg-emerald-500 animate-ping' : 'bg-amber-500'}`} />
               </div>
               <p className="text-xs text-slate-600 dark:text-slate-300 mt-1">
                 {isFiltrationActive
-                  ? 'Continuous 4-stage treatment online: Rapid Sand Filter ➔ Carbon Bed ➔ UV Sterilisation ➔ Chlorination.'
-                  : 'Filtration pumps suspended for membrane backwash & maintenance. Storage remains secure.'}
+                  ? `${t('wr_pipelineOnline')}: ${t('ch_stage1Short')} ➔ ${t('ch_stage2Short')} ➔ ${t('ch_stage3Short')} ➔ ${t('ch_stage4Short')}.`
+                  : t('wr_pipelinePaused')}
               </p>
             </div>
           </div>
@@ -320,7 +318,7 @@ export default function WaterReusePage() {
             {!isTechnicianOrAdmin ? (
               <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 text-xs font-semibold">
                 <Lock className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />
-                <span>Resident Mode (Filtration Protected)</span>
+                <span>{t('wr_residentMode')}</span>
               </div>
             ) : (
               <Button
@@ -331,7 +329,7 @@ export default function WaterReusePage() {
                 className={isFiltrationActive ? 'bg-amber-600 hover:bg-amber-700 text-white font-bold' : 'bg-emerald-600 hover:bg-emerald-700 text-white font-bold'}
                 icon={isFiltrationActive ? <Wrench className="w-3.5 h-3.5" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
               >
-                {isFiltrationActive ? 'Pause for Maintenance' : 'Resume Filtration'}
+                {isFiltrationActive ? t('ch_pauseForMaintenance') : t('ch_resumeFiltration')}
               </Button>
             )}
           </div>
@@ -378,14 +376,14 @@ export default function WaterReusePage() {
                 <div>
                   <div className="flex items-center gap-2">
                     <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                      Water Reuse — Gardening & Urban Parks
+                      {t('wr_gardeningTitle')}
                     </h3>
                     <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                      Channel 1 (35% Alloc.)
+                      {t('wr_channel1Alloc')}
                     </span>
                   </div>
                   <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                    Dispense purified recycled floodwater for community gardens, roadside plantations, and botanical parks.
+                    {t('wr_gardeningDesc')}
                   </p>
                 </div>
               </div>
@@ -398,7 +396,7 @@ export default function WaterReusePage() {
                     : 'bg-slate-100 dark:bg-white/5 text-slate-500 border-slate-200 dark:border-white/10'
                 }`}>
                   <span className={`w-2 h-2 rounded-full ${gardeningSession.active ? 'bg-emerald-500 animate-ping' : 'bg-slate-400'}`} />
-                  {gardeningSession.active ? 'WATERING IN PROGRESS' : 'STANDBY · READY'}
+                  {gardeningSession.active ? t('wr_wateringInProgress') : t('wr_standbyReady')}
                 </span>
               </div>
             </div>
@@ -408,12 +406,12 @@ export default function WaterReusePage() {
               {/* Metric 1: Soil Moisture */}
               <div className="bg-white/80 dark:bg-slate-800/40 border border-slate-200/80 dark:border-white/5 rounded-xl p-4 flex items-center justify-between">
                 <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Ward Soil Moisture</span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{t('wr_soilMoisture')}</span>
                   <div className="text-2xl font-black font-mono text-emerald-600 dark:text-emerald-400 mt-1">
                     {gardeningSession.soilMoisture}%
                   </div>
                   <p className="text-[10px] text-emerald-500 font-semibold mt-1 flex items-center gap-1">
-                    <Check className="w-3 h-3" /> {gardeningSession.soilMoisture > 60 ? 'Thoroughly Hydrated' : 'Optimal Root Zone'}
+                    <Check className="w-3 h-3" /> {gardeningSession.soilMoisture > 60 ? t('wr_hydrated') : t('wr_optimalRoot')}
                   </p>
                 </div>
                 <div className="w-11 h-11 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
@@ -424,12 +422,12 @@ export default function WaterReusePage() {
               {/* Metric 2: Today's Dispensed Volume */}
               <div className="bg-white/80 dark:bg-slate-800/40 border border-slate-200/80 dark:border-white/5 rounded-xl p-4 flex items-center justify-between">
                 <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Dispensed Today</span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{t('wr_dispensedToday')}</span>
                   <div className="text-2xl font-black font-mono text-slate-900 dark:text-white mt-1">
-                    {gardeningSession.volumeDispensed.toLocaleString()} <span className="text-xs font-normal text-slate-400">Liters</span>
+                    {gardeningSession.volumeDispensed.toLocaleString()} <span className="text-xs font-normal text-slate-400">{t('md_litres')}</span>
                   </div>
                   <p className="text-[10px] text-sky-500 font-semibold mt-1">
-                    Saved approx. ₹1,260 commercial water fees
+                    {t('wr_savedFees')}
                   </p>
                 </div>
                 <div className="w-11 h-11 rounded-xl bg-sky-500/10 text-sky-500 flex items-center justify-center">
@@ -440,12 +438,12 @@ export default function WaterReusePage() {
               {/* Metric 3: Flow & Pump */}
               <div className="bg-white/80 dark:bg-slate-800/40 border border-slate-200/80 dark:border-white/5 rounded-xl p-4 flex items-center justify-between">
                 <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Dispense Flow Rate</span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{t('wr_flowRate')}</span>
                   <div className="text-2xl font-black font-mono text-slate-900 dark:text-white mt-1">
                     {gardeningSession.flowRate} <span className="text-xs font-normal text-slate-400">L/min</span>
                   </div>
                   <p className="text-[10px] text-slate-400 font-semibold mt-1">
-                    Line 2 · 1.5 Bar Drip Irrigation
+                    {t('wr_line2')}
                   </p>
                 </div>
                 <div className="w-11 h-11 rounded-xl bg-violet-500/10 text-violet-500 flex items-center justify-center">
@@ -459,7 +457,7 @@ export default function WaterReusePage() {
               <div className="space-y-1">
                 <span className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
                   <Timer className="w-3.5 h-3.5 text-emerald-500" />
-                  Select Watering Target Volume:
+                  {t('wr_selectVolume')}:
                 </span>
                 <div className="flex items-center gap-2 pt-1">
                   {[100, 250, 500].map((vol) => (
@@ -488,7 +486,7 @@ export default function WaterReusePage() {
                   className={gardeningSession.active ? 'bg-rose-600 hover:bg-rose-700 text-white font-black' : 'bg-emerald-600 hover:bg-emerald-700 text-white font-black shadow-md shadow-emerald-600/30'}
                   icon={gardeningSession.active ? <Square className="w-4 h-4" /> : <Play className="w-4 h-4" />}
                 >
-                  {gardeningSession.active ? 'Stop Garden Watering' : `Start Garden Watering (${selectedVolume}L)`}
+                  {gardeningSession.active ? t('wr_stopWatering') : `${t('wr_startWatering')} (${selectedVolume}L)`}
                 </Button>
               </div>
             </div>

@@ -10,9 +10,11 @@ import Button from '../../components/common/Button';
 import Input from '../../components/common/Input';
 import { submitComplaint, getComplaints } from '../../services/complaintService';
 import { useTheme } from '../../context/ThemeContext';
+import { useLanguage } from '../../context/LanguageContext';
 
 export default function CitizenComplaintPortal() {
   const { isDark } = useTheme();
+  const { t, tStatus, locale } = useLanguage();
   const [complaints, setComplaints] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -49,8 +51,8 @@ export default function CitizenComplaintPortal() {
     if (!form.title || !form.description || !form.location) {
       Swal.fire({
         icon: 'error',
-        title: 'Missing Fields',
-        text: 'Please provide a title, description, and location for your report.',
+        title: t('cp_missingFields'),
+        text: t('cp_missingFieldsDesc'),
         background: isDark ? '#1E293B' : '#FFFFFF',
         color: isDark ? '#F8FAFC' : '#0F172A',
       });
@@ -62,8 +64,8 @@ export default function CitizenComplaintPortal() {
       const res = await submitComplaint(form);
       Swal.fire({
         icon: 'success',
-        title: 'Complaint Submitted!',
-        text: res.message || 'Your report has been sent to Municipality Admins.',
+        title: t('cp_submitted'),
+        text: t('cp_submittedDesc'),
         background: isDark ? '#1E293B' : '#FFFFFF',
         color: isDark ? '#F8FAFC' : '#0F172A',
       });
@@ -81,8 +83,8 @@ export default function CitizenComplaintPortal() {
     } catch (err) {
       Swal.fire({
         icon: 'error',
-        title: 'Submission Failed',
-        text: err.response?.data?.error || 'Failed to submit report. Please try again.',
+        title: t('cp_submitFailed'),
+        text: err.response?.data?.error || t('cp_submitFailedDesc'),
         background: isDark ? '#1E293B' : '#FFFFFF',
         color: isDark ? '#F8FAFC' : '#0F172A',
       });
@@ -94,17 +96,17 @@ export default function CitizenComplaintPortal() {
   const getStatusBadge = (status) => {
     switch (status) {
       case 'Submitted':
-        return <Badge variant="secondary" size="sm">Submitted</Badge>;
+        return <Badge variant="secondary" size="sm">{t('status_submitted')}</Badge>;
       case 'Under Review':
-        return <Badge variant="warning" size="sm">Under Review</Badge>;
+        return <Badge variant="warning" size="sm">{t('status_under_review')}</Badge>;
       case 'Assigned':
-        return <Badge variant="info" size="sm">Assigned</Badge>;
+        return <Badge variant="info" size="sm">{t('status_assigned')}</Badge>;
       case 'In Progress':
-        return <Badge variant="brand" size="sm">In Progress</Badge>;
+        return <Badge variant="brand" size="sm">{t('status_in_progress')}</Badge>;
       case 'Resolved':
-        return <Badge variant="success" size="sm">Resolved</Badge>;
+        return <Badge variant="success" size="sm">{t('status_resolved')}</Badge>;
       default:
-        return <Badge variant="secondary" size="sm">Closed</Badge>;
+        return <Badge variant="secondary" size="sm">{tStatus(status || 'Closed')}</Badge>;
     }
   };
 
@@ -120,10 +122,10 @@ export default function CitizenComplaintPortal() {
             </div>
             <div>
               <h1 className="text-xl font-black text-slate-900 dark:text-white font-display">
-                Citizen Grievance & Issue Portal
+                {t('cp_title')}
               </h1>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                Report drain blockages, water overflow, and local flooding directly to municipal authorities
+                {t('cp_subtitle')}
               </p>
             </div>
           </div>
@@ -135,7 +137,7 @@ export default function CitizenComplaintPortal() {
           onClick={() => setShowForm(!showForm)}
           icon={<Plus className="w-4 h-4" />}
         >
-          {showForm ? "Cancel Report" : "File New Complaint"}
+          {showForm ? t('cp_cancelReport') : t('cp_fileNew')}
         </Button>
       </div>
 
@@ -148,46 +150,46 @@ export default function CitizenComplaintPortal() {
         >
           <div className="flex items-center gap-2 pb-3 border-b dark:border-white/10 border-slate-100">
             <Sparkles className="w-5 h-5 text-amber-500" />
-            <h2 className="text-base font-bold text-slate-900 dark:text-white">Submit New Citizen Report</h2>
+            <h2 className="text-base font-bold text-slate-900 dark:text-white">{t('cp_submitNew')}</h2>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Issue Type</label>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">{t('cp_issueType')}</label>
                 <select
                   value={form.issueType}
                   onChange={(e) => setForm({ ...form, issueType: e.target.value })}
                   className="w-full h-10 px-3 rounded-xl border dark:border-white/10 border-slate-200 dark:bg-white/5 bg-slate-50 text-xs font-semibold text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500"
                 >
-                  <option value="Water Overflow" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">Water Overflow</option>
-                  <option value="Drainage Blockage" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">Drainage Blockage</option>
-                  <option value="Flooding" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">Flooding</option>
-                  <option value="System Damage" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">System Damage</option>
-                  <option value="Water Leakage" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">Water Leakage</option>
-                  <option value="Other" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">Other</option>
+                  <option value="Water Overflow" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">{t('issue_water_overflow')}</option>
+                  <option value="Drainage Blockage" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">{t('issue_drainage_blockage')}</option>
+                  <option value="Flooding" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">{t('issue_flooding')}</option>
+                  <option value="System Damage" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">{t('issue_system_damage')}</option>
+                  <option value="Water Leakage" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">{t('issue_water_leakage')}</option>
+                  <option value="Other" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">{t('issue_other')}</option>
                 </select>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Priority Level</label>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">{t('cp_priorityLevel')}</label>
                 <select
                   value={form.priority}
                   onChange={(e) => setForm({ ...form, priority: e.target.value })}
                   className="w-full h-10 px-3 rounded-xl border dark:border-white/10 border-slate-200 dark:bg-white/5 bg-slate-50 text-xs font-semibold text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500"
                 >
-                  <option value="Low" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">Low Priority</option>
-                  <option value="Medium" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">Medium Priority</option>
-                  <option value="High" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">High Priority</option>
-                  <option value="Urgent" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">Urgent / Emergency</option>
+                  <option value="Low" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">{t('priority_low')}</option>
+                  <option value="Medium" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">{t('priority_medium')}</option>
+                  <option value="High" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">{t('priority_high')}</option>
+                  <option value="Urgent" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">{t('priority_urgent')}</option>
                 </select>
               </div>
             </div>
 
             <div>
               <Input
-                label="Report Title"
-                placeholder="e.g. Clogged main drainage channel behind market"
+                label={t('cp_reportTitle')}
+                placeholder={t('cp_reportTitlePh')}
                 value={form.title}
                 onChange={(e) => setForm({ ...form, title: e.target.value })}
                 required
@@ -196,31 +198,31 @@ export default function CitizenComplaintPortal() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Input
-                label="Location & Landmarks"
-                placeholder="e.g. Zone 4 Riverbed Crossing"
+                label={t('cp_locationLandmarks')}
+                placeholder={t('cp_locationPh')}
                 value={form.location}
                 onChange={(e) => setForm({ ...form, location: e.target.value })}
                 required
               />
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Ward / Area</label>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">{t('wardArea')}</label>
                 <select
                   value={form.ward}
                   onChange={(e) => setForm({ ...form, ward: e.target.value })}
                   className="w-full h-10 px-3 rounded-xl border dark:border-white/10 border-slate-200 dark:bg-white/5 bg-slate-50 text-xs font-semibold text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500"
                 >
                   {Array.from({ length: 25 }, (_, i) => (
-                    <option key={i} value={`Ward ${i + 1}`} className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">Ward {i + 1}</option>
+                    <option key={i} value={`Ward ${i + 1}`} className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">{t('ward')} {i + 1}</option>
                   ))}
                 </select>
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Issue Description</label>
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">{t('cp_issueDescription')}</label>
               <textarea
                 rows="3"
-                placeholder="Describe the issue in detail..."
+                placeholder={t('cp_describePh')}
                 value={form.description}
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
                 className="w-full p-3 rounded-xl border dark:border-white/10 border-slate-200 dark:bg-white/5 bg-slate-50 text-xs font-semibold text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500"
@@ -230,10 +232,10 @@ export default function CitizenComplaintPortal() {
 
             <div className="flex justify-end gap-2 pt-2">
               <Button type="button" variant="secondary" size="sm" onClick={() => setShowForm(false)}>
-                Cancel
+                {t('cancel')}
               </Button>
               <Button type="submit" variant="warning" size="sm" isLoading={submitting} icon={<Send className="w-4 h-4" />}>
-                Submit Complaint
+                {t('cp_submitComplaint')}
               </Button>
             </div>
           </form>
@@ -243,14 +245,14 @@ export default function CitizenComplaintPortal() {
       {/* ── FILED COMPLAINTS TRACKER LIST ── */}
       <div className="space-y-3">
         <p className="text-xs font-black tracking-widest uppercase text-slate-400 dark:text-slate-500">
-          Tracked Citizen Reports ({complaints.length})
+          {t('cp_tracked')} ({complaints.length})
         </p>
 
         {loading ? (
-          <div className="py-12 text-center text-slate-400">Loading complaints...</div>
+          <div className="py-12 text-center text-slate-400">{t('cp_loading')}</div>
         ) : complaints.length === 0 ? (
           <div className="dark:bg-[#0F172A] bg-white border dark:border-white/10 border-slate-200 rounded-2xl p-8 text-center text-slate-400">
-            No complaints filed yet. Click "File New Complaint" above to report a local issue.
+            {t('cp_noneYet')}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -271,12 +273,12 @@ export default function CitizenComplaintPortal() {
 
                 <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t dark:border-white/5 border-slate-100 text-[11px] text-slate-500 dark:text-slate-400 font-semibold">
                   <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5 text-amber-500" /> {c.location} ({c.ward})</span>
-                  <span className="font-mono">{new Date(c.createdAt).toLocaleDateString()}</span>
+                  <span className="font-mono">{new Date(c.createdAt).toLocaleDateString(locale)}</span>
                 </div>
 
                 {c.assignedTechnician && c.assignedTechnician !== 'Unassigned' && (
                   <div className="bg-sky-500/10 border border-sky-500/20 p-2 rounded-xl text-[11px] text-sky-600 dark:text-sky-400 font-semibold flex items-center justify-between">
-                    <span>Assigned Technician: <strong>{c.assignedTechnician}</strong></span>
+                    <span>{t('cp_assignedTechnician')}: <strong>{c.assignedTechnician}</strong></span>
                     {c.linkedWorkOrderId && <span className="font-mono">WO: {c.linkedWorkOrderId}</span>}
                   </div>
                 )}

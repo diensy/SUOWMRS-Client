@@ -16,7 +16,7 @@ import { playCriticalBeep, playConfirmBeep, playActionBeep } from '../../utils/s
 
 export default function Esp32Diagnostics() {
   const { isDark } = useTheme();
-  const { t } = useLanguage();
+  const { t, tStatus, locale } = useLanguage();
   const { socket } = useSocket();
 
   const [loading, setLoading] = useState(true);
@@ -81,14 +81,14 @@ export default function Esp32Diagnostics() {
   const handleReboot = async () => {
     playCriticalBeep();
     const result = await Swal.fire({
-      title: t('swal_reboot_title') || 'Reboot ESP32 Controller?',
-      text: t('swal_reboot_desc') || 'Telemetry streaming will pause for approximately 3-5 seconds while the microcontroller restarts.',
+      title: t('swal_reboot_title'),
+      text: t('swal_reboot_desc'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#EF4444',
       cancelButtonColor: '#6B7280',
-      confirmButtonText: t('swal_reboot_confirm') || 'Yes, Reboot Node',
-      cancelButtonText: t('swal_cancel') || 'Cancel',
+      confirmButtonText: t('swal_reboot_confirm'),
+      cancelButtonText: t('swal_cancel'),
       background: isDark ? '#0F172A' : '#FFFFFF',
       color: isDark ? '#F8FAFC' : '#0F172A',
     });
@@ -101,8 +101,8 @@ export default function Esp32Diagnostics() {
         setDevice((prev) => ({ ...prev, status: 'rebooting' }));
         Swal.fire({
           icon: 'success',
-          title: t('swal_reboot_success_title') || 'Reboot Signal Sent',
-          text: t('swal_reboot_success_desc') || 'The ESP32 controller has been instructed to perform a soft system reset.',
+          title: t('swal_reboot_success_title'),
+          text: t('swal_reboot_success_desc'),
           timer: 2500,
           showConfirmButton: false,
           background: isDark ? '#0F172A' : '#FFFFFF',
@@ -116,8 +116,8 @@ export default function Esp32Diagnostics() {
         setRebooting(false);
         Swal.fire({
           icon: 'error',
-          title: t('commandFailed') || 'Command Failed',
-          text: err.response?.data?.details || err.response?.data?.error || 'Could not send reboot signal to the telemetry node.',
+          title: t('commandFailed'),
+          text: err.response?.data?.details || err.response?.data?.error || t('esp_rebootFailedDesc'),
           background: isDark ? '#0F172A' : '#FFFFFF',
           color: isDark ? '#F8FAFC' : '#0F172A',
         });
@@ -170,7 +170,7 @@ export default function Esp32Diagnostics() {
           <div>
             <div className="flex items-center gap-3">
               <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
-                ESP32 Node Diagnostics
+                {t('esp_title')}
               </h1>
               <Badge
                 variant={
@@ -183,11 +183,11 @@ export default function Esp32Diagnostics() {
                 size="md"
               >
                 <span className="w-2 h-2 rounded-full mr-1.5 animate-ping bg-current" />
-                {device.status ? device.status.toUpperCase() : 'ONLINE'}
+                {tStatus(device.status || 'online').toUpperCase()}
               </Badge>
             </div>
             <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
-              Real-time telemetry, core parameters, network link, and control interface for Node <span className="font-mono font-semibold text-blue-500">{device.deviceId}</span>
+              {t('esp_subtitle')} <span className="font-mono font-semibold text-blue-500">{device.deviceId}</span>
             </p>
           </div>
         </div>
@@ -202,7 +202,7 @@ export default function Esp32Diagnostics() {
             className="h-9 px-3.5 rounded-lg border-slate-300 dark:border-white/10"
           >
             <Radio className="w-4 h-4 mr-1.5 text-cyan-500 flex-shrink-0" />
-            <span>Ping Test</span>
+            <span>{t('esp_pingTest')}</span>
           </Button>
 
           <Button
@@ -213,7 +213,7 @@ export default function Esp32Diagnostics() {
             className="h-9 px-3.5 rounded-lg border-slate-300 dark:border-white/10"
           >
             <RefreshCw className="w-4 h-4 mr-1.5 flex-shrink-0" />
-            <span>Refresh</span>
+            <span>{t('refresh')}</span>
           </Button>
 
           <Button
@@ -224,7 +224,7 @@ export default function Esp32Diagnostics() {
             className="h-9 px-3.5 rounded-lg shadow-sm"
           >
             <Power className="w-4 h-4 mr-1.5 flex-shrink-0" />
-            <span>Reboot Node</span>
+            <span>{t('esp_rebootNode')}</span>
           </Button>
         </div>
       </div>
@@ -238,7 +238,7 @@ export default function Esp32Diagnostics() {
         >
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-              Controller Node ID
+              {t('esp_nodeId')}
             </span>
             <div className="p-2 rounded-lg bg-blue-500/10 text-blue-500">
               <Cpu className="w-4 h-4" />
@@ -259,7 +259,7 @@ export default function Esp32Diagnostics() {
         >
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-              Wi-Fi RSSI Signal
+              {t('esp_wifiSignal')}
             </span>
             <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-500">
               <Wifi className="w-4 h-4" />
@@ -270,7 +270,7 @@ export default function Esp32Diagnostics() {
               {Math.round(Number(device.wifiSignalDbm) || -58)} dBm
             </span>
             <span className={`text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 ${getSignalColor(device.wifiSignalDbm)}`}>
-              {device.wifiQuality || 'Excellent'}
+              {tStatus(device.wifiQuality || 'Excellent')}
             </span>
           </div>
           <div className="w-full bg-slate-200 dark:bg-slate-800 h-1.5 rounded-full mt-3 overflow-hidden">
@@ -288,7 +288,7 @@ export default function Esp32Diagnostics() {
         >
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-              Ping Latency
+              {t('esp_pingLatency')}
             </span>
             <div className="p-2 rounded-lg bg-cyan-500/10 text-cyan-500">
               <Activity className="w-4 h-4" />
@@ -299,12 +299,12 @@ export default function Esp32Diagnostics() {
               {device.pingLatencyMs || 12} ms
             </span>
             <span className="text-xs text-emerald-500 font-medium flex items-center">
-              ● Ultra-fast
+              ● {t('esp_ultraFast')}
             </span>
           </div>
           <div className="text-xs text-slate-500 dark:text-slate-400 mt-2 flex items-center gap-1">
             <Clock className="w-3.5 h-3.5" />
-            Updated {new Date(device.lastPing || Date.now()).toLocaleTimeString()}
+            {t('st_updated')} {new Date(device.lastPing || Date.now()).toLocaleTimeString(locale)}
           </div>
         </motion.div>
 
@@ -315,7 +315,7 @@ export default function Esp32Diagnostics() {
         >
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-              System Uptime
+              {t('esp_systemUptime')}
             </span>
             <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-500">
               <Clock className="w-4 h-4" />
@@ -325,7 +325,7 @@ export default function Esp32Diagnostics() {
             {formatUptime(device.uptimeSeconds)}
           </div>
           <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Zero unexpected watchdog reboots
+            {t('esp_zeroReboots')}
           </div>
         </motion.div>
       </div>
@@ -340,7 +340,7 @@ export default function Esp32Diagnostics() {
                 <Server className="w-5 h-5" />
               </div>
               <h3 className="text-lg font-bold text-slate-900 dark:text-white">
-                Network & Firmware Config
+                {t('esp_networkFirmware')}
               </h3>
             </div>
             <span className="text-xs font-mono px-2 py-1 rounded bg-blue-500/10 text-blue-500 border border-blue-500/20">
@@ -350,7 +350,7 @@ export default function Esp32Diagnostics() {
 
           <div className="space-y-3.5 divide-y divide-slate-100 dark:divide-white/5">
             <div className="flex items-center justify-between pt-2">
-              <span className="text-sm text-slate-600 dark:text-slate-400">IP Address</span>
+              <span className="text-sm text-slate-600 dark:text-slate-400">{t('esp_ipAddress')}</span>
               <div className="flex items-center gap-2">
                 <span className="font-mono text-sm font-semibold text-slate-900 dark:text-white">
                   {device.ipAddress}
@@ -358,7 +358,7 @@ export default function Esp32Diagnostics() {
                 <button
                   onClick={copyIp}
                   className="p-1 rounded text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors"
-                  title="Copy IP"
+                  title={t('esp_copyIp')}
                 >
                   {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
                 </button>
@@ -366,32 +366,32 @@ export default function Esp32Diagnostics() {
             </div>
 
             <div className="flex items-center justify-between pt-3">
-              <span className="text-sm text-slate-600 dark:text-slate-400">MAC Hardware Address</span>
+              <span className="text-sm text-slate-600 dark:text-slate-400">{t('esp_macAddress')}</span>
               <span className="font-mono text-sm font-semibold text-slate-900 dark:text-white">
                 {device.macAddress}
               </span>
             </div>
 
             <div className="flex items-center justify-between pt-3">
-              <span className="text-sm text-slate-600 dark:text-slate-400">Firmware Build</span>
+              <span className="text-sm text-slate-600 dark:text-slate-400">{t('esp_firmwareBuild')}</span>
               <div className="flex items-center gap-2">
                 <span className="font-mono text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 font-bold">
-                  {device.firmwareVersion} (Stable)
+                  {device.firmwareVersion} ({t('status_stable')})
                 </span>
               </div>
             </div>
 
             <div className="flex items-center justify-between pt-3">
-              <span className="text-sm text-slate-600 dark:text-slate-400">Sensor Update Frequency</span>
+              <span className="text-sm text-slate-600 dark:text-slate-400">{t('esp_sensorFrequency')}</span>
               <span className="font-mono text-sm font-semibold text-blue-500">
-                {device.sensorFrequencySeconds || 5} seconds
+                {device.sensorFrequencySeconds || 5} {t('esp_seconds')}
               </span>
             </div>
 
             <div className="flex items-center justify-between pt-3">
-              <span className="text-sm text-slate-600 dark:text-slate-400">TLS & MQTT Encryption</span>
+              <span className="text-sm text-slate-600 dark:text-slate-400">{t('esp_tlsMqtt')}</span>
               <span className="text-xs font-semibold text-emerald-500 flex items-center gap-1">
-                <ShieldCheck className="w-4 h-4" /> TLS 1.3 / X.509 Active
+                <ShieldCheck className="w-4 h-4" /> TLS 1.3 / X.509 {t('active')}
               </span>
             </div>
           </div>
@@ -405,7 +405,7 @@ export default function Esp32Diagnostics() {
                 <HardDrive className="w-5 h-5" />
               </div>
               <h3 className="text-lg font-bold text-slate-900 dark:text-white">
-                Hardware Health & Memory
+                {t('esp_hardwareHealth')}
               </h3>
             </div>
             <span className="text-xs font-mono px-2 py-1 rounded bg-purple-500/10 text-purple-500 border border-purple-500/20">
@@ -417,7 +417,7 @@ export default function Esp32Diagnostics() {
             {/* Free Heap Memory */}
             <div>
               <div className="flex justify-between text-xs mb-1.5">
-                <span className="text-slate-600 dark:text-slate-400">Free Heap SRAM</span>
+                <span className="text-slate-600 dark:text-slate-400">{t('esp_freeHeap')}</span>
                 <span className="font-mono font-semibold text-slate-900 dark:text-white">
                   {Math.round((device.freeHeapBytes || 224890) / 1024)} KB / 320 KB
                 </span>
@@ -433,9 +433,9 @@ export default function Esp32Diagnostics() {
             {/* Core CPU Temperature */}
             <div>
               <div className="flex justify-between text-xs mb-1.5">
-                <span className="text-slate-600 dark:text-slate-400">On-Chip Thermal Sensor</span>
+                <span className="text-slate-600 dark:text-slate-400">{t('esp_thermalSensor')}</span>
                 <span className="font-mono font-semibold text-emerald-500">
-                  {device.cpuTemperatureC || 41.5}°C (Nominal)
+                  {device.cpuTemperatureC || 41.5}°C ({t('esp_nominal')})
                 </span>
               </div>
               <div className="w-full bg-slate-200 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
@@ -449,16 +449,16 @@ export default function Esp32Diagnostics() {
             {/* SPI Flash Memory */}
             <div className="pt-2 border-t border-slate-100 dark:divide-white/5 space-y-2">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-slate-600 dark:text-slate-400">SPI Flash Storage</span>
+                <span className="text-slate-600 dark:text-slate-400">{t('esp_flashStorage')}</span>
                 <span className="font-mono text-slate-900 dark:text-white font-semibold">4.0 MB Quad-SPI</span>
               </div>
               <div className="flex items-center justify-between text-sm">
-                <span className="text-slate-600 dark:text-slate-400">Internal Brownout Detector</span>
-                <span className="text-emerald-500 font-semibold text-xs">Armed & Protected</span>
+                <span className="text-slate-600 dark:text-slate-400">{t('esp_brownout')}</span>
+                <span className="text-emerald-500 font-semibold text-xs">{t('esp_armedProtected')}</span>
               </div>
               <div className="flex items-center justify-between text-sm">
-                <span className="text-slate-600 dark:text-slate-400">Watchdog Timer (WDT)</span>
-                <span className="text-blue-500 font-semibold text-xs">Task + Interrupt WDT Active</span>
+                <span className="text-slate-600 dark:text-slate-400">{t('esp_watchdog')}</span>
+                <span className="text-blue-500 font-semibold text-xs">{t('esp_wdtActive')}</span>
               </div>
             </div>
           </div>
@@ -470,7 +470,7 @@ export default function Esp32Diagnostics() {
         <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-3 text-slate-400">
           <div className="flex items-center gap-2">
             <Terminal className="w-4 h-4 text-emerald-400" />
-            <span className="font-semibold text-slate-300">ESP32 Telemetry Console Stream (UART0 / WebSocket)</span>
+            <span className="font-semibold text-slate-300">{t('esp_consoleStream')}</span>
           </div>
           <span className="text-[11px] text-slate-500">Baud: 115200 • 8-N-1</span>
         </div>

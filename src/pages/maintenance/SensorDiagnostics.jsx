@@ -15,7 +15,7 @@ import { useLanguage } from '../../context/LanguageContext';
 
 export default function SensorDiagnostics() {
   const { isDark } = useTheme();
-  const { t } = useLanguage();
+  const { t, tStatus, locale } = useLanguage();
   const { socket } = useSocket();
 
   const [sensors, setSensors] = useState([]);
@@ -61,13 +61,14 @@ export default function SensorDiagnostics() {
   // Handle Calibrate
   const handleCalibrate = async (sensor) => {
     const result = await Swal.fire({
-      title: `Calibrate ${sensor.name}?`,
-      text: 'This will perform a zero-offset baseline correction and reset sensor noise counters.',
+      title: t('sd_calibrateQ', { name: sensor.name }),
+      text: t('sd_calibrateDesc'),
       icon: 'info',
       showCancelButton: true,
       confirmButtonColor: '#3B82F6',
       cancelButtonColor: '#6B7280',
-      confirmButtonText: 'Start Calibration',
+      confirmButtonText: t('sd_startCalibration'),
+      cancelButtonText: t('cancel'),
       background: isDark ? '#1E293B' : '#FFFFFF',
       color: isDark ? '#F8FAFC' : '#0F172A',
     });
@@ -78,8 +79,8 @@ export default function SensorDiagnostics() {
         const res = await calibrateSensor(sensor._id);
         Swal.fire({
           icon: 'success',
-          title: 'Calibration Successful!',
-          text: res.message || 'Sensor baseline offset calibrated to ±0.01m accuracy.',
+          title: t('sd_calibrationSuccess'),
+          text: t('sd_calibrationSuccessDesc'),
           timer: 2500,
           showConfirmButton: false,
           background: isDark ? '#1E293B' : '#FFFFFF',
@@ -89,8 +90,10 @@ export default function SensorDiagnostics() {
       } catch (err) {
         Swal.fire({
           icon: 'error',
-          title: 'Calibration Error',
-          text: 'Unable to communicate with sensor calibration bus.',
+          title: t('sd_calibrationError'),
+          text: t('sd_calibrationErrorDesc'),
+          background: isDark ? '#1E293B' : '#FFFFFF',
+          color: isDark ? '#F8FAFC' : '#0F172A',
         });
       } finally {
         setCalibratingId(null);
@@ -100,11 +103,11 @@ export default function SensorDiagnostics() {
 
   // Helper for days until next calibration
   const getDaysUntil = (dateStr) => {
-    if (!dateStr) return '30 days';
+    if (!dateStr) return t('sd_daysLeft', { days: 30 });
     const diff = new Date(dateStr) - new Date();
     const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
-    if (days < 0) return `${Math.abs(days)}d overdue`;
-    return `${days} days left`;
+    if (days < 0) return t('sd_daysOverdue', { days: Math.abs(days) });
+    return t('sd_daysLeft', { days });
   };
 
   return (
@@ -118,15 +121,15 @@ export default function SensorDiagnostics() {
           <div>
             <div className="flex items-center gap-3">
               <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
-                Sensor Diagnostics & Calibration
+                {t('sd_title')}
               </h1>
               <Badge variant="success" size="md">
                 <span className="w-2 h-2 rounded-full mr-1.5 animate-ping bg-current" />
-                Active Telemetry
+                {t('sd_activeTelemetry')}
               </Badge>
             </div>
             <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
-              Verify ultrasonic echoes, hydrostatic depth pressure, signal drift, and perform scheduled multi-point calibrations.
+              {t('sd_subtitle')}
             </p>
           </div>
         </div>
@@ -140,7 +143,7 @@ export default function SensorDiagnostics() {
             className="h-9 px-3.5 rounded-lg border-slate-300 dark:border-white/10"
           >
             <RefreshCw className="w-4 h-4 mr-1.5 flex-shrink-0" />
-            <span>Refresh Telemetry</span>
+            <span>{t('sd_refreshTelemetry')}</span>
           </Button>
         </div>
       </div>
@@ -170,7 +173,7 @@ export default function SensorDiagnostics() {
                         {sensor.name}
                       </h3>
                       <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">
-                        Model: {sensor.hardwareModel || 'JSN-SR04T'} • Pin: {sensor.gpioPin || 'GPIO18'}
+                        {t('sd_model')}: {sensor.hardwareModel || 'JSN-SR04T'} • {t('sd_pin')}: {sensor.gpioPin || 'GPIO18'}
                       </span>
                     </div>
                   </div>
@@ -179,7 +182,7 @@ export default function SensorDiagnostics() {
                     variant={isHealthy ? 'success' : sensor.status === 'warning' ? 'warning' : 'danger'}
                     size="md"
                   >
-                    ● {sensor.status ? sensor.status.toUpperCase() : 'HEALTHY'}
+                    ● {tStatus(sensor.status || 'healthy').toUpperCase()}
                   </Badge>
                 </div>
 
@@ -187,7 +190,7 @@ export default function SensorDiagnostics() {
                 <div className="my-5 p-4 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/5 flex items-center justify-between">
                   <div>
                     <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                      Live Physical Reading
+                      {t('sd_liveReading')}
                     </span>
                     <div className="text-3xl font-extrabold font-mono text-slate-900 dark:text-white mt-1 flex items-baseline gap-2">
                       {sensor.readingValue || '2.4'}
@@ -196,14 +199,14 @@ export default function SensorDiagnostics() {
                       </span>
                     </div>
                     <span className="text-xs text-slate-400">
-                      Converted Distance / Water Column
+                      {t('sd_convertedDistance')}
                     </span>
                   </div>
 
                   {/* Health Gauge Meter */}
                   <div className="text-right">
                     <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 block mb-1">
-                      Signal Health
+                      {t('sd_signalHealth')}
                     </span>
                     <span className="text-xl font-bold font-mono text-emerald-500">
                       {sensor.healthPercentage || 98}%
@@ -217,11 +220,11 @@ export default function SensorDiagnostics() {
                   <div className="p-3 rounded-lg bg-slate-50 dark:bg-white/[0.02] border border-slate-100 dark:border-white/5">
                     <span className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
                       <Calendar className="w-3.5 h-3.5 text-blue-500" />
-                      Last Calibrated
+                      {t('sd_lastCalibrated')}
                     </span>
                     <span className="font-mono font-medium text-slate-900 dark:text-white text-xs mt-1 block">
                       {sensor.lastCalibrationDate
-                        ? new Date(sensor.lastCalibrationDate).toLocaleDateString()
+                        ? new Date(sensor.lastCalibrationDate).toLocaleDateString(locale)
                         : '2026-03-01'}
                     </span>
                   </div>
@@ -229,11 +232,11 @@ export default function SensorDiagnostics() {
                   <div className="p-3 rounded-lg bg-slate-50 dark:bg-white/[0.02] border border-slate-100 dark:border-white/5">
                     <span className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
                       <Award className="w-3.5 h-3.5 text-amber-500" />
-                      Next Due Date
+                      {t('sd_nextDue')}
                     </span>
                     <span className="font-mono font-medium text-slate-900 dark:text-white text-xs mt-1 block">
                       {sensor.nextCalibrationDueDate
-                        ? new Date(sensor.nextCalibrationDueDate).toLocaleDateString()
+                        ? new Date(sensor.nextCalibrationDueDate).toLocaleDateString(locale)
                         : '2026-04-01'}{' '}
                       <span className="text-[10px] text-emerald-500 font-normal">
                         ({getDaysUntil(sensor.nextCalibrationDueDate)})
@@ -244,20 +247,20 @@ export default function SensorDiagnostics() {
                   <div className="p-3 rounded-lg bg-slate-50 dark:bg-white/[0.02] border border-slate-100 dark:border-white/5">
                     <span className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
                       <ShieldAlert className="w-3.5 h-3.5 text-rose-500" />
-                      Error / Dropout Count
+                      {t('sd_errorCount')}
                     </span>
                     <span className="font-mono font-bold text-xs mt-1 block text-slate-900 dark:text-white">
-                      {sensor.errorCount || 0} anomaly events
+                      {sensor.errorCount || 0} {t('sd_anomalyEvents')}
                     </span>
                   </div>
 
                   <div className="p-3 rounded-lg bg-slate-50 dark:bg-white/[0.02] border border-slate-100 dark:border-white/5">
                     <span className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
                       <Sliders className="w-3.5 h-3.5 text-purple-500" />
-                      Zero Offset Shift
+                      {t('sd_zeroOffset')}
                     </span>
                     <span className="font-mono font-medium text-slate-900 dark:text-white text-xs mt-1 block">
-                      +0.012 m (Within Spec)
+                      +0.012 m ({t('sd_withinSpec')})
                     </span>
                   </div>
                 </div>
@@ -272,7 +275,7 @@ export default function SensorDiagnostics() {
               {/* Action Trigger */}
               <div className="mt-6 pt-4 border-t border-slate-100 dark:border-white/5 flex items-center justify-between">
                 <span className="text-xs text-slate-500 dark:text-slate-400">
-                  Technician action recommended every 30 days
+                  {t('sd_actionEvery30')}
                 </span>
                 <Button
                   variant="primary"
@@ -282,7 +285,7 @@ export default function SensorDiagnostics() {
                   className="h-9 px-3.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 shadow-sm"
                 >
                   <Wrench className="w-4 h-4 mr-1.5 flex-shrink-0" />
-                  <span>Calibrate Sensor</span>
+                  <span>{t('sd_calibrateSensor')}</span>
                 </Button>
               </div>
             </motion.div>
@@ -294,26 +297,26 @@ export default function SensorDiagnostics() {
       <div className="p-6 rounded-xl border bg-white dark:bg-slate-900/60 border-slate-200 dark:border-white/10 shadow-sm">
         <h4 className="text-base font-bold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-emerald-500" />
-          Standard Field Calibration Protocol (SOP-WAT-204)
+          {t('sd_protocolTitle')}
         </h4>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-slate-600 dark:text-slate-400">
           <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-white/[0.02] border border-slate-200/60 dark:border-white/5">
             <span className="font-semibold text-slate-900 dark:text-white block mb-1">
-              1. Acoustic Transducer Clean
+              1. {t('sd_proto1')}
             </span>
-            Inspect the ultrasonic cone for water droplets, algae, or calcification. Gently wipe with isopropyl wipe.
+            {t('sd_proto1Desc')}
           </div>
           <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-white/[0.02] border border-slate-200/60 dark:border-white/5">
             <span className="font-semibold text-slate-900 dark:text-white block mb-1">
-              2. Zero-Level Calibration
+              2. {t('sd_proto2')}
             </span>
-            Press "Calibrate Sensor" while water level is verified with physical sounding tape at zero reference datum.
+            {t('sd_proto2Desc')}
           </div>
           <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-white/[0.02] border border-slate-200/60 dark:border-white/5">
             <span className="font-semibold text-slate-900 dark:text-white block mb-1">
-              3. Telemetry Confirmation
+              3. {t('sd_proto3')}
             </span>
-            Verify ping latency remains below 20ms and reading fluctuations settle within ±0.5 cm.
+            {t('sd_proto3Desc')}
           </div>
         </div>
       </div>

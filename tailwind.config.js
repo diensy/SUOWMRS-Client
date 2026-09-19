@@ -29,8 +29,8 @@ export default {
         }
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
-        display: ['Outfit', 'Inter', 'sans-serif']
+        sans: ['Inter', 'Noto Sans Devanagari', 'Noto Sans Oriya', 'Noto Sans Telugu', 'Noto Sans Tamil', 'Noto Sans Bengali', 'Nirmala UI', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+        display: ['Outfit', 'Inter', 'Noto Sans Devanagari', 'Noto Sans Oriya', 'Noto Sans Telugu', 'Noto Sans Tamil', 'Noto Sans Bengali', 'Nirmala UI', 'sans-serif']
       },
       boxShadow: {
         'subtle': '0 1px 2px 0 rgba(0, 0, 0, 0.05)',

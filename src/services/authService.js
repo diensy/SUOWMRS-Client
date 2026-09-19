@@ -1,9 +1,8 @@
 import axios from 'axios';
-
-const API_URL = import.meta.env.VITE_API_URL || '/api';
+import { API_BASE_URL } from '../config/apiConfig';
 
 const authApi = axios.create({
-  baseURL: `${API_URL}/auth`,
+  baseURL: `${API_BASE_URL}/auth`,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -82,3 +81,42 @@ export const updateUserStatus = async (id, status) => {
   const res = await authApi.patch(`/users/${id}/status`, { status });
   return res.data;
 };
+
+export const sendOtp = async (email, fullName) => {
+  const res = await authApi.post('/send-otp', { email, fullName });
+  return res.data;
+};
+
+export const verifyOtp = async (email, otp) => {
+  const res = await authApi.post('/verify-otp', { email, otp });
+  return res.data; // { success, otpToken }
+};
+
+// ── Forgot Password & Reset ──
+export const forgotPassword = async (email) => {
+  const res = await authApi.post('/forgot-password', { email });
+  return res.data;
+};
+
+export const verifyResetOtp = async (email, otp) => {
+  const res = await authApi.post('/verify-reset-otp', { email, otp });
+  return res.data;
+};
+
+export const resetPassword = async ({ email, otp, newPassword, confirmPassword }) => {
+  const res = await authApi.post('/reset-password', { email, otp, newPassword, confirmPassword });
+  return res.data;
+};
+
+// ── Municipality Admin & Role Management ──
+export const updateUserRole = async (id, data) => {
+  const res = await authApi.patch(`/users/${id}/role`, data);
+  return res.data;
+};
+
+export const getMunicipalityAdmins = async () => {
+  const res = await authApi.get('/municipality-admins');
+  return res.data;
+};
+
+

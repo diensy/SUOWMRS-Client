@@ -15,6 +15,7 @@ import { getCurrentUser } from './services/authService';
 import LandingPage from './pages/LandingPage';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
+import ForgotPassword from './pages/auth/ForgotPassword';
 
 // Pages — Dashboard
 import UserDashboard from './pages/dashboard/UserDashboard';
@@ -23,6 +24,7 @@ import MunicipalityDashboard from './pages/admin/MunicipalityDashboard';
 // Pages — User Profile & Approvals
 import ProfilePage from './pages/user/ProfilePage';
 import UserApprovalsPage from './pages/admin/UserApprovalsPage';
+import AdminPricingPage from './pages/admin/AdminPricingPage';
 
 // Pages — Phase 6 Municipality & Citizen Portal
 import MultiSystemMonitoringPage from './pages/admin/MultiSystemMonitoringPage';
@@ -48,14 +50,21 @@ import WaterReusePage from './pages/user/WaterReusePage';
 import WeatherPage from './pages/user/WeatherPage';
 import SosPage from './pages/user/SosPage';
 import WaterMonitoringPage from './pages/user/WaterMonitoringPage';
+import PaymentDashboardPage from './pages/user/PaymentDashboardPage';
+import PaymentCheckoutPage from './pages/user/PaymentCheckoutPage';
+import InvoicesPage from './pages/user/InvoicesPage';
+import SubscriptionPage from './pages/user/SubscriptionPage';
+import { primeTTS } from './services/ttsService';
 
 export default function App() {
+  // Warm the neural-voice capability lookup so the first "Listen" click is instant
+  useEffect(() => { primeTTS(); }, []);
+
   const [userRole, setUserRole] = useState(() => {
     const user = getCurrentUser();
     return user?.role || 'Resident';
   });
 
-  // Sync role if localStorage updates (e.g. login / logout in another tab or component)
   useEffect(() => {
     const checkRole = () => {
       const user = getCurrentUser();
@@ -77,6 +86,7 @@ export default function App() {
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
 
             {/* Dashboard wrapper */}
             <Route
@@ -167,6 +177,39 @@ export default function App() {
                 element={
                   <ProtectedRoute allowedRoles={['Resident', 'Admin']} currentRole={userRole}>
                     <SosPage />
+                  </ProtectedRoute>
+                }
+              />
+              {/* Payment routes */}
+              <Route
+                path="/payments"
+                element={
+                  <ProtectedRoute allowedRoles={['Resident', 'Admin']} currentRole={userRole}>
+                    <PaymentDashboardPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/payments/checkout"
+                element={
+                  <ProtectedRoute allowedRoles={['Resident', 'Admin']} currentRole={userRole}>
+                    <PaymentCheckoutPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/payments/invoices"
+                element={
+                  <ProtectedRoute allowedRoles={['Resident', 'Admin']} currentRole={userRole}>
+                    <InvoicesPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/payments/subscription"
+                element={
+                  <ProtectedRoute allowedRoles={['Resident', 'Admin']} currentRole={userRole}>
+                    <SubscriptionPage />
                   </ProtectedRoute>
                 }
               />
@@ -271,6 +314,14 @@ export default function App() {
                 }
               />
               <Route
+                path="/admin/pricing"
+                element={
+                  <ProtectedRoute allowedRoles={['Admin']} currentRole={userRole}>
+                    <AdminPricingPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
                 path="/municipality/systems"
                 element={
                   <ProtectedRoute allowedRoles={['Admin']} currentRole={userRole}>
@@ -347,9 +398,9 @@ export default function App() {
             {/* Fallback */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
-        </BrowserRouter>
-      </SnackbarProvider>
-    </LanguageProvider>
+          </BrowserRouter>
+        </SnackbarProvider>
+      </LanguageProvider>
     </ThemeProvider>
   );
 }

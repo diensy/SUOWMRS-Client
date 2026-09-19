@@ -7,9 +7,11 @@ import Input from '../../components/common/Input';
 import SystemMap from '../../components/maps/SystemMap';
 import { getMunicipalityMapNodes, triggerFloodDiversion } from '../../services/municipalityService';
 import { confirmDiversion, customSwal } from '../../utils/swal';
+import { useLanguage } from '../../context/LanguageContext';
 
 export default function CityGisMapPage() {
   const navigate = useNavigate();
+  const { t, tStatus } = useLanguage();
   const [nodes, setNodes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('All');
@@ -40,8 +42,8 @@ export default function CityGisMapPage() {
     if (parseFloat(sys.storageLevel) >= 95) {
       return customSwal.fire({
         icon: 'error',
-        title: 'Diversion Rejected: Cistern Full',
-        text: `The underground cistern buffer at ${sys.systemId} is at ${parseFloat(sys.storageLevel).toFixed(0)}% capacity. Cannot divert more water.`,
+        title: t('gis_cisternFullTitle'),
+        text: t('gis_cisternFullDesc', { id: sys.systemId, pct: parseFloat(sys.storageLevel).toFixed(0) }),
       });
     }
 
@@ -85,8 +87,8 @@ export default function CityGisMapPage() {
 
         customSwal.fire({
           icon: 'success',
-          title: 'Flood Diversion Activated',
-          text: `Underground solenoid diverter valve opened for ${sys.systemId}. Flood pressure reduced.`,
+          title: t('gis_diversionActivated'),
+          text: t('gis_diversionActivatedDesc', { id: sys.systemId }),
           timer: 3500,
         });
       }
@@ -94,8 +96,8 @@ export default function CityGisMapPage() {
       console.error('Failed to divert water:', err);
       customSwal.fire({
         icon: 'error',
-        title: 'Diversion Failed',
-        text: err.response?.data?.error || 'Could not communicate with drainage telemetry node.',
+        title: t('gis_diversionFailed'),
+        text: err.response?.data?.error || t('gis_diversionFailedDesc'),
       });
     } finally {
       setDivertingId(null);
@@ -125,10 +127,10 @@ export default function CityGisMapPage() {
             </div>
             <div>
               <h1 className="text-xl font-black text-slate-900 dark:text-white font-display">
-                City GIS Flood & Drainage Map
+                {t('gis_title')}
               </h1>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                Real-time geospatial mapping across all 128 municipal drainage nodes
+                {t('gis_subtitle')}
               </p>
             </div>
           </div>
@@ -141,7 +143,7 @@ export default function CityGisMapPage() {
           isLoading={loading}
           icon={<RefreshCw className="w-4 h-4" />}
         >
-          Refresh Map
+          {t('gis_refreshMap')}
         </Button>
       </div>
 
@@ -166,7 +168,7 @@ export default function CityGisMapPage() {
         <div className="w-full md:w-72">
           <Input
             type="text"
-            placeholder="Filter map by Ward or System ID..."
+            placeholder={t('gis_filterPh')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             leftIcon={<Search className="w-4 h-4 text-slate-400" />}
@@ -196,11 +198,11 @@ export default function CityGisMapPage() {
                   ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20'
                   : 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20'
               }`}>
-                {selectedNodeDetails.status}
+                {tStatus(selectedNodeDetails.status)}
               </span>
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              Water Level: <strong className="text-slate-900 dark:text-white font-mono">{parseFloat(selectedNodeDetails.waterLevel).toFixed(1)}%</strong> | Storage Level: <strong className="text-slate-900 dark:text-white font-mono">{parseFloat(selectedNodeDetails.storageLevel).toFixed(1)}%</strong>
+              {t('waterLevel')}: <strong className="text-slate-900 dark:text-white font-mono">{parseFloat(selectedNodeDetails.waterLevel).toFixed(1)}%</strong> | {t('gis_storageLevel')}: <strong className="text-slate-900 dark:text-white font-mono">{parseFloat(selectedNodeDetails.storageLevel).toFixed(1)}%</strong>
             </p>
           </div>
 
@@ -216,20 +218,20 @@ export default function CityGisMapPage() {
                 onClick={() => handleDivert(selectedNodeDetails)}
               >
                 {parseFloat(selectedNodeDetails.storageLevel) >= 95
-                  ? '⚠️ Cistern Full (≥95%)'
-                  : '⚡ Divert Water'}
+                  ? `⚠️ ${t('gis_cisternFull')} (≥95%)`
+                  : `⚡ ${t('gis_divertWater')}`}
               </Button>
             )}
 
             <Button variant="secondary" size="sm" onClick={() => setSelectedNodeDetails(null)}>
-              Close Panel
+              {t('gis_closePanel')}
             </Button>
             <Button
               variant="primary"
               size="sm"
               onClick={() => navigate('/admin/systems')}
             >
-              View in Multi-System Table
+              {t('gis_viewInTable')}
             </Button>
           </div>
         </div>

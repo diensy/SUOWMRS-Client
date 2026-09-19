@@ -10,9 +10,11 @@ import Button from '../../components/common/Button';
 import Input from '../../components/common/Input';
 import { getComplaints, updateComplaint } from '../../services/complaintService';
 import { useTheme } from '../../context/ThemeContext';
+import { useLanguage } from '../../context/LanguageContext';
 
 export default function MunicipalityComplaintsPage() {
   const { isDark } = useTheme();
+  const { t, tStatus, locale } = useLanguage();
   const [complaints, setComplaints] = useState([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('All');
@@ -44,7 +46,7 @@ export default function MunicipalityComplaintsPage() {
         toast: true,
         position: 'top-end',
         icon: 'success',
-        title: `Complaint ${complaint.complaintId} marked as ${newStatus}`,
+        title: t('mc_markedAs', { id: complaint.complaintId, status: tStatus(newStatus) }),
         showConfirmButton: false,
         timer: 2000,
         background: isDark ? '#1E293B' : '#FFFFFF',
@@ -54,8 +56,8 @@ export default function MunicipalityComplaintsPage() {
     } catch (err) {
       Swal.fire({
         icon: 'error',
-        title: 'Update Failed',
-        text: 'Failed to update complaint status.',
+        title: t('prof_updateFailed'),
+        text: t('mc_updateFailedDesc'),
         background: isDark ? '#1E293B' : '#FFFFFF',
         color: isDark ? '#F8FAFC' : '#0F172A',
       });
@@ -67,17 +69,18 @@ export default function MunicipalityComplaintsPage() {
   // Integration Flow: Assign Technician & Generate Work Order
   const handleAssignAndDispatch = async (complaint) => {
     const { value: techName } = await Swal.fire({
-      title: `Assign Technician & Dispatch Ticket`,
-      text: `Dispatch repair work order for ${complaint.complaintId}: ${complaint.title}`,
+      title: t('mc_assignTitle'),
+      text: t('mc_assignText', { id: complaint.complaintId, title: complaint.title }),
       input: 'select',
       inputOptions: {
         'Rajesh Kumar (TECH-8842)': 'Rajesh Kumar (TECH-8842) - Electrical & Hardware',
         'Ramesh Sahoo (TECH-9021)': 'Ramesh Sahoo (TECH-9021) - Drainage & Valves',
         'Sunita Pattnaik (TECH-7712)': 'Sunita Pattnaik (TECH-7712) - Sensors & IoT',
       },
-      inputPlaceholder: 'Select Field Technician',
+      inputPlaceholder: t('mc_selectTechnician'),
       showCancelButton: true,
-      confirmButtonText: 'Dispatch Repair Ticket',
+      confirmButtonText: t('mc_dispatchTicket'),
+      cancelButtonText: t('cancel'),
       confirmButtonColor: '#0EA5E9',
       background: isDark ? '#1E293B' : '#FFFFFF',
       color: isDark ? '#F8FAFC' : '#0F172A',
@@ -94,8 +97,8 @@ export default function MunicipalityComplaintsPage() {
 
         Swal.fire({
           icon: 'success',
-          title: 'Work Order Dispatched!',
-          text: `Linked Work Order created in Technician Suite (${res.complaint.linkedWorkOrderId}) and assigned to ${techName}.`,
+          title: t('mc_dispatched'),
+          text: t('mc_dispatchedDesc', { wo: res.complaint.linkedWorkOrderId, tech: techName }),
           background: isDark ? '#1E293B' : '#FFFFFF',
           color: isDark ? '#F8FAFC' : '#0F172A',
         });
@@ -103,8 +106,10 @@ export default function MunicipalityComplaintsPage() {
       } catch (err) {
         Swal.fire({
           icon: 'error',
-          title: 'Dispatch Failed',
-          text: 'Failed to dispatch work order.',
+          title: t('mc_dispatchFailed'),
+          text: t('mc_dispatchFailedDesc'),
+          background: isDark ? '#1E293B' : '#FFFFFF',
+          color: isDark ? '#F8FAFC' : '#0F172A',
         });
       } finally {
         setUpdatingId(null);
@@ -115,17 +120,17 @@ export default function MunicipalityComplaintsPage() {
   const getStatusBadge = (status) => {
     switch (status) {
       case 'Submitted':
-        return <Badge variant="secondary" size="sm">Submitted</Badge>;
+        return <Badge variant="secondary" size="sm">{t('status_submitted')}</Badge>;
       case 'Under Review':
-        return <Badge variant="warning" size="sm">Under Review</Badge>;
+        return <Badge variant="warning" size="sm">{t('status_under_review')}</Badge>;
       case 'Assigned':
-        return <Badge variant="info" size="sm">Assigned</Badge>;
+        return <Badge variant="info" size="sm">{t('status_assigned')}</Badge>;
       case 'In Progress':
-        return <Badge variant="brand" size="sm">In Progress</Badge>;
+        return <Badge variant="brand" size="sm">{t('status_in_progress')}</Badge>;
       case 'Resolved':
-        return <Badge variant="success" size="sm">Resolved</Badge>;
+        return <Badge variant="success" size="sm">{t('status_resolved')}</Badge>;
       default:
-        return <Badge variant="secondary" size="sm">Closed</Badge>;
+        return <Badge variant="secondary" size="sm">{tStatus(status || 'Closed')}</Badge>;
     }
   };
 
@@ -141,10 +146,10 @@ export default function MunicipalityComplaintsPage() {
             </div>
             <div>
               <h1 className="text-xl font-black text-slate-900 dark:text-white font-display">
-                Municipality Complaint Management
+                {t('mc_title')}
               </h1>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                Review citizen grievances, assign technicians, and link work orders
+                {t('mc_subtitle')}
               </p>
             </div>
           </div>
@@ -157,7 +162,7 @@ export default function MunicipalityComplaintsPage() {
           isLoading={loading}
           icon={<RefreshCw className="w-4 h-4" />}
         >
-          Refresh List
+          {t('mc_refreshList')}
         </Button>
       </div>
 
@@ -174,7 +179,7 @@ export default function MunicipalityComplaintsPage() {
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10'
               }`}
             >
-              {st}
+              {st === 'All' ? t('all') : tStatus(st)}
             </button>
           ))}
         </div>
@@ -182,7 +187,7 @@ export default function MunicipalityComplaintsPage() {
         <div className="w-full md:w-72">
           <Input
             type="text"
-            placeholder="Search Complaint ID, title, or ward..."
+            placeholder={t('mc_searchPh')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             leftIcon={<Search className="w-4 h-4 text-slate-400" />}
@@ -194,10 +199,10 @@ export default function MunicipalityComplaintsPage() {
       {/* Complaints List Cards */}
       <div className="space-y-4">
         {loading ? (
-          <div className="py-12 text-center text-slate-400">Loading complaints...</div>
+          <div className="py-12 text-center text-slate-400">{t('cp_loading')}</div>
         ) : complaints.length === 0 ? (
           <div className="dark:bg-[#0F172A] bg-white border dark:border-white/10 border-slate-200 rounded-2xl p-8 text-center text-slate-400">
-            No citizen complaints found matching filters.
+            {t('mc_noneFound')}
           </div>
         ) : (
           complaints.map((c) => (
@@ -209,13 +214,13 @@ export default function MunicipalityComplaintsPage() {
                 <div className="flex items-center gap-3">
                   <span className="font-mono font-black text-sm text-amber-500">{c.complaintId}</span>
                   <Badge variant={c.priority === 'Urgent' ? 'danger' : 'warning'} size="sm">
-                    {c.priority} Priority
+                    {tStatus(c.priority)} {t('priority')}
                   </Badge>
                   {getStatusBadge(c.status)}
                 </div>
 
                 <span className="text-xs text-slate-400 font-mono">
-                  Filed: {new Date(c.createdAt).toLocaleString()}
+                  {t('mc_filed')}: {new Date(c.createdAt).toLocaleString(locale)}
                 </span>
               </div>
 
@@ -226,16 +231,16 @@ export default function MunicipalityComplaintsPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-slate-50 dark:bg-white/[0.02] p-3 rounded-xl border dark:border-white/5 border-slate-200/60 text-xs">
                 <div>
-                  <span className="text-[10px] font-bold text-slate-400 uppercase">Citizen Name</span>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase">{t('mc_citizenName')}</span>
                   <p className="font-bold text-slate-900 dark:text-white mt-0.5">{c.citizenName}</p>
                 </div>
                 <div>
-                  <span className="text-[10px] font-bold text-slate-400 uppercase">Location / Ward</span>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase">{t('mc_locationWard')}</span>
                   <p className="font-bold text-slate-900 dark:text-white mt-0.5">{c.location} ({c.ward})</p>
                 </div>
                 <div>
-                  <span className="text-[10px] font-bold text-slate-400 uppercase">Assigned Technician</span>
-                  <p className="font-bold text-sky-600 dark:text-sky-400 mt-0.5">{c.assignedTechnician}</p>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase">{t('cp_assignedTechnician')}</span>
+                  <p className="font-bold text-sky-600 dark:text-sky-400 mt-0.5">{!c.assignedTechnician || c.assignedTechnician === 'Unassigned' ? t('wo_unassigned') : c.assignedTechnician}</p>
                 </div>
               </div>
 
@@ -249,7 +254,7 @@ export default function MunicipalityComplaintsPage() {
                       onClick={() => handleUpdateStatus(c, 'Under Review')}
                       isLoading={updatingId === c._id}
                     >
-                      Mark Under Review
+                      {t('mc_markUnderReview')}
                     </Button>
                   )}
 
@@ -260,7 +265,7 @@ export default function MunicipalityComplaintsPage() {
                     isLoading={updatingId === c._id}
                     icon={<Wrench className="w-4 h-4" />}
                   >
-                    {c.linkedWorkOrderId ? 'Re-assign Technician' : 'Dispatch Technician & Work Order'}
+                    {c.linkedWorkOrderId ? t('mc_reassign') : t('mc_dispatchTechWo')}
                   </Button>
                 </div>
 
@@ -272,7 +277,7 @@ export default function MunicipalityComplaintsPage() {
                     isLoading={updatingId === c._id}
                     icon={<CheckCircle2 className="w-4 h-4" />}
                   >
-                    Mark Resolved
+                    {t('mc_markResolved')}
                   </Button>
                 )}
               </div>

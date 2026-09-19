@@ -55,6 +55,7 @@ function MetricCard({ icon: Icon, label, value, unit, color = 'text-sky-500', bg
 }
 
 function ValveControl({ valveStatus, onToggle, loading }) {
+  const { t } = useLanguage();
   const isOpen = valveStatus === 'OPEN';
   return (
     <div className="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-white/10 rounded-2xl p-5 shadow-sm">
@@ -62,16 +63,16 @@ function ValveControl({ valveStatus, onToggle, loading }) {
         <div>
           <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
             <Zap className="w-4 h-4 text-amber-500" />
-            Solenoid Valve Control
+            {t('st_valveControl')}
           </h3>
-          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Manual override for underground drain valve</p>
+          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">{t('st_valveControlDesc')}</p>
         </div>
         <span className={`text-[10px] font-black px-2.5 py-1 rounded-full border ${
           isOpen
             ? 'bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/30'
             : 'bg-slate-100 dark:bg-white/[0.06] text-slate-500 border-slate-200 dark:border-white/10'
         }`}>
-          {isOpen ? 'OPEN · DRAINING' : 'STANDBY · CLOSED'}
+          {isOpen ? t('st_openDraining') : t('st_standbyClosed')}
         </span>
       </div>
 
@@ -98,14 +99,14 @@ function ValveControl({ valveStatus, onToggle, loading }) {
           disabled={isOpen || loading}
           className="flex-1 py-2.5 rounded-xl text-xs font-black bg-sky-600 hover:bg-sky-500 text-white transition-all shadow-md shadow-sky-900/30 disabled:opacity-40 disabled:cursor-not-allowed"
         >
-          OPEN VALVE
+          {t('openValve').toUpperCase()}
         </button>
         <button
           onClick={() => onToggle('STANDBY')}
           disabled={!isOpen || loading}
           className="flex-1 py-2.5 rounded-xl text-xs font-black bg-slate-200 dark:bg-white/10 hover:bg-slate-300 dark:hover:bg-white/20 text-slate-700 dark:text-slate-300 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
         >
-          CLOSE VALVE
+          {t('closeValve').toUpperCase()}
         </button>
       </div>
     </div>
@@ -113,15 +114,16 @@ function ValveControl({ valveStatus, onToggle, loading }) {
 }
 
 function TankVisual({ fillPct }) {
+  const { t } = useLanguage();
   const clamp = Math.min(100, Math.max(0, fillPct));
   const color = clamp > 80 ? '#EF4444' : clamp > 60 ? '#F59E0B' : '#0EA5E9';
-  const label = clamp > 80 ? 'CRITICAL' : clamp > 60 ? 'HIGH' : clamp > 30 ? 'NORMAL' : 'LOW';
+  const label = clamp > 80 ? t('status_critical') : clamp > 60 ? t('status_high') : clamp > 30 ? t('status_normal') : t('status_low');
 
   return (
     <div className="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-white/10 rounded-2xl p-5 shadow-sm flex flex-col items-center gap-4">
       <div className="flex items-center gap-2 self-start w-full">
         <Database className="w-4 h-4 text-sky-500" />
-        <h3 className="text-sm font-bold text-slate-900 dark:text-white">Underground Storage Tank</h3>
+        <h3 className="text-sm font-bold text-slate-900 dark:text-white">{t('st_tankTitle')}</h3>
       </div>
       {/* Tank SVG */}
       <div className="relative w-40 h-52 select-none">
@@ -174,14 +176,14 @@ function TankVisual({ fillPct }) {
         </div>
       </div>
       <p className="text-xs text-slate-500 dark:text-slate-400 text-center">
-        Real-time storage level · updates with telemetry stream
+        {t('st_tankNote')}
       </p>
     </div>
   );
 }
 
 export default function StoragePage() {
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   const { storageData: socketStorage } = useSocket();
   const [storage, setStorage] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -249,13 +251,13 @@ export default function StoragePage() {
             {t('storage')}
           </h1>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Underground cistern capacity & valve management · Auto-refresh 20s
+            {t('st_subtitle')}
           </p>
         </div>
         <div className="flex items-center gap-2">
           {lastUpdated && (
             <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">
-              Updated {lastUpdated.toLocaleTimeString()}
+              {t('st_updated')} {lastUpdated.toLocaleTimeString(locale)}
             </span>
           )}
           <button
@@ -276,10 +278,10 @@ export default function StoragePage() {
         </div>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <MetricCard icon={Database} label="Total Capacity" value={(capacity / 1000).toFixed(1)} unit="kL" color="text-sky-500" bg="bg-sky-500/10" />
-          <MetricCard icon={Droplets} label="Current Volume" value={(current / 1000).toFixed(1)} unit="kL" color="text-emerald-500" bg="bg-emerald-500/10" />
-          <MetricCard icon={ArrowDown} label="Available" value={(available / 1000).toFixed(1)} unit="kL" color="text-amber-500" bg="bg-amber-500/10" />
-          <MetricCard icon={Activity} label="Inflow Rate" value={s.inFlowRate ?? 0} unit="L/min" color="text-fuchsia-500" bg="bg-fuchsia-500/10" />
+          <MetricCard icon={Database} label={t('st_totalCapacity')} value={(capacity / 1000).toFixed(1)} unit="kL" color="text-sky-500" bg="bg-sky-500/10" />
+          <MetricCard icon={Droplets} label={t('st_currentVolume')} value={(current / 1000).toFixed(1)} unit="kL" color="text-emerald-500" bg="bg-emerald-500/10" />
+          <MetricCard icon={ArrowDown} label={t('available')} value={(available / 1000).toFixed(1)} unit="kL" color="text-amber-500" bg="bg-amber-500/10" />
+          <MetricCard icon={Activity} label={t('inflowRate')} value={s.inFlowRate ?? 0} unit="L/min" color="text-fuchsia-500" bg="bg-fuchsia-500/10" />
         </div>
       )}
 
@@ -292,18 +294,18 @@ export default function StoragePage() {
         <div className="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-white/10 rounded-2xl p-5 shadow-sm flex flex-col items-center justify-center gap-3">
           <div className="flex items-center gap-2 self-start w-full">
             <Gauge className="w-4 h-4 text-sky-500" />
-            <h3 className="text-sm font-bold text-slate-900 dark:text-white">Fill Level</h3>
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white">{t('st_fillLevel')}</h3>
           </div>
           <CircularGauge
             percentage={fillPct}
-            label="Fill Level"
+            label={t('st_fillLevel')}
             sublabel={`${(current / 1000).toFixed(1)}kL / ${(capacity / 1000).toFixed(0)}kL`}
           />
           <div className="w-full space-y-2 text-xs">
             {[
-              { label: 'Safe Zone', range: '0–60%', color: '#0EA5E9' },
-              { label: 'Warning', range: '60–80%', color: '#F59E0B' },
-              { label: 'Critical', range: '80–100%', color: '#EF4444' },
+              { label: t('st_safeZone'), range: '0–60%', color: '#0EA5E9' },
+              { label: t('status_warning'), range: '60–80%', color: '#F59E0B' },
+              { label: t('status_critical'), range: '80–100%', color: '#EF4444' },
             ].map(item => (
               <div key={item.label} className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -334,14 +336,14 @@ export default function StoragePage() {
         }`}>
         {fillPct > 80 ? <AlertTriangle className="w-4 h-4 flex-shrink-0" /> : <CheckCircle2 className="w-4 h-4 flex-shrink-0" />}
         {fillPct > 80
-          ? `CRITICAL: Storage at ${fillPct.toFixed(0)}% — Overflow risk. Open valve to divert flow.`
+          ? t('st_bannerCritical', { pct: fillPct.toFixed(0) })
           : fillPct > 60
-          ? `WARNING: Storage at ${fillPct.toFixed(0)}% — Approaching capacity. Monitor inflow rate.`
-          : `NORMAL: Storage at ${fillPct.toFixed(0)}% — System operating within safe parameters.`
+          ? t('st_bannerWarning', { pct: fillPct.toFixed(0) })
+          : t('st_bannerNormal', { pct: fillPct.toFixed(0) })
         }
         {s.isManualOverride && (
           <span className="ml-auto text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30">
-            MANUAL OVERRIDE ACTIVE
+            {t('st_manualOverride')}
           </span>
         )}
       </div>

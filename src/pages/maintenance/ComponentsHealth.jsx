@@ -17,7 +17,7 @@ import { useLanguage } from '../../context/LanguageContext';
 
 export default function ComponentsHealth() {
   const { isDark } = useTheme();
-  const { t } = useLanguage();
+  const { t, tStatus, locale } = useLanguage();
   const { socket } = useSocket();
 
   const [components, setComponents] = useState([]);
@@ -81,11 +81,9 @@ export default function ComponentsHealth() {
     const nextStatus = isCurrentlyActive ? 'MAINTENANCE_PAUSED' : 'ACTIVE';
 
     const confirmRes = await confirmAction({
-      title: isCurrentlyActive ? 'Pause Water Filtration for Maintenance?' : 'Resume Water Filtration?',
-      text: isCurrentlyActive
-        ? 'Purification pumps, sand bed filters, and UV sterilization will be placed in Maintenance Mode.'
-        : 'Purification pipeline will re-engage all 4 treatment stages.',
-      confirmText: isCurrentlyActive ? 'Enter Maintenance Mode' : 'Resume Filtration',
+      title: isCurrentlyActive ? t('ch_pauseFiltrationQ') : t('ch_resumeFiltrationQ'),
+      text: isCurrentlyActive ? t('ch_pauseFiltrationDesc') : t('ch_resumeFiltrationDesc'),
+      confirmText: isCurrentlyActive ? t('ch_enterMaintenance') : t('ch_resumeFiltration'),
       isDanger: isCurrentlyActive,
     });
 
@@ -97,16 +95,16 @@ export default function ComponentsHealth() {
       setFiltrationStatus(nextStatus);
       customSwal.fire({
         icon: 'success',
-        title: isCurrentlyActive ? 'MAINTENANCE MODE — Filtration Paused' : 'FILTRATION ACTIVE — System Healthy',
-        text: res?.message || 'Filtration status updated successfully.',
+        title: isCurrentlyActive ? t('ch_maintenanceModeTitle') : t('ch_filtrationActiveTitle'),
+        text: t('ch_filtrationUpdated'),
         timer: 3000,
       });
     } catch (err) {
       console.error('Failed to toggle filtration mode:', err);
       customSwal.fire({
         icon: 'error',
-        title: 'Filtration Control Failed',
-        text: err.response?.data?.error || 'Failed to update filtration state.',
+        title: t('ch_filtrationFailed'),
+        text: err.response?.data?.error || t('ch_filtrationFailedDesc'),
       });
     } finally {
       setFiltrationLoading(false);
@@ -172,15 +170,15 @@ export default function ComponentsHealth() {
           <div>
             <div className="flex items-center gap-3">
               <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
-                Actuators & Components Health
+                {t('ch_title')}
               </h1>
               <Badge variant="success" size="md">
                 <span className="w-2 h-2 rounded-full mr-1.5 animate-ping bg-current" />
-                Live Telemetry Loop
+                {t('ch_liveLoop')}
               </Badge>
             </div>
             <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
-              Direct telemetry inspection for Submersible Pumps, Solenoid Valves, Industrial Relays, and Power Subsystems.
+              {t('ch_subtitle')}
             </p>
           </div>
         </div>
@@ -194,7 +192,7 @@ export default function ComponentsHealth() {
             className="h-9 px-3.5 rounded-lg border-slate-300 dark:border-white/10"
           >
             <RefreshCw className="w-4 h-4 mr-1.5 flex-shrink-0" />
-            <span>Refresh State</span>
+            <span>{t('ch_refreshState')}</span>
           </Button>
         </div>
       </div>
@@ -214,7 +212,7 @@ export default function ComponentsHealth() {
                 </div>
                 <div>
                   <h3 className="font-bold text-slate-900 dark:text-white text-base">
-                    Submersible Pump
+                    {t('ch_submersiblePump')}
                   </h3>
                   <span className="text-xs text-slate-500 dark:text-slate-400">
                     2.0 HP Induction Motor
@@ -222,21 +220,21 @@ export default function ComponentsHealth() {
                 </div>
               </div>
               <Badge variant="success" size="sm">
-                ● {pump.state?.toUpperCase() || 'RUNNING'}
+                ● {tStatus(pump.state || 'running').toUpperCase()}
               </Badge>
             </div>
 
             <div className="my-4 p-4 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/5 flex items-center justify-between">
               <div>
                 <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
-                  Total Runtime Hours
+                  {t('ch_totalRuntime')}
                 </span>
                 <div className="text-2xl font-extrabold font-mono text-slate-900 dark:text-white mt-0.5">
-                  {pump.runtimeHours || '342.5'} <span className="text-sm font-normal text-slate-400">hrs</span>
+                  {pump.runtimeHours || '342.5'} <span className="text-sm font-normal text-slate-400">{t('ch_hrs')}</span>
                 </div>
               </div>
               <div className="text-right">
-                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Health Index</span>
+                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">{t('ch_healthIndex')}</span>
                 <div className="text-xl font-bold font-mono text-emerald-500">
                   {pump.healthPercentage || 94}%
                 </div>
@@ -245,29 +243,29 @@ export default function ComponentsHealth() {
 
             <div className="space-y-2.5 text-xs">
               <div className="flex justify-between py-1.5 border-b border-slate-100 dark:border-white/5">
-                <span className="text-slate-500 dark:text-slate-400">Operating Voltage</span>
+                <span className="text-slate-500 dark:text-slate-400">{t('ch_operatingVoltage')}</span>
                 <span className="font-mono font-semibold text-slate-900 dark:text-white">{pump.voltage || 230.2} VAC</span>
               </div>
               <div className="flex justify-between py-1.5 border-b border-slate-100 dark:border-white/5">
-                <span className="text-slate-500 dark:text-slate-400">Motor Current Draw</span>
+                <span className="text-slate-500 dark:text-slate-400">{t('ch_motorCurrent')}</span>
                 <span className="font-mono font-semibold text-slate-900 dark:text-white">{pump.current || 4.8} A</span>
               </div>
               <div className="flex justify-between py-1.5 border-b border-slate-100 dark:border-white/5">
-                <span className="text-slate-500 dark:text-slate-400">Motor Temperature</span>
+                <span className="text-slate-500 dark:text-slate-400">{t('ch_motorTemp')}</span>
                 <span className="font-mono font-semibold text-emerald-500">{pump.operatingTemp || 44.2}°C</span>
               </div>
               <div className="flex justify-between py-1.5">
-                <span className="text-slate-500 dark:text-slate-400">Last Overhaul</span>
+                <span className="text-slate-500 dark:text-slate-400">{t('ch_lastOverhaul')}</span>
                 <span className="font-mono text-slate-700 dark:text-slate-300">
-                  {pump.lastMaintenanceDate ? new Date(pump.lastMaintenanceDate).toLocaleDateString() : '2026-02-28'}
+                  {pump.lastMaintenanceDate ? new Date(pump.lastMaintenanceDate).toLocaleDateString(locale) : '2026-02-28'}
                 </span>
               </div>
             </div>
           </div>
 
           <div className="mt-4 pt-3 border-t border-slate-100 dark:border-white/5 flex items-center justify-between text-xs text-slate-500">
-            <span>Flow: 140 L/min</span>
-            <span className="text-emerald-500 font-medium">Cavitation: None detected</span>
+            <span>{t('ch_flow')}: 140 L/min</span>
+            <span className="text-emerald-500 font-medium">{t('ch_cavitationNone')}</span>
           </div>
         </motion.div>
 
@@ -284,7 +282,7 @@ export default function ComponentsHealth() {
                 </div>
                 <div>
                   <h3 className="font-bold text-slate-900 dark:text-white text-base">
-                    Solenoid Valve
+                    {t('ch_solenoidValve')}
                   </h3>
                   <span className="text-xs text-slate-500 dark:text-slate-400">
                     24V DC Pilot Actuated
@@ -292,52 +290,52 @@ export default function ComponentsHealth() {
                 </div>
               </div>
               <Badge variant="success" size="sm">
-                ● {valve.state?.toUpperCase() || 'OPEN'}
+                ● {tStatus(valve.state || 'open').toUpperCase()}
               </Badge>
             </div>
 
             <div className="my-4 p-4 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/5 flex items-center justify-between">
               <div>
                 <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
-                  Total Actuation Cycles
+                  {t('ch_totalActuation')}
                 </span>
                 <div className="text-2xl font-extrabold font-mono text-slate-900 dark:text-white mt-0.5">
-                  {valve.actuationCount || '1,420'} <span className="text-sm font-normal text-slate-400">cycles</span>
+                  {valve.actuationCount || '1,420'} <span className="text-sm font-normal text-slate-400">{t('ch_cycles')}</span>
                 </div>
               </div>
               <div className="text-right">
-                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Control Mode</span>
+                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">{t('ch_controlMode')}</span>
                 <div className="text-sm font-bold font-mono text-cyan-500 uppercase">
-                  {valve.controlMode || 'AUTO'}
+                  {tStatus(valve.controlMode || 'auto').toUpperCase()}
                 </div>
               </div>
             </div>
 
             <div className="space-y-2.5 text-xs">
               <div className="flex justify-between py-1.5 border-b border-slate-100 dark:border-white/5">
-                <span className="text-slate-500 dark:text-slate-400">Opening Latency</span>
+                <span className="text-slate-500 dark:text-slate-400">{t('ch_openingLatency')}</span>
                 <span className="font-mono font-semibold text-slate-900 dark:text-white">450 ms</span>
               </div>
               <div className="flex justify-between py-1.5 border-b border-slate-100 dark:border-white/5">
-                <span className="text-slate-500 dark:text-slate-400">Holding Coil Current</span>
+                <span className="text-slate-500 dark:text-slate-400">{t('ch_holdingCoil')}</span>
                 <span className="font-mono font-semibold text-slate-900 dark:text-white">0.42 A</span>
               </div>
               <div className="flex justify-between py-1.5 border-b border-slate-100 dark:border-white/5">
-                <span className="text-slate-500 dark:text-slate-400">Seal Integrity</span>
-                <span className="font-mono font-semibold text-emerald-500">100% (No Leakage)</span>
+                <span className="text-slate-500 dark:text-slate-400">{t('ch_sealIntegrity')}</span>
+                <span className="font-mono font-semibold text-emerald-500">100% ({t('ch_noLeakage')})</span>
               </div>
               <div className="flex justify-between py-1.5">
-                <span className="text-slate-500 dark:text-slate-400">Last Inspection</span>
+                <span className="text-slate-500 dark:text-slate-400">{t('ch_lastInspection')}</span>
                 <span className="font-mono text-slate-700 dark:text-slate-300">
-                  {valve.lastMaintenanceDate ? new Date(valve.lastMaintenanceDate).toLocaleDateString() : '2026-03-02'}
+                  {valve.lastMaintenanceDate ? new Date(valve.lastMaintenanceDate).toLocaleDateString(locale) : '2026-03-02'}
                 </span>
               </div>
             </div>
           </div>
 
           <div className="mt-4 pt-3 border-t border-slate-100 dark:border-white/5 flex items-center justify-between text-xs text-slate-500">
-            <span>Pressure Drop: 0.12 Bar</span>
-            <span className="text-emerald-500 font-medium">Plunger Free</span>
+            <span>{t('ch_pressureDrop')}: 0.12 Bar</span>
+            <span className="text-emerald-500 font-medium">{t('ch_plungerFree')}</span>
           </div>
         </motion.div>
 
@@ -354,7 +352,7 @@ export default function ComponentsHealth() {
                 </div>
                 <div>
                   <h3 className="font-bold text-slate-900 dark:text-white text-base">
-                    Relay Module
+                    {t('ch_relayModule')}
                   </h3>
                   <span className="text-xs text-slate-500 dark:text-slate-400">
                     4-Channel Optocoupled
@@ -362,21 +360,21 @@ export default function ComponentsHealth() {
                 </div>
               </div>
               <Badge variant="warning" size="sm">
-                ● INSPECTION RECOMMENDED
+                ● {t('sh_inspectionNeeded').toUpperCase()}
               </Badge>
             </div>
 
             <div className="my-4 p-4 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/5 flex items-center justify-between">
               <div>
                 <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
-                  Switching Count
+                  {t('ch_switchingCount')}
                 </span>
                 <div className="text-2xl font-extrabold font-mono text-slate-900 dark:text-white mt-0.5">
-                  {relay.actuationCount || '3,890'} <span className="text-sm font-normal text-slate-400">cycles</span>
+                  {relay.actuationCount || '3,890'} <span className="text-sm font-normal text-slate-400">{t('ch_cycles')}</span>
                 </div>
               </div>
               <div className="text-right">
-                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Operating Temp</span>
+                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">{t('ch_operatingTemp')}</span>
                 <div className="text-xl font-bold font-mono text-amber-500">
                   {relay.operatingTemp || 52.4}°C
                 </div>
@@ -385,27 +383,27 @@ export default function ComponentsHealth() {
 
             <div className="space-y-2.5 text-xs">
               <div className="flex justify-between py-1.5 border-b border-slate-100 dark:border-white/5">
-                <span className="text-slate-500 dark:text-slate-400">Ch 1 (Pump Trigger)</span>
-                <span className="font-mono font-semibold text-emerald-500">CLOSED [ACTIVE]</span>
+                <span className="text-slate-500 dark:text-slate-400">Ch 1 ({t('ch_pumpTrigger')})</span>
+                <span className="font-mono font-semibold text-emerald-500">{t('status_closed').toUpperCase()} [{t('active').toUpperCase()}]</span>
               </div>
               <div className="flex justify-between py-1.5 border-b border-slate-100 dark:border-white/5">
-                <span className="text-slate-500 dark:text-slate-400">Ch 2 (Valve Trigger)</span>
-                <span className="font-mono font-semibold text-emerald-500">CLOSED [ACTIVE]</span>
+                <span className="text-slate-500 dark:text-slate-400">Ch 2 ({t('ch_valveTrigger')})</span>
+                <span className="font-mono font-semibold text-emerald-500">{t('status_closed').toUpperCase()} [{t('active').toUpperCase()}]</span>
               </div>
               <div className="flex justify-between py-1.5 border-b border-slate-100 dark:border-white/5">
-                <span className="text-slate-500 dark:text-slate-400">Ch 3 (Alarm Beacon)</span>
-                <span className="font-mono font-semibold text-amber-500">OPEN [ELEVATED TEMP]</span>
+                <span className="text-slate-500 dark:text-slate-400">Ch 3 ({t('ch_alarmBeacon')})</span>
+                <span className="font-mono font-semibold text-amber-500">{t('status_open').toUpperCase()} [{t('ch_elevatedTemp')}]</span>
               </div>
               <div className="flex justify-between py-1.5">
-                <span className="text-slate-500 dark:text-slate-400">Ch 4 (Auxiliary Fan)</span>
-                <span className="font-mono text-slate-400">OPEN [STANDBY]</span>
+                <span className="text-slate-500 dark:text-slate-400">Ch 4 ({t('ch_auxFan')})</span>
+                <span className="font-mono text-slate-400">{t('status_open').toUpperCase()} [{t('status_standby').toUpperCase()}]</span>
               </div>
             </div>
           </div>
 
           <div className="mt-4 pt-3 border-t border-slate-100 dark:border-white/5 flex items-center justify-between text-xs text-amber-500 font-medium">
-            <span>Thermal threshold warning</span>
-            <span>Check fan filter</span>
+            <span>{t('ch_thermalWarning')}</span>
+            <span>{t('ch_checkFanFilter')}</span>
           </div>
         </motion.div>
       </div>
@@ -431,18 +429,18 @@ export default function ComponentsHealth() {
             <div>
               <div className="flex items-center gap-2.5">
                 <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                  Multi-Stage Water Filtration & Purification Suite
+                  {t('ch_filtrationSuite')}
                 </h3>
                 <span className={`text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full border ${
                   filtrationStatus === 'ACTIVE'
                     ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30'
                     : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30'
                 }`}>
-                  {filtrationStatus === 'ACTIVE' ? '● FILTRATION ACTIVE — System Healthy' : '▲ MAINTENANCE MODE — Filtration Paused'}
+                  {filtrationStatus === 'ACTIVE' ? `● ${t('ch_filtrationActiveTitle')}` : `▲ ${t('ch_maintenanceModeTitle')}`}
                 </span>
               </div>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                Rapid Sand Filter Bed ➔ Activated Carbon Adsorption ➔ UV-C Germicidal Reactor ➔ Residual Chlorination
+                {t('ch_stage1')} ➔ {t('ch_stage2')} ➔ {t('ch_stage3')} ➔ {t('ch_stage4')}
               </p>
             </div>
           </div>
@@ -456,7 +454,7 @@ export default function ComponentsHealth() {
               className={filtrationStatus === 'ACTIVE' ? 'bg-amber-600 hover:bg-amber-700 text-white font-bold' : 'bg-emerald-600 hover:bg-emerald-700 text-white font-bold'}
               icon={filtrationStatus === 'ACTIVE' ? <Wrench className="w-4 h-4" /> : <CheckCircle2 className="w-4 h-4" />}
             >
-              {filtrationStatus === 'ACTIVE' ? 'Pause for Maintenance' : 'Resume Filtration (System Healthy)'}
+              {filtrationStatus === 'ACTIVE' ? t('ch_pauseForMaintenance') : t('ch_resumeFiltrationHealthy')}
             </Button>
           </div>
         </div>
@@ -464,35 +462,35 @@ export default function ComponentsHealth() {
         {/* 4-Stage Diagnostic Readouts */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4 text-xs">
           <div className="p-3 rounded-xl bg-slate-50 dark:bg-white/[0.02] border border-slate-100 dark:border-white/5">
-            <span className="text-[10px] font-bold text-slate-400 uppercase">Stage 1: Sand Bed Filter</span>
+            <span className="text-[10px] font-bold text-slate-400 uppercase">{t('ch_stageLabel')} 1: {t('ch_stage1Short')}</span>
             <div className="font-mono font-bold text-slate-900 dark:text-white mt-1 text-sm">
-              {filtrationStatus === 'ACTIVE' ? '1.2 Bar (Nominal)' : 'BACKWASH MODE'}
+              {filtrationStatus === 'ACTIVE' ? `1.2 Bar (${t('esp_nominal')})` : t('ch_backwashMode')}
             </div>
-            <span className="text-[10px] text-emerald-500">Differential normal</span>
+            <span className="text-[10px] text-emerald-500">{t('ch_differentialNormal')}</span>
           </div>
 
           <div className="p-3 rounded-xl bg-slate-50 dark:bg-white/[0.02] border border-slate-100 dark:border-white/5">
-            <span className="text-[10px] font-bold text-slate-400 uppercase">Stage 2: Activated Carbon</span>
+            <span className="text-[10px] font-bold text-slate-400 uppercase">{t('ch_stageLabel')} 2: {t('ch_stage2Short')}</span>
             <div className="font-mono font-bold text-slate-900 dark:text-white mt-1 text-sm">
-              {filtrationStatus === 'ACTIVE' ? '92% Clean' : 'FLUSHING'}
+              {filtrationStatus === 'ACTIVE' ? `92% ${t('ch_clean')}` : t('ch_flushing')}
             </div>
-            <span className="text-[10px] text-emerald-500">Adsorption capacity OK</span>
+            <span className="text-[10px] text-emerald-500">{t('ch_adsorptionOk')}</span>
           </div>
 
           <div className="p-3 rounded-xl bg-slate-50 dark:bg-white/[0.02] border border-slate-100 dark:border-white/5">
-            <span className="text-[10px] font-bold text-slate-400 uppercase">Stage 3: UV-C Sterilizer</span>
+            <span className="text-[10px] font-bold text-slate-400 uppercase">{t('ch_stageLabel')} 3: {t('ch_stage3Short')}</span>
             <div className="font-mono font-bold text-slate-900 dark:text-white mt-1 text-sm">
-              {filtrationStatus === 'ACTIVE' ? '254 nm · 99.8%' : 'STANDBY (0W)'}
+              {filtrationStatus === 'ACTIVE' ? '254 nm · 99.8%' : `${t('status_standby').toUpperCase()} (0W)`}
             </div>
-            <span className="text-[10px] text-emerald-500">Germicidal dose verified</span>
+            <span className="text-[10px] text-emerald-500">{t('ch_germicidalVerified')}</span>
           </div>
 
           <div className="p-3 rounded-xl bg-slate-50 dark:bg-white/[0.02] border border-slate-100 dark:border-white/5">
-            <span className="text-[10px] font-bold text-slate-400 uppercase">Stage 4: Chlorination</span>
+            <span className="text-[10px] font-bold text-slate-400 uppercase">{t('ch_stageLabel')} 4: {t('ch_stage4Short')}</span>
             <div className="font-mono font-bold text-slate-900 dark:text-white mt-1 text-sm">
-              {filtrationStatus === 'ACTIVE' ? '0.8 ppm Dosed' : 'ISOLATED'}
+              {filtrationStatus === 'ACTIVE' ? `0.8 ppm ${t('ch_dosed')}` : t('ch_isolated')}
             </div>
-            <span className="text-[10px] text-emerald-500">Residual pathogen defense</span>
+            <span className="text-[10px] text-emerald-500">{t('ch_pathogenDefense')}</span>
           </div>
         </div>
       </motion.div>
@@ -508,7 +506,7 @@ export default function ComponentsHealth() {
               </div>
               <div>
                 <h3 className="font-bold text-slate-900 dark:text-white">
-                  Solar & Battery Power System
+                  {t('ch_powerSystem')}
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
                   12V Regulated DC Bus with LiFePO4 Buffer
@@ -522,19 +520,19 @@ export default function ComponentsHealth() {
 
           <div className="grid grid-cols-3 gap-3 text-center">
             <div className="p-3 rounded-xl bg-slate-50 dark:bg-white/[0.02] border border-slate-100 dark:border-white/5">
-              <span className="text-xs text-slate-500">Bus Voltage</span>
+              <span className="text-xs text-slate-500">{t('ch_busVoltage')}</span>
               <div className="text-lg font-bold font-mono text-slate-900 dark:text-white mt-1">
                 {power.voltage || 13.8} V
               </div>
             </div>
             <div className="p-3 rounded-xl bg-slate-50 dark:bg-white/[0.02] border border-slate-100 dark:border-white/5">
-              <span className="text-xs text-slate-500">Solar Input</span>
+              <span className="text-xs text-slate-500">{t('ch_solarInput')}</span>
               <div className="text-lg font-bold font-mono text-emerald-500 mt-1">
                 {power.current || 2.1} A
               </div>
             </div>
             <div className="p-3 rounded-xl bg-slate-50 dark:bg-white/[0.02] border border-slate-100 dark:border-white/5">
-              <span className="text-xs text-slate-500">Battery State</span>
+              <span className="text-xs text-slate-500">{t('ch_batteryState')}</span>
               <div className="text-lg font-bold font-mono text-cyan-500 mt-1">
                 94% Float
               </div>
@@ -551,7 +549,7 @@ export default function ComponentsHealth() {
               </div>
               <div>
                 <h3 className="font-bold text-slate-900 dark:text-white">
-                  Communication Network Gateway
+                  {t('ch_networkGateway')}
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
                   Industrial 4G LTE Cat-M1 + Local Wi-Fi AP
@@ -565,19 +563,19 @@ export default function ComponentsHealth() {
 
           <div className="grid grid-cols-3 gap-3 text-center">
             <div className="p-3 rounded-xl bg-slate-50 dark:bg-white/[0.02] border border-slate-100 dark:border-white/5">
-              <span className="text-xs text-slate-500">Link Uptime</span>
+              <span className="text-xs text-slate-500">{t('ch_linkUptime')}</span>
               <div className="text-lg font-bold font-mono text-slate-900 dark:text-white mt-1">
                 99.98%
               </div>
             </div>
             <div className="p-3 rounded-xl bg-slate-50 dark:bg-white/[0.02] border border-slate-100 dark:border-white/5">
-              <span className="text-xs text-slate-500">Cellular Signal</span>
+              <span className="text-xs text-slate-500">{t('ch_cellularSignal')}</span>
               <div className="text-lg font-bold font-mono text-emerald-500 mt-1">
                 -62 dBm
               </div>
             </div>
             <div className="p-3 rounded-xl bg-slate-50 dark:bg-white/[0.02] border border-slate-100 dark:border-white/5">
-              <span className="text-xs text-slate-500">Socket Protocol</span>
+              <span className="text-xs text-slate-500">{t('ch_socketProtocol')}</span>
               <div className="text-lg font-bold font-mono text-indigo-500 mt-1">
                 WSS / TLS
               </div>

@@ -103,10 +103,10 @@ export default function WaterMonitoringPage() {
 
   const getThresholdInfo = (val) => {
     const num = getNumericLevel(val);
-    if (num < 50) return { label: 'NORMAL', color: '#22C55E', textClass: 'text-emerald-500', bgClass: 'bg-emerald-500/10 border-emerald-500/30' };
-    if (num < 75) return { label: 'WARNING', color: '#F59E0B', textClass: 'text-amber-500', bgClass: 'bg-amber-500/10 border-amber-500/30' };
-    if (num < 90) return { label: 'HIGH RISK', color: '#F97316', textClass: 'text-orange-500', bgClass: 'bg-orange-500/10 border-orange-500/30' };
-    return { label: 'CRITICAL FLOOD', color: '#EF4444', textClass: 'text-rose-500', bgClass: 'bg-rose-500/10 border-rose-500/30' };
+    if (num < 50) return { label: t('status_normal'), statusKey: 'status_normal', color: '#22C55E', textClass: 'text-emerald-500', bgClass: 'bg-emerald-500/10 border-emerald-500/30' };
+    if (num < 75) return { label: t('status_warning'), statusKey: 'status_warning', color: '#F59E0B', textClass: 'text-amber-500', bgClass: 'bg-amber-500/10 border-amber-500/30' };
+    if (num < 90) return { label: t('status_danger'), statusKey: 'status_danger', color: '#F97316', textClass: 'text-orange-500', bgClass: 'bg-orange-500/10 border-orange-500/30' };
+    return { label: t('status_critical'), statusKey: 'status_critical', color: '#EF4444', textClass: 'text-rose-500', bgClass: 'bg-rose-500/10 border-rose-500/30' };
   };
 
   const currentLevel = getNumericLevel(level);
@@ -130,11 +130,11 @@ export default function WaterMonitoringPage() {
               <Waves className="w-5 h-5 text-sky-300 animate-pulse" />
             </div>
             <h1 className="text-xl sm:text-2xl font-black font-display tracking-tight">
-              Real-Time Water Level & Drainage Telemetry
+              {t('wm_title')}
             </h1>
           </div>
           <p className="text-xs text-teal-100 max-w-xl">
-            Live IoT ultrasonic sensor telemetry, channel depth measurement, saturation thresholds, and multi-ward drainage node monitoring.
+            {t('wm_subtitle')}
           </p>
         </div>
 
@@ -143,14 +143,14 @@ export default function WaterMonitoringPage() {
             <span className={`w-2 h-2 rounded-full ${isConnected ? 'bg-emerald-400 animate-ping' : 'bg-amber-400'}`} />
             <span className="font-semibold text-white">{isConnected ? `${t('live')} ${t('sensorTelemetry')}` : t('offline')}</span>
           </div>
-          {/* <VoiceSpeakerButton
-            text={`Live water telemetry report: Primary sump water level is ${currentLevel.toFixed(1)} percent, with a depth of ${depthCm} centimeters. Current threshold condition is ${currentThresh.label}. Flow velocity is 4.8 meters per second. Line power is stable.`}
-            label="Listen Telemetry"
+          <VoiceSpeakerButton
+            text={() => t('tts_waterTelemetryReport', { level: currentLevel.toFixed(1), depth: depthCm, status: currentThresh.label })}
+            label={t('tts_listenTelemetry')}
             size="sm"
             variant="subtle"
             className="bg-white/10 hover:bg-white/20 text-white border-white/20"
             id="water-telemetry-header-voice"
-          /> */}
+          />
           <Button
             variant="secondary"
             size="sm"
@@ -174,11 +174,11 @@ export default function WaterMonitoringPage() {
           <div>
             <div className="flex items-center justify-between gap-2">
               <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">{t('primarySumpLevel')}</span>
-              {/* <VoiceSpeakerButton
-                text={`Primary sump level is ${currentLevel.toFixed(1)} percent (${depthCm} cm). Threshold is ${currentThresh.label}.`}
+              <VoiceSpeakerButton
+                text={() => t('tts_sumpPrimary', { level: currentLevel.toFixed(1), depth: depthCm, status: currentThresh.label })}
                 size="xs"
                 id="sump-primary-voice"
-              /> */}
+              />
             </div>
             <div className="flex items-baseline gap-2 mt-1">
               <span className={`text-2xl font-black font-mono ${currentThresh.textClass}`}>
@@ -270,10 +270,10 @@ export default function WaterMonitoringPage() {
           <div>
             <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
               <Activity className="w-4 h-4 text-sky-500" />
-              Water Level Telemetry & Threshold Curve
+              {t('wm_chartTitle')}
             </h2>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              Continuous ultrasonic depth logging with active threshold alarm bands.
+              {t('wm_chartSubtitle')}
             </p>
           </div>
 
@@ -331,25 +331,25 @@ export default function WaterMonitoringPage() {
           <div>
             <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
               <MapPin className="w-4 h-4 text-emerald-500" />
-              Ward Drainage Station Network
+              {t('wm_networkTitle')}
             </h2>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              Live status across all municipal drainage monitoring nodes.
+              {t('wm_networkSubtitle')}
             </p>
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-slate-500">Filter Status:</span>
+            <span className="text-xs font-semibold text-slate-500">{t('wm_filterStatus')}:</span>
             <select
               value={selectedWard}
               onChange={(e) => setSelectedWard(e.target.value)}
               className="px-3 py-1.5 rounded-xl text-xs font-semibold border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 focus:outline-none"
             >
-              <option value="All" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">All Nodes</option>
-              <option value="Normal" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">Normal Only</option>
-              <option value="Warning" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">Warning Only</option>
-              <option value="High Risk" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">High Risk</option>
-              <option value="Critical Flood" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">Critical Flood</option>
+              <option value="All" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">{t('wm_allNodes')}</option>
+              <option value="Normal" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">{t('status_normal')}</option>
+              <option value="Warning" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">{t('status_warning')}</option>
+              <option value="High Risk" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">{t('status_danger')}</option>
+              <option value="Critical Flood" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">{t('status_critical')}</option>
             </select>
           </div>
         </div>
@@ -366,7 +366,7 @@ export default function WaterMonitoringPage() {
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-mono font-bold text-slate-400">{node.id}</span>
                   <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md border ${thresh.bgClass} ${thresh.textClass}`}>
-                    {node.status}
+                    {thresh.label}
                   </span>
                 </div>
 
@@ -389,8 +389,8 @@ export default function WaterMonitoringPage() {
                 </div>
 
                 <div className="flex items-center justify-between text-[10px] text-slate-400 pt-1 border-t dark:border-white/5 border-slate-200/60 font-mono">
-                  <span>Flow: {node.flowRate} m/s</span>
-                  <span>Signal: {node.rssi} dBm</span>
+                  <span>{t('ch_flow')}: {node.flowRate} m/s</span>
+                  <span>{t('wm_signal')}: {node.rssi} dBm</span>
                 </div>
               </motion.div>
             );

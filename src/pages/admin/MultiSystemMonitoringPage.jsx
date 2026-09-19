@@ -12,7 +12,7 @@ import { getMunicipalitySystems, triggerFloodDiversion } from '../../services/mu
 import { confirmDiversion, customSwal } from '../../utils/swal';
 
 export default function MultiSystemMonitoringPage() {
-  const { t, localizeNumber } = useLanguage();
+  const { t, tStatus, localizeNumber, locale } = useLanguage();
   const [systems, setSystems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('All'); // 'All', 'Normal', 'Warning', 'Critical', 'Offline'
@@ -54,8 +54,8 @@ export default function MultiSystemMonitoringPage() {
     if (parseFloat(sys.storageLevel) >= 95) {
       return customSwal.fire({
         icon: 'error',
-        title: 'Diversion Rejected: Cistern Full',
-        text: `Underground cistern at ${sys.systemId} is at capacity (${parseFloat(sys.storageLevel).toFixed(0)}%). Cannot accept diversion.`,
+        title: t('gis_cisternFullTitle'),
+        text: t('gis_cisternFullDesc', { id: sys.systemId, pct: parseFloat(sys.storageLevel).toFixed(0) }),
       });
     }
 
@@ -88,8 +88,8 @@ export default function MultiSystemMonitoringPage() {
 
         customSwal.fire({
           icon: 'success',
-          title: 'Flood Diversion Activated',
-          text: `Underground diverter valve engaged for ${sys.systemId} (${sys.location}). Flood stress relieved.`,
+          title: t('gis_diversionActivated'),
+          text: t('gis_diversionActivatedDesc', { id: `${sys.systemId} (${sys.location})` }),
           timer: 3500,
         });
       }
@@ -97,8 +97,8 @@ export default function MultiSystemMonitoringPage() {
       console.error('Failed to divert water:', err);
       customSwal.fire({
         icon: 'error',
-        title: 'Diversion Action Failed',
-        text: err.response?.data?.error || 'Could not communicate with drainage telemetry node.',
+        title: t('gis_diversionFailed'),
+        text: err.response?.data?.error || t('gis_diversionFailedDesc'),
       });
     } finally {
       setDivertingId(null);
@@ -108,13 +108,13 @@ export default function MultiSystemMonitoringPage() {
   const getStatusBadge = (status) => {
     switch (status) {
       case 'Normal':
-        return <Badge variant="success" size="sm">Normal</Badge>;
+        return <Badge variant="success" size="sm">{t('status_normal')}</Badge>;
       case 'Warning':
-        return <Badge variant="warning" size="sm">Warning</Badge>;
+        return <Badge variant="warning" size="sm">{t('status_warning')}</Badge>;
       case 'Critical':
-        return <Badge variant="danger" size="sm">Critical</Badge>;
+        return <Badge variant="danger" size="sm">{t('status_critical')}</Badge>;
       default:
-        return <Badge variant="secondary" size="sm">Offline</Badge>;
+        return <Badge variant="secondary" size="sm">{t('offline')}</Badge>;
     }
   };
 
@@ -123,14 +123,14 @@ export default function MultiSystemMonitoringPage() {
       return (
         <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-md">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-          Online
+          {t('online')}
         </span>
       );
     }
     return (
       <span className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-500 dark:text-slate-400 bg-slate-500/10 border border-slate-500/20 px-2 py-0.5 rounded-md">
         <WifiOff className="w-3 h-3" />
-        Offline
+        {t('offline')}
       </span>
     );
   };
@@ -147,10 +147,10 @@ export default function MultiSystemMonitoringPage() {
             </div>
             <div>
               <h1 className="text-xl font-black text-slate-900 dark:text-white font-display">
-                Multi-System Monitoring Table
+                {t('ms_title')}
               </h1>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                City-wide grid telemetry across all 128 drainage and storage installations
+                {t('ms_subtitle')}
               </p>
             </div>
           </div>
@@ -163,7 +163,7 @@ export default function MultiSystemMonitoringPage() {
           isLoading={loading}
           icon={<RefreshCw className="w-4 h-4" />}
         >
-          Refresh Data
+          {t('refreshData')}
         </Button>
       </div>
 
@@ -182,7 +182,7 @@ export default function MultiSystemMonitoringPage() {
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10'
               }`}
             >
-              {tab} {tab === 'All' ? `(${totalCount})` : ''}
+              {tab === 'All' ? t('all') : tStatus(tab)} {tab === 'All' ? `(${localizeNumber(totalCount)})` : ''}
             </button>
           ))}
         </div>
@@ -191,13 +191,13 @@ export default function MultiSystemMonitoringPage() {
         <form onSubmit={handleSearchSubmit} className="flex items-center gap-2 w-full md:w-72">
           <Input
             type="text"
-            placeholder="Search System ID, Ward, Location..."
+            placeholder={t('ms_searchPh')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             leftIcon={<Search className="w-4 h-4 text-slate-400" />}
             size="sm"
           />
-          <Button type="submit" variant="primary" size="sm">Search</Button>
+          <Button type="submit" variant="primary" size="sm">{t('search')}</Button>
         </form>
       </div>
 
@@ -209,14 +209,14 @@ export default function MultiSystemMonitoringPage() {
               <AlertOctagon className="w-5 h-5 animate-pulse" />
             </div>
             <div>
-              <h4 className="text-xs font-black uppercase tracking-wider">Critical Sump Saturation Detected</h4>
+              <h4 className="text-xs font-black uppercase tracking-wider">{t('ms_criticalSaturation')}</h4>
               <p className="text-xs opacity-90">
-                {systems.filter(s => s.status === 'Critical' || s.waterLevel >= 75).length} ward(s) currently exceed 75% overflow threshold. Admin flood diversion available below.
+                {t('ms_criticalSaturationDesc', { n: localizeNumber(systems.filter(s => s.status === 'Critical' || s.waterLevel >= 75).length) })}
               </p>
             </div>
           </div>
           <span className="text-[11px] font-mono font-bold bg-rose-500/20 px-2.5 py-1 rounded-lg self-start sm:self-auto">
-            Direct Action Enabled
+            {t('ms_directAction')}
           </span>
         </div>
       )}
@@ -227,14 +227,14 @@ export default function MultiSystemMonitoringPage() {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b dark:border-white/10 border-slate-200 bg-slate-50/50 dark:bg-white/[0.02] text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-                <th className="py-3.5 px-4">System ID</th>
-                <th className="py-3.5 px-4">Location / Ward</th>
-                <th className="py-3.5 px-4">Water Level</th>
-                <th className="py-3.5 px-4">Status</th>
-                <th className="py-3.5 px-4">Storage Level</th>
-                <th className="py-3.5 px-4">Device</th>
-                <th className="py-3.5 px-4 text-right">Last Updated</th>
-                <th className="py-3.5 px-4 text-center">Flood Action</th>
+                <th className="py-3.5 px-4">{t('ms_systemId')}</th>
+                <th className="py-3.5 px-4">{t('mc_locationWard')}</th>
+                <th className="py-3.5 px-4">{t('waterLevel')}</th>
+                <th className="py-3.5 px-4">{t('status')}</th>
+                <th className="py-3.5 px-4">{t('gis_storageLevel')}</th>
+                <th className="py-3.5 px-4">{t('ms_device')}</th>
+                <th className="py-3.5 px-4 text-right">{t('lastUpdated')}</th>
+                <th className="py-3.5 px-4 text-center">{t('ms_floodAction')}</th>
               </tr>
             </thead>
             <tbody className="divide-y dark:divide-white/5 divide-slate-100 text-xs font-semibold">
@@ -242,13 +242,13 @@ export default function MultiSystemMonitoringPage() {
                 <tr>
                   <td colSpan="8" className="py-12 text-center text-slate-400">
                     <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-[#0EA5E9]" />
-                    Loading system grid data...
+                    {t('ms_loading')}
                   </td>
                 </tr>
               ) : systems.length === 0 ? (
                 <tr>
                   <td colSpan="8" className="py-12 text-center text-slate-400">
-                    No system installations found matching filters.
+                    {t('ms_noneFound')}
                   </td>
                 </tr>
               ) : (
@@ -284,7 +284,7 @@ export default function MultiSystemMonitoringPage() {
                       {getDeviceBadge(sys.deviceStatus)}
                     </td>
                     <td className="py-3.5 px-4 text-right text-slate-500 dark:text-slate-400 text-[11px] font-mono">
-                      {new Date(sys.lastUpdated).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      {new Date(sys.lastUpdated).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })}
                     </td>
                     <td className="py-3.5 px-4 text-center">
                       {sys.status === 'Critical' || sys.waterLevel >= 75 ? (
@@ -296,10 +296,10 @@ export default function MultiSystemMonitoringPage() {
                           isLoading={divertingId === sys.systemId}
                           onClick={() => handleDivert(sys)}
                         >
-                          {sys.storageLevel >= 95 ? 'Cistern Full' : '⚡ Divert Water'}
+                          {sys.storageLevel >= 95 ? t('gis_cisternFull') : `⚡ ${t('gis_divertWater')}`}
                         </Button>
                       ) : (
-                        <span className="text-[11px] text-slate-400 font-mono">Nominal Flow</span>
+                        <span className="text-[11px] text-slate-400 font-mono">{t('ms_nominalFlow')}</span>
                       )}
                     </td>
                   </tr>
@@ -312,11 +312,7 @@ export default function MultiSystemMonitoringPage() {
         {/* Pagination Footer */}
         <div className="p-4 border-t dark:border-white/10 border-slate-200 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
           <span>
-            {t('showingPage')
-              ?.replace('{page}', localizeNumber(page))
-              ?.replace('{pages}', localizeNumber(totalPages))
-              ?.replace('{total}', localizeNumber(totalCount))
-              || `Showing Page ${page} of ${totalPages} (${totalCount} total systems)`}
+            {t('showingPage', { page: localizeNumber(page), pages: localizeNumber(totalPages), total: localizeNumber(totalCount) })}
           </span>
           <div className="flex items-center gap-2">
             <Button

@@ -8,12 +8,15 @@ import Button from '../../components/common/Button';
 import Input from '../../components/common/Input';
 import { loginUser } from '../../services/authService';
 import { useTheme } from '../../context/ThemeContext';
+import { useLanguage } from '../../context/LanguageContext';
+import LanguageSwitcher from '../../components/common/LanguageSwitcher';
 import { customSwal } from '../../utils/swal';
 
 export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
   const { isDark, toggleTheme } = useTheme();
+  const { t } = useLanguage();
 
   const [role, setRole] = useState('Resident');
   const [email, setEmail] = useState('resident@suowmrs.org');
@@ -65,8 +68,8 @@ export default function Login() {
 
       await customSwal.fire({
         icon: 'success',
-        title: 'Welcome Back!',
-        text: `Signed in as ${result.user?.fullName || role}`,
+        title: t('login_welcomeBackTitle'),
+        text: t('login_signedInAs', { name: result.user?.fullName || t(`role_${role.toLowerCase()}`) }),
         timer: 1500,
         showConfirmButton: false,
       });
@@ -81,7 +84,7 @@ export default function Login() {
         navigate('/dashboard');
       }
     } catch (err) {
-      const msg = err.response?.data?.error || 'Sign in failed. Please check your email and password.';
+      const msg = err.response?.data?.error || t('login_failed');
       setErrorMessage(msg);
     } finally {
       setLoading(false);
@@ -102,33 +105,36 @@ export default function Login() {
           </span>
         </Link>
 
-        <button
-          onClick={toggleTheme}
-          type="button"
-          className="p-2 rounded-xl dark:bg-white/5 bg-slate-200/70 dark:border-white/10 border-slate-300 border text-slate-600 dark:text-slate-300 hover:text-amber-500 transition"
-          title="Toggle Theme"
-        >
-          {isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-700" />}
-        </button>
+        <div className="flex items-center gap-2">
+          <LanguageSwitcher />
+          <button
+            onClick={toggleTheme}
+            type="button"
+            className="p-2 rounded-xl dark:bg-white/5 bg-slate-200/70 dark:border-white/10 border-slate-300 border text-slate-600 dark:text-slate-300 hover:text-amber-500 transition"
+            title={isDark ? t('lightMode') : t('darkMode')}
+          >
+            {isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-700" />}
+          </button>
+        </div>
       </div>
 
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-6">
           <h1 className="text-2xl sm:text-3xl font-black font-display text-slate-900 dark:text-white">
-            Welcome Back
+            {t('login_title')}
           </h1>
           <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-            Sign in to access your water monitoring & flood management portal
+            {t('login_subtitle')}
           </p>
         </div>
 
         {/* Role Switcher Tabs */}
         <div className="flex bg-slate-200/80 dark:bg-white/5 p-1 rounded-2xl mb-6 border border-slate-200 dark:border-white/10">
           {[
-            { id: 'Resident', label: 'Resident' },
-            { id: 'Technician', label: 'Technician' },
-            { id: 'Admin', label: 'Municipality' },
+            { id: 'Resident', label: t('role_resident') },
+            { id: 'Technician', label: t('role_technician') },
+            { id: 'Admin', label: t('login_municipality') },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -166,7 +172,7 @@ export default function Login() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <Input
-              label="Email Address"
+              label={t('emailAddress')}
               type="email"
               icon={Mail}
               value={email}
@@ -177,7 +183,7 @@ export default function Login() {
 
             <div className="relative">
               <Input
-                label="Password"
+                label={t('password')}
                 type={showPassword ? 'text' : 'password'}
                 icon={Lock}
                 value={password}
@@ -202,19 +208,14 @@ export default function Login() {
                   onChange={(e) => setRememberMe(e.target.checked)}
                   className="rounded border-slate-300 dark:border-white/20 text-[#0F4C5C] focus:ring-[#0F4C5C]"
                 />
-                Remember me
+                {t('rememberMe')}
               </label>
-              <button
-                type="button"
-                onClick={() => customSwal.fire({
-                  icon: 'info',
-                  title: 'Password Reset',
-                  text: 'Please contact your municipal system administrator or use the demo password: password123',
-                })}
+              <Link
+                to="/forgot-password"
                 className="text-[#0EA5E9] hover:underline font-semibold"
               >
-                Forgot password?
-              </button>
+                {t('forgotPasswordQ')}
+              </Link>
             </div>
 
             <Button
@@ -226,21 +227,21 @@ export default function Login() {
               icon={ArrowRight}
               iconPosition="right"
             >
-              Sign In as {role}
+              {t('signInAs', { role: role === 'Admin' ? t('login_municipality') : t(`role_${role.toLowerCase()}`) })}
             </Button>
           </form>
 
           {/* Demo tip */}
           <div className="mt-5 p-2.5 rounded-xl dark:bg-white/5 bg-slate-50 border dark:border-white/10 border-slate-200 text-center">
             <p className="text-[11px] text-slate-500 dark:text-slate-400">
-              💡 <strong>Quick Demo:</strong> Tabs automatically switch demo accounts with valid credentials.
+              💡 <strong>{t('login_quickDemo')}</strong> {t('login_quickDemoDesc')}
             </p>
           </div>
 
           <div className="mt-5 pt-4 border-t dark:border-white/10 border-slate-100 text-center text-xs text-slate-500 dark:text-slate-400">
-            Don't have an account yet?{' '}
+            {t('noAccountYet')}{' '}
             <Link to="/register" className="font-bold text-[#0EA5E9] hover:underline">
-              Sign Up here
+              {t('signUpHere')}
             </Link>
           </div>
         </div>

@@ -200,15 +200,15 @@ export default function UserDashboard() {
     setAlertFeed(prev => [alert, ...prev.slice(0, 4)]);
 
     if (alert.type === 'critical') {
-      showSnackbar(`🚨 CRITICAL FLOOD ALERT: Water level at ${alert.level?.toFixed(1)}%! Emergency protocol active.`, 'error', 6000);
+      showSnackbar(`🚨 ${t('alert_critical', { level: alert.level?.toFixed(1) })}`, 'error', 6000);
     } else if (alert.type === 'danger') {
-      showSnackbar(`High Risk: Water at ${alert.level?.toFixed(1)}% — Valve auto-opened!`, 'warning', 4000);
+      showSnackbar(t('alert_danger', { level: alert.level?.toFixed(1) }), 'warning', 4000);
     } else if (alert.type === 'warning') {
-      showSnackbar(`Caution: Rising water level at ${alert.level?.toFixed(1)}%`, 'warning', 3000);
+      showSnackbar(t('alert_warning', { level: alert.level?.toFixed(1) }), 'warning', 3000);
     } else {
-      showSnackbar(`Water level stable at ${alert.level?.toFixed(1)}% (Normal)`, 'success', 2500);
+      showSnackbar(t('alert_normal', { level: alert.level?.toFixed(1) }), 'success', 2500);
     }
-  }, [showSnackbar]);
+  }, [showSnackbar, t]);
 
   useEffect(() => {
     setAlertCallback(handleIncomingAlert);
@@ -218,17 +218,17 @@ export default function UserDashboard() {
   const prevConnectedRef = useRef(null);
   useEffect(() => {
     if (prevConnectedRef.current === null) { prevConnectedRef.current = isConnected; return; }
-    if (isConnected && !prevConnectedRef.current) showSnackbar('Live telemetry stream connected!', 'success', 2500);
-    if (!isConnected && prevConnectedRef.current) showSnackbar('Telemetry stream disconnected. Reconnecting...', 'error', 3000);
+    if (isConnected && !prevConnectedRef.current) showSnackbar(t('dash_streamConnected'), 'success', 2500);
+    if (!isConnected && prevConnectedRef.current) showSnackbar(t('dash_streamDisconnected'), 'error', 3000);
     prevConnectedRef.current = isConnected;
   }, [isConnected]);
 
   // ── SOS Handler ──
   const handleSos = async () => {
-    const result = await confirmSosDispatch({ location: 'Zone 4 — Ward 12 Riverbed', waterLevel: level, status: threshold.label });
+    const result = await confirmSosDispatch({ location: 'Zone 4 — Ward 12 Riverbed', waterLevel: level, status: t(threshold.statusKey) });
     if (result.isConfirmed) {
-      await customSwal.fire({ icon: 'success', iconColor: '#22C55E', title: 'SOS Dispatched!', text: 'Municipal emergency team alerted. Stay safe and evacuate if needed.', confirmButtonText: 'Acknowledged', confirmButtonClass: 'bg-brand-deep text-white px-5 py-2.5 rounded-xl text-sm font-bold' });
-      showSnackbar('Emergency SOS transmitted to Municipality Control!', 'error', 5000);
+      await customSwal.fire({ icon: 'success', iconColor: '#22C55E', title: t('dash_sosDispatched'), text: t('dash_sosDispatchedDesc'), confirmButtonText: t('dash_acknowledged'), confirmButtonClass: 'bg-brand-deep text-white px-5 py-2.5 rounded-xl text-sm font-bold' });
+      showSnackbar(t('dash_sosTransmitted'), 'error', 5000);
     }
   };
 
@@ -241,9 +241,9 @@ export default function UserDashboard() {
       const action = storage.valveStatus === 'OPEN' ? 'STANDBY' : 'OPEN';
       const res = await toggleValve(action);
       setStorage(prev => ({ ...prev, valveStatus: res.storage.valveStatus, inFlowRate: res.storage.inFlowRate }));
-      showSnackbar(`Solenoid valve set to ${action} (Manual Override)`, action === 'OPEN' ? 'success' : 'info', 3000);
+      showSnackbar(t('dash_valveSet', { status: t(`status_${action.toLowerCase()}`) }), action === 'OPEN' ? 'success' : 'info', 3000);
     } catch {
-      showSnackbar('Failed to update valve status. Check API connection.', 'error');
+      showSnackbar(t('dash_valveFailed'), 'error');
     } finally { setValveLoading(false); }
   };
 
@@ -274,10 +274,10 @@ export default function UserDashboard() {
 
       setIsComplaintOpen(false);
       setComplaintText('');
-      showSnackbar(res.message || `Report #${res.complaint?.complaintId || 'CMP-2026'} submitted to Ward Engineers!`, 'success', 5000);
+      showSnackbar(t('dash_reportSubmitted', { id: res.complaint?.complaintId || 'CMP-2026' }), 'success', 5000);
     } catch (err) {
       console.error('Failed to submit report:', err);
-      showSnackbar(err.response?.data?.error || 'Failed to submit report. Please check API connection.', 'error', 4000);
+      showSnackbar(err.response?.data?.error || t('dash_reportFailed'), 'error', 4000);
     } finally {
       setSubmittingComplaint(false);
     }
@@ -317,9 +317,9 @@ export default function UserDashboard() {
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 flex items-center gap-1.5">
             <span className="font-mono font-semibold text-sky-600 dark:text-sky-400">Zone 4 — Ward 12 Riverbed</span>
             <span className="text-slate-300 dark:text-slate-500">•</span>
-            <span>Node <span className="font-mono text-sky-600 dark:text-sky-400 font-bold">SYS-042</span></span>
+            <span>{t('dash_node')} <span className="font-mono text-sky-600 dark:text-sky-400 font-bold">SYS-042</span></span>
             <span className="text-slate-300 dark:text-slate-500">•</span>
-            <span>Last ping: <strong>{lastPing}</strong></span>
+            <span>{t('dash_lastPing')}: <strong>{lastPing}</strong></span>
           </p>
         </div>
         <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
@@ -329,7 +329,7 @@ export default function UserDashboard() {
           <Button variant="primary" size="sm" icon={MessageSquareWarning} onClick={() => setIsComplaintOpen(true)}>
             {t('reportIssue')}
           </Button>
-          {/* 🔊 LISTEN DASHBOARD (temporarily commented out)
+          {/* 🔊 LISTEN DASHBOARD */}
           <button
             type="button"
             onClick={() => {
@@ -370,7 +370,6 @@ export default function UserDashboard() {
               </>
             )}
           </button>
-          */}
         </div>
       </div>
 
@@ -400,7 +399,7 @@ export default function UserDashboard() {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              {/* <VoiceSpeakerButton
+              <VoiceSpeakerButton
                 text={level >= 90
                   ? ttsText('tts_floodBannerCritical', { level: level.toFixed(1), valve: storage.valveStatus })
                   : ttsText('tts_floodBannerWarning', { level: level.toFixed(1), valve: storage.valveStatus })
@@ -409,7 +408,7 @@ export default function UserDashboard() {
                 size="xs"
                 label={t('tts_listen')}
                 id="dash-flood-banner"
-              /> */}
+              />
               <Badge variant={threshold.status} size="sm" dot>{t(threshold.statusKey)}</Badge>
             </div>
           </motion.div>
@@ -431,12 +430,12 @@ export default function UserDashboard() {
               <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t('waterLevel')}</span>
             </div>
             <div className="flex items-center gap-2">
-              {/* <VoiceSpeakerButton
+              <VoiceSpeakerButton
                 text={ttsText('tts_waterLevel', { level: safeLevel.toFixed(1), status: t(threshold.statusKey) })}
                 size="xs"
                 label={t('tts_listen')}
                 id="dash-gauge-audio"
-              /> */}
+              />
               <StatusIndicator status={threshold.status} size="sm" />
             </div>
           </div>
@@ -559,7 +558,7 @@ export default function UserDashboard() {
               />
             </div>
             {storage.fillPercentage >= 90 && (
-              <p className="text-[10px] text-rose-500 dark:text-rose-400 font-semibold mt-1">⚠ Storage nearly full!</p>
+              <p className="text-[10px] text-rose-500 dark:text-rose-400 font-semibold mt-1">⚠ {t('dash_storageNearlyFull')}</p>
             )}
           </div>
         </motion.div>
@@ -615,7 +614,7 @@ export default function UserDashboard() {
           </div>
 
           <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-            Auto-actuates at 75% threshold to divert drainage inflow to the underground reservoir.
+            {t('dash_valveAutoNote')}
           </p>
 
           <Button
@@ -646,7 +645,7 @@ export default function UserDashboard() {
                 {t('live')}
               </span>
             </div>
-            <span className="text-xs text-slate-400">Last {chartData.length} readings</span>
+            <span className="text-xs text-slate-400">{t('dash_lastReadings', { n: chartData.length })}</span>
           </div>
           {chartData.length > 0 ? (
             <ResponsiveContainer width="100%" height={180}>
@@ -666,7 +665,7 @@ export default function UserDashboard() {
             </ResponsiveContainer>
           ) : (
             <div className="h-44 flex items-center justify-center text-xs text-slate-400">
-              <span>Awaiting telemetry data from socket stream...</span>
+              <span>{t('dash_awaitingTelemetry')}</span>
             </div>
           )}
 
@@ -813,38 +812,38 @@ export default function UserDashboard() {
 
 
       {/* ─────────── COMPLAINT MODAL ─────────── */}
-      <Modal isOpen={isComplaintOpen} onClose={() => setIsComplaintOpen(false)} title="Submit Citizen Report" subtitle="Direct channel to Municipal Engineering Division">
+      <Modal isOpen={isComplaintOpen} onClose={() => setIsComplaintOpen(false)} title={t('dash_submitReport')} subtitle={t('dash_submitReportSub')}>
         <form onSubmit={handleComplaintSubmit} className="space-y-4 text-left">
           <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Issue Category</label>
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">{t('dash_issueCategory')}</label>
             <select
               value={complaintCategory}
               onChange={(e) => setComplaintCategory(e.target.value)}
               required
               className="w-full rounded-xl border border-slate-200 dark:border-white/10 dark:bg-[#0F172A] p-2.5 text-xs text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-deep cursor-pointer"
             >
-              <option value="Drain blockage / debris clogged" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">Drain blockage / debris clogged</option>
-              <option value="Water level sensor offline" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">Water level sensor offline</option>
-              <option value="Solenoid valve leakage" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">Solenoid valve leakage</option>
-              <option value="Foul odour near drain sump" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">Foul odour near drain sump</option>
-              <option value="Water reuse quality concern" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">Water reuse quality concern</option>
+              <option value="Drain blockage / debris clogged" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">{t('dash_cat1')}</option>
+              <option value="Water level sensor offline" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">{t('dash_cat2')}</option>
+              <option value="Solenoid valve leakage" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">{t('dash_cat3')}</option>
+              <option value="Foul odour near drain sump" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">{t('dash_cat4')}</option>
+              <option value="Water reuse quality concern" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">{t('dash_cat5')}</option>
             </select>
           </div>
           <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Description & Location</label>
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">{t('dash_descLocation')}</label>
             <textarea
               rows={3}
               value={complaintText}
               onChange={(e) => setComplaintText(e.target.value)}
               required
-              placeholder="Describe the issue and exact location near the drain node..."
+              placeholder={t('dash_descPh')}
               className="w-full rounded-xl border border-slate-200 dark:border-white/10 dark:bg-[#0F172A] p-2.5 text-xs text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-deep resize-none"
             />
           </div>
           <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100 dark:border-white/10">
-            <Button variant="ghost" size="sm" onClick={() => setIsComplaintOpen(false)} type="button" disabled={submittingComplaint}>Cancel</Button>
+            <Button variant="ghost" size="sm" onClick={() => setIsComplaintOpen(false)} type="button" disabled={submittingComplaint}>{t('cancel')}</Button>
             <Button type="submit" variant="primary" size="sm" isLoading={submittingComplaint} disabled={submittingComplaint}>
-              {submittingComplaint ? 'Submitting...' : 'Submit Report'}
+              {submittingComplaint ? t('dash_submitting') : t('dash_submitReportBtn')}
             </Button>
           </div>
         </form>

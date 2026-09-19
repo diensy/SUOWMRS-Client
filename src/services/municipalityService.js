@@ -1,6 +1,7 @@
 import axios from 'axios';
+import { API_BASE_URL } from '../config/apiConfig';
 
-const API_BASE = (import.meta.env.VITE_API_URL || '/api') + '/municipality';
+const API_BASE = `${API_BASE_URL}/municipality`;
 
 export async function getMunicipalityOverview() {
   const res = await axios.get(`${API_BASE}/overview`);

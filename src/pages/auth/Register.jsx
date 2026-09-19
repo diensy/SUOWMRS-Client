@@ -10,11 +10,15 @@ import Button from '../../components/common/Button';
 import Input from '../../components/common/Input';
 import { registerUser } from '../../services/authService';
 import { useTheme } from '../../context/ThemeContext';
+import { useLanguage } from '../../context/LanguageContext';
+import LanguageSwitcher from '../../components/common/LanguageSwitcher';
 import { customSwal } from '../../utils/swal';
 
 export default function Register() {
   const navigate = useNavigate();
   const { theme, toggleTheme, isDark } = useTheme();
+  const { t } = useLanguage();
+  const roleLabel = (r) => (r === 'Admin' ? t('login_municipality') : t(`role_${r.toLowerCase()}`));
 
   // Role: 'Resident' | 'Technician' | 'Admin' (Municipality)
   const [activeRole, setActiveRole] = useState('Resident');
@@ -67,19 +71,19 @@ export default function Register() {
 
     // Validation checks
     if (formData.password.length < 6) {
-      setErrorMessage('Password must be at least 6 characters long.');
+      setErrorMessage(t('reg_errPasswordLength'));
       return;
     }
     if (formData.password !== formData.confirmPassword) {
-      setErrorMessage('Passwords do not match. Please verify.');
+      setErrorMessage(t('reg_errPasswordMismatch'));
       return;
     }
     if (!formData.agreedToTerms) {
-      setErrorMessage('You must agree to the Terms & Conditions.');
+      setErrorMessage(t('reg_errTerms'));
       return;
     }
     if (activeRole === 'Admin' && !formData.isAuthorizedRepresentative) {
-      setErrorMessage('Please confirm that you are an authorized municipal representative.');
+      setErrorMessage(t('reg_errAuthorized'));
       return;
     }
 
@@ -96,8 +100,8 @@ export default function Register() {
 
       await customSwal.fire({
         icon: 'success',
-        title: 'Account Created Successfully!',
-        text: `Your ${activeRole} account has been registered successfully. Redirecting to login...`,
+        title: t('reg_successTitle'),
+        text: t('reg_successText', { role: roleLabel(activeRole) }),
         timer: 1800,
         showConfirmButton: false,
       });
@@ -107,11 +111,11 @@ export default function Register() {
           signupSuccess: true,
           registeredEmail: payload.email,
           registeredRole: activeRole,
-          message: `Signup successfully completed for ${activeRole} account! Please sign in with your credentials.`,
+          message: t('reg_signupCompleted', { role: roleLabel(activeRole) }),
         },
       });
     } catch (err) {
-      const msg = err.response?.data?.error || 'Registration failed. Please check your details.';
+      const msg = err.response?.data?.error || t('reg_failed');
       setErrorMessage(msg);
     } finally {
       setLoading(false);
@@ -132,37 +136,40 @@ export default function Register() {
           </span>
         </Link>
 
-        <button
-          onClick={toggleTheme}
-          type="button"
-          className="p-2 rounded-xl dark:bg-white/5 bg-slate-200/70 dark:border-white/10 border-slate-300 border text-slate-600 dark:text-slate-300 hover:text-amber-500 transition"
-          title="Toggle Theme"
-        >
-          {isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-700" />}
-        </button>
+        <div className="flex items-center gap-2">
+          <LanguageSwitcher />
+          <button
+            onClick={toggleTheme}
+            type="button"
+            className="p-2 rounded-xl dark:bg-white/5 bg-slate-200/70 dark:border-white/10 border-slate-300 border text-slate-600 dark:text-slate-300 hover:text-amber-500 transition"
+            title={isDark ? t('lightMode') : t('darkMode')}
+          >
+            {isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-700" />}
+          </button>
+        </div>
       </div>
 
       <div className="w-full max-w-xl">
         {/* Header Titles */}
         <div className="text-center mb-6">
           <h1 className="text-2xl sm:text-3xl font-black font-display text-slate-900 dark:text-white">
-            {activeRole === 'Resident' && 'Resident / Citizen Sign Up'}
-            {activeRole === 'Technician' && 'Technician Sign Up'}
-            {activeRole === 'Admin' && 'Municipality / Authority Sign Up'}
+            {activeRole === 'Resident' && t('reg_titleResident')}
+            {activeRole === 'Technician' && t('reg_titleTechnician')}
+            {activeRole === 'Admin' && t('reg_titleAdmin')}
           </h1>
           <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-            {activeRole === 'Resident' && 'Monitor local drainage levels, receive flood warnings & access treated water.'}
-            {activeRole === 'Technician' && 'Manage IoT sensors, inspect solenoid valves & log repair work orders.'}
-            {activeRole === 'Admin' && 'City-wide drainage grid oversight, GIS hazard maps & citizen reports.'}
+            {activeRole === 'Resident' && t('reg_subResident')}
+            {activeRole === 'Technician' && t('reg_subTechnician')}
+            {activeRole === 'Admin' && t('reg_subAdmin')}
           </p>
         </div>
 
         {/* ── 3-Tab Role Selector ── */}
         <div className="flex bg-slate-200/80 dark:bg-white/5 p-1 rounded-2xl mb-6 border border-slate-200 dark:border-white/10">
           {[
-            { id: 'Resident', label: 'Resident / Citizen' },
-            { id: 'Technician', label: 'Technician' },
-            { id: 'Admin', label: 'Municipality' },
+            { id: 'Resident', label: t('reg_tabResident') },
+            { id: 'Technician', label: t('role_technician') },
+            { id: 'Admin', label: t('login_municipality') },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -199,7 +206,7 @@ export default function Register() {
             {activeRole === 'Resident' && (
               <div className="space-y-4">
                 <Input
-                  label="Full Name"
+                  label={t('fullName')}
                   name="fullName"
                   type="text"
                   icon={User}
@@ -211,7 +218,7 @@ export default function Register() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Input
-                    label="Email Address"
+                    label={t('emailAddress')}
                     name="email"
                     type="email"
                     icon={Mail}
@@ -221,7 +228,7 @@ export default function Register() {
                     required
                   />
                   <Input
-                    label="Mobile Number"
+                    label={t('mobileNumber')}
                     name="mobileNumber"
                     type="tel"
                     icon={Phone}
@@ -235,7 +242,7 @@ export default function Register() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="relative">
                     <Input
-                      label="Password"
+                      label={t('password')}
                       name="password"
                       type={showPassword ? 'text' : 'password'}
                       icon={Lock}
@@ -255,7 +262,7 @@ export default function Register() {
 
                   <div className="relative">
                     <Input
-                      label="Confirm Password"
+                      label={t('confirmPassword')}
                       name="confirmPassword"
                       type={showConfirmPassword ? 'text' : 'password'}
                       icon={Lock}
@@ -276,7 +283,7 @@ export default function Register() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Input
-                    label="City"
+                    label={t('city')}
                     name="city"
                     type="text"
                     icon={MapPin}
@@ -286,7 +293,7 @@ export default function Register() {
                     required
                   />
                   <Input
-                    label="Ward / Area"
+                    label={t('wardArea')}
                     name="wardArea"
                     type="text"
                     icon={Building2}
@@ -304,7 +311,7 @@ export default function Register() {
               <div className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Input
-                    label="Full Name"
+                    label={t('fullName')}
                     name="fullName"
                     type="text"
                     icon={User}
@@ -314,7 +321,7 @@ export default function Register() {
                     required
                   />
                   <Input
-                    label="Employee ID"
+                    label={t('employeeId')}
                     name="employeeId"
                     type="text"
                     icon={BadgeCheck}
@@ -327,7 +334,7 @@ export default function Register() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Input
-                    label="Email Address"
+                    label={t('emailAddress')}
                     name="email"
                     type="email"
                     icon={Mail}
@@ -337,7 +344,7 @@ export default function Register() {
                     required
                   />
                   <Input
-                    label="Mobile Number"
+                    label={t('mobileNumber')}
                     name="mobileNumber"
                     type="tel"
                     icon={Phone}
@@ -350,7 +357,7 @@ export default function Register() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Input
-                    label="Organization / Municipality"
+                    label={t('organizationMunicipality')}
                     name="organization"
                     type="text"
                     icon={Building2}
@@ -360,7 +367,7 @@ export default function Register() {
                     required
                   />
                   <Input
-                    label="Department"
+                    label={t('department')}
                     name="department"
                     type="text"
                     icon={Briefcase}
@@ -374,7 +381,7 @@ export default function Register() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="relative">
                     <Input
-                      label="Password"
+                      label={t('password')}
                       name="password"
                       type={showPassword ? 'text' : 'password'}
                       icon={Lock}
@@ -394,7 +401,7 @@ export default function Register() {
 
                   <div className="relative">
                     <Input
-                      label="Confirm Password"
+                      label={t('confirmPassword')}
                       name="confirmPassword"
                       type={showConfirmPassword ? 'text' : 'password'}
                       icon={Lock}
@@ -420,7 +427,7 @@ export default function Register() {
               <div className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Input
-                    label="Full Name"
+                    label={t('fullName')}
                     name="fullName"
                     type="text"
                     icon={User}
@@ -430,7 +437,7 @@ export default function Register() {
                     required
                   />
                   <Input
-                    label="Official Email Address"
+                    label={t('officialEmail')}
                     name="officialEmail"
                     type="email"
                     icon={Mail}
@@ -443,7 +450,7 @@ export default function Register() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Input
-                    label="Mobile Number"
+                    label={t('mobileNumber')}
                     name="mobileNumber"
                     type="tel"
                     icon={Phone}
@@ -453,7 +460,7 @@ export default function Register() {
                     required
                   />
                   <Input
-                    label="Municipality / Organization Name"
+                    label={t('municipalityOrgName')}
                     name="municipalityName"
                     type="text"
                     icon={Building2}
@@ -466,7 +473,7 @@ export default function Register() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Input
-                    label="Designation"
+                    label={t('designation')}
                     name="designation"
                     type="text"
                     icon={Briefcase}
@@ -476,7 +483,7 @@ export default function Register() {
                     required
                   />
                   <Input
-                    label="Official Employee ID"
+                    label={t('officialEmployeeId')}
                     name="officialEmployeeId"
                     type="text"
                     icon={BadgeCheck}
@@ -489,7 +496,7 @@ export default function Register() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Input
-                    label="City"
+                    label={t('city')}
                     name="city"
                     type="text"
                     icon={MapPin}
@@ -499,7 +506,7 @@ export default function Register() {
                     required
                   />
                   <Input
-                    label="State"
+                    label={t('stateLabel')}
                     name="state"
                     type="text"
                     icon={MapPin}
@@ -513,7 +520,7 @@ export default function Register() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="relative">
                     <Input
-                      label="Password"
+                      label={t('password')}
                       name="password"
                       type={showPassword ? 'text' : 'password'}
                       icon={Lock}
@@ -533,7 +540,7 @@ export default function Register() {
 
                   <div className="relative">
                     <Input
-                      label="Confirm Password"
+                      label={t('confirmPassword')}
                       name="confirmPassword"
                       type={showConfirmPassword ? 'text' : 'password'}
                       icon={Lock}
@@ -561,7 +568,7 @@ export default function Register() {
                     className="mt-0.5 rounded border-slate-300 dark:border-white/20 text-[#0F4C5C] focus:ring-[#0F4C5C]"
                     required
                   />
-                  <span>I confirm that I am an authorized representative of the above Municipal Authority.</span>
+                  <span>{t('reg_authorizedConfirm')}</span>
                 </label>
               </div>
             )}
@@ -576,7 +583,7 @@ export default function Register() {
                 className="mt-0.5 rounded border-slate-300 dark:border-white/20 text-[#0F4C5C] focus:ring-[#0F4C5C]"
                 required
               />
-              <span>I agree to the Terms & Conditions and SUOWMRS Data Privacy Policy.</span>
+              <span>{t('reg_agreeTerms')}</span>
             </label>
 
             {/* ── Action Button with exact labels ── */}
@@ -589,17 +596,17 @@ export default function Register() {
               icon={ArrowRight}
               iconPosition="right"
             >
-              {activeRole === 'Resident' && 'Create Resident Account'}
-              {activeRole === 'Technician' && 'Create Technician Account'}
-              {activeRole === 'Admin' && 'Submit for Verification'}
+              {activeRole === 'Resident' && t('reg_createResident')}
+              {activeRole === 'Technician' && t('reg_createTechnician')}
+              {activeRole === 'Admin' && t('reg_submitVerification')}
             </Button>
           </form>
 
           {/* Footer Link to Login */}
           <div className="mt-6 pt-5 border-t dark:border-white/10 border-slate-100 text-center text-xs text-slate-500 dark:text-slate-400">
-            Already have an account?{' '}
+            {t('alreadyHaveAccount')}{' '}
             <Link to="/login" className="font-bold text-[#0EA5E9] hover:underline">
-              Sign In here
+              {t('signInHere')}
             </Link>
           </div>
         </div>

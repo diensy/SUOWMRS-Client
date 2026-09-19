@@ -4,13 +4,15 @@ import { motion } from 'framer-motion';
 import {
   Shield, CheckCircle2, AlertTriangle, AlertOctagon, WifiOff,
   Droplets, Recycle, Wrench, MessageSquareWarning, ArrowUpRight,
-  MapPin, Layers, RefreshCw, Activity, UserCheck
+  MapPin, Layers, RefreshCw, Activity, UserCheck, Building2
 } from 'lucide-react';
 import Badge from '../../components/common/Badge';
 import Button from '../../components/common/Button';
 import { getMunicipalityOverview } from '../../services/municipalityService';
+import { useLanguage } from '../../context/LanguageContext';
 
 export default function MunicipalityDashboard() {
+  const { t } = useLanguage();
   const [stats, setStats] = useState({
     totalSystems: 128,
     systemsOnline: 121,
@@ -52,16 +54,16 @@ export default function MunicipalityDashboard() {
             </div>
             <div>
               <h1 className="text-xl font-black text-slate-900 dark:text-white font-display">
-                Municipality Central Command
+                {t('md_title')}
               </h1>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                City-wide SUOWMRS grid overview & municipal water management portal
+                {t('md_subtitle')}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <Button
             variant="outline"
             size="sm"
@@ -69,11 +71,21 @@ export default function MunicipalityDashboard() {
             isLoading={loading}
             icon={<RefreshCw className="w-4 h-4" />}
           >
-            Refresh Grid
+            {t('md_refreshGrid')}
           </Button>
+          <Link to="/admin/approvals">
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-purple-300 dark:border-purple-500/30 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-500/10"
+              icon={<Building2 className="w-4 h-4" />}
+            >
+              {t('md_manageAdmin')}
+            </Button>
+          </Link>
           <Link to="/admin/emergency">
             <Button variant="danger" size="sm" icon={<AlertOctagon className="w-4 h-4" />}>
-              Emergency Monitoring
+              {t('emergencyMonitoring')}
             </Button>
           </Link>
         </div>
@@ -82,14 +94,14 @@ export default function MunicipalityDashboard() {
       {/* ── TOP METRICS ROW (Target Prompt Specs) ── */}
       <div>
         <p className="text-xs font-black tracking-widest uppercase text-slate-400 dark:text-slate-500 mb-3">
-          City System Network Overview
+          {t('md_networkOverview')}
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           
           {/* Total Systems */}
           <div className="dark:bg-[#0F172A] bg-white border dark:border-white/10 border-slate-200/90 shadow-md rounded-2xl p-5 relative overflow-hidden group">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-500 dark:text-slate-400">Total Systems</span>
+              <span className="text-xs font-bold text-slate-500 dark:text-slate-400">{t('md_totalSystems')}</span>
               <div className="w-9 h-9 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-500">
                 <Layers className="w-5 h-5" />
               </div>
@@ -98,7 +110,7 @@ export default function MunicipalityDashboard() {
               <span className="text-3xl font-black text-slate-900 dark:text-white font-display">
                 {stats.totalSystems}
               </span>
-              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 ml-2">Grid Nodes</span>
+              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 ml-2">{t('md_gridNodes')}</span>
             </div>
             <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold mt-2 flex items-center gap-1">
               <CheckCircle2 className="w-3.5 h-3.5" /> 100% Instrumented Coverage
@@ -108,7 +120,7 @@ export default function MunicipalityDashboard() {
           {/* Systems Online */}
           <div className="dark:bg-[#0F172A] bg-white border dark:border-white/10 border-slate-200/90 shadow-md rounded-2xl p-5 relative overflow-hidden group">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-500 dark:text-slate-400">Systems Online</span>
+              <span className="text-xs font-bold text-slate-500 dark:text-slate-400">{t('md_systemsOnline')}</span>
               <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500">
                 <CheckCircle2 className="w-5 h-5" />
               </div>
@@ -117,7 +129,7 @@ export default function MunicipalityDashboard() {
               <span className="text-3xl font-black text-emerald-600 dark:text-emerald-400 font-display">
                 {stats.systemsOnline}
               </span>
-              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 ml-2">Operational</span>
+              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 ml-2">{t('md_operational')}</span>
             </div>
             <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-2">
               94.5% Active Connectivity
@@ -127,7 +139,7 @@ export default function MunicipalityDashboard() {
           {/* Warning Systems */}
           <div className="dark:bg-[#0F172A] bg-white border dark:border-white/10 border-slate-200/90 shadow-md rounded-2xl p-5 relative overflow-hidden group">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-500 dark:text-slate-400">Warning Systems</span>
+              <span className="text-xs font-bold text-slate-500 dark:text-slate-400">{t('md_warningSystems')}</span>
               <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500">
                 <AlertTriangle className="w-5 h-5" />
               </div>
@@ -136,17 +148,17 @@ export default function MunicipalityDashboard() {
               <span className="text-3xl font-black text-amber-500 font-display">
                 {stats.warningSystems}
               </span>
-              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 ml-2">Elevated Level</span>
+              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 ml-2">{t('md_elevatedLevel')}</span>
             </div>
             <p className="text-[11px] text-amber-600 dark:text-amber-400 font-semibold mt-2">
-              Requires Active Monitoring
+              {t('md_requiresMonitoring')}
             </p>
           </div>
 
           {/* Critical Systems */}
           <div className="dark:bg-[#0F172A] bg-white border dark:border-white/10 border-slate-200/90 shadow-md rounded-2xl p-5 relative overflow-hidden group">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-500 dark:text-slate-400">Critical Systems</span>
+              <span className="text-xs font-bold text-slate-500 dark:text-slate-400">{t('md_criticalSystems')}</span>
               <div className="w-9 h-9 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-500">
                 <AlertOctagon className="w-5 h-5" />
               </div>
@@ -155,10 +167,10 @@ export default function MunicipalityDashboard() {
               <span className="text-3xl font-black text-rose-600 dark:text-rose-400 font-display">
                 {stats.criticalSystems}
               </span>
-              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 ml-2">Action Needed</span>
+              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 ml-2">{t('md_actionNeeded')}</span>
             </div>
             <p className="text-[11px] text-rose-600 dark:text-rose-400 font-semibold mt-2">
-              Auto Diverter Valve Active
+              {t('md_autoDiverterActive')}
             </p>
           </div>
 
@@ -168,7 +180,7 @@ export default function MunicipalityDashboard() {
       {/* ── ADDITIONAL METRICS ROW ── */}
       <div>
         <p className="text-xs font-black tracking-widest uppercase text-slate-400 dark:text-slate-500 mb-3">
-          City Conservation & Operational Dispatch
+          {t('md_conservationDispatch')}
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           
@@ -177,9 +189,9 @@ export default function MunicipalityDashboard() {
               <Droplets className="w-5 h-5" />
             </div>
             <div>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 font-semibold">Total Water Collected</p>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 font-semibold">{t('md_totalCollected')}</p>
               <p className="text-lg font-black text-slate-900 dark:text-white font-display mt-0.5">
-                {(stats.totalWaterCollectedLiters / 1000000).toFixed(2)}M Litres
+                {(stats.totalWaterCollectedLiters / 1000000).toFixed(2)}M {t('md_litres')}
               </p>
             </div>
           </div>
@@ -189,9 +201,9 @@ export default function MunicipalityDashboard() {
               <Recycle className="w-5 h-5" />
             </div>
             <div>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 font-semibold">Total Water Reused</p>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 font-semibold">{t('md_totalReused')}</p>
               <p className="text-lg font-black text-slate-900 dark:text-white font-display mt-0.5">
-                {(stats.totalWaterReusedLiters / 1000000).toFixed(2)}M Litres
+                {(stats.totalWaterReusedLiters / 1000000).toFixed(2)}M {t('md_litres')}
               </p>
             </div>
           </div>
@@ -201,7 +213,7 @@ export default function MunicipalityDashboard() {
               <Wrench className="w-5 h-5" />
             </div>
             <div>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 font-semibold">Active Work Orders</p>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 font-semibold">{t('md_activeWorkOrders')}</p>
               <p className="text-lg font-black text-slate-900 dark:text-white font-display mt-0.5">
                 {stats.activeWorkOrders} Tickets Active
               </p>
@@ -213,7 +225,7 @@ export default function MunicipalityDashboard() {
               <MessageSquareWarning className="w-5 h-5" />
             </div>
             <div>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 font-semibold">Active Complaints</p>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 font-semibold">{t('md_activeComplaints')}</p>
               <p className="text-lg font-black text-slate-900 dark:text-white font-display mt-0.5">
                 {stats.activeCitizenComplaints} Citizen Reports
               </p>
@@ -226,7 +238,7 @@ export default function MunicipalityDashboard() {
       {/* ── QUICK NAVIGATION GRID ── */}
       <div>
         <p className="text-xs font-black tracking-widest uppercase text-slate-400 dark:text-slate-500 mb-3">
-          Central Command Quick Navigation
+          {t('md_quickNav')}
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           
@@ -238,9 +250,9 @@ export default function MunicipalityDashboard() {
                 </div>
                 <ArrowUpRight className="w-5 h-5 text-slate-400 group-hover:text-[#0EA5E9] transition-colors" />
               </div>
-              <h3 className="text-sm font-bold text-slate-900 dark:text-white">Multi-System Monitoring Table</h3>
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white">{t('md_nav1')}</h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                Filterable, paginated data grid of all 128 city drainage installations.
+                {t('md_nav1Desc')}
               </p>
             </div>
           </Link>
@@ -253,9 +265,9 @@ export default function MunicipalityDashboard() {
                 </div>
                 <ArrowUpRight className="w-5 h-5 text-slate-400 group-hover:text-emerald-500 transition-colors" />
               </div>
-              <h3 className="text-sm font-bold text-slate-900 dark:text-white">GIS City Map</h3>
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white">{t('md_nav2')}</h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                Interactive GIS map with colored status markers and system popups.
+                {t('md_nav2Desc')}
               </p>
             </div>
           </Link>
@@ -268,9 +280,9 @@ export default function MunicipalityDashboard() {
                 </div>
                 <ArrowUpRight className="w-5 h-5 text-slate-400 group-hover:text-amber-500 transition-colors" />
               </div>
-              <h3 className="text-sm font-bold text-slate-900 dark:text-white">Citizen Complaint Management</h3>
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white">{t('md_nav3')}</h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                Review citizen reports, assign field technicians, and link repair work orders.
+                {t('md_nav3Desc')}
               </p>
             </div>
           </Link>
@@ -283,9 +295,9 @@ export default function MunicipalityDashboard() {
                 </div>
                 <ArrowUpRight className="w-5 h-5 text-slate-400 group-hover:text-indigo-500 transition-colors" />
               </div>
-              <h3 className="text-sm font-bold text-slate-900 dark:text-white">User & Technician Approvals</h3>
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white">{t('userTechApprovals')}</h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                Review and approve pending citizen and field technician registrations.
+                {t('md_nav4Desc')}
               </p>
             </div>
           </Link>
@@ -298,9 +310,9 @@ export default function MunicipalityDashboard() {
                 </div>
                 <ArrowUpRight className="w-5 h-5 text-slate-400 group-hover:text-teal-500 transition-colors" />
               </div>
-              <h3 className="text-sm font-bold text-slate-900 dark:text-white">Technician Diagnostics Suite</h3>
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white">{t('md_nav5')}</h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                ESP32 node diagnostics, sensor calibrations, and pump/valve actuators.
+                {t('md_nav5Desc')}
               </p>
             </div>
           </Link>
@@ -313,9 +325,9 @@ export default function MunicipalityDashboard() {
                 </div>
                 <ArrowUpRight className="w-5 h-5 text-slate-400 group-hover:text-rose-500 transition-colors" />
               </div>
-              <h3 className="text-sm font-bold text-slate-900 dark:text-white">Emergency Flood Dispatch</h3>
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white">{t('md_nav6')}</h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                Monitor critical flood warnings, storage capacity thresholds, and SOS calls.
+                {t('md_nav6Desc')}
               </p>
             </div>
           </Link>

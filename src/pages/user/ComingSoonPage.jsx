@@ -24,9 +24,9 @@ export default function ComingSoonPage({ titleKey, icon: Icon, description }) {
         )}
         <h2 className="text-xl font-extrabold text-slate-900 dark:text-white">{t(titleKey)}</h2>
         <p className="text-sm font-medium text-slate-600 dark:text-slate-400 max-w-md leading-relaxed">
-          {description || 'This section is being built in upcoming phases. Check back soon!'}
+          {description || t('featureUnderDevelopment')}
         </p>
-        <Badge variant="brand" size="md">Coming Soon</Badge>
+        <Badge variant="brand" size="md">{t('comingSoon')}</Badge>
       </div>
     </motion.div>
   );

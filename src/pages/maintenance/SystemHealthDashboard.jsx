@@ -18,7 +18,7 @@ import { useLanguage } from '../../context/LanguageContext';
 export default function SystemHealthDashboard() {
   const navigate = useNavigate();
   const { isDark } = useTheme();
-  const { t } = useLanguage();
+  const { t, tStatus, locale } = useLanguage();
   const { socket } = useSocket();
 
   const [loading, setLoading] = useState(true);
@@ -73,15 +73,15 @@ export default function SystemHealthDashboard() {
   const getStatusBadge = (status) => {
     switch (status) {
       case 'healthy':
-        return <Badge variant="normal" size="sm" dot>Healthy</Badge>;
+        return <Badge variant="normal" size="sm" dot>{t('status_healthy')}</Badge>;
       case 'warning':
-        return <Badge variant="warning" size="sm" dot>Inspection Needed</Badge>;
+        return <Badge variant="warning" size="sm" dot>{t('sh_inspectionNeeded')}</Badge>;
       case 'critical':
-        return <Badge variant="critical" size="sm" dot>Critical Issue</Badge>;
+        return <Badge variant="critical" size="sm" dot>{t('sh_criticalIssue')}</Badge>;
       case 'offline':
-        return <Badge variant="neutral" size="sm" dot>Offline</Badge>;
+        return <Badge variant="neutral" size="sm" dot>{t('offline')}</Badge>;
       default:
-        return <Badge variant="info" size="sm">Active</Badge>;
+        return <Badge variant="info" size="sm">{t('active')}</Badge>;
     }
   };
 
@@ -113,11 +113,11 @@ export default function SystemHealthDashboard() {
               <Activity className="w-5 h-5" />
             </div>
             <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white font-display">
-              System Health & Hardware Diagnostics
+              {t('sh_title')}
             </h1>
           </div>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Real-time telemetry diagnostics for Node <span className="font-mono text-[#0EA5E9] font-bold">SYS-042</span> (ESP32, Sensors, Actuators, Power)
+            {t('sh_subtitlePrefix')} <span className="font-mono text-[#0EA5E9] font-bold">SYS-042</span> {t('sh_subtitleSuffix')}
           </p>
         </div>
 
@@ -129,7 +129,7 @@ export default function SystemHealthDashboard() {
             icon={RefreshCw}
             className={loading ? 'animate-spin' : ''}
           >
-            Refresh Diagnostics
+            {t('sh_refreshDiagnostics')}
           </Button>
           <Button
             variant="primary"
@@ -138,7 +138,7 @@ export default function SystemHealthDashboard() {
             icon={Wrench}
             className="bg-[#0F4C5C] hover:bg-[#0A333E] text-white"
           >
-            Manage Work Orders
+            {t('sh_manageWorkOrders')}
           </Button>
         </div>
       </div>
@@ -161,40 +161,40 @@ export default function SystemHealthDashboard() {
           </div>
           <div>
             <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-              Overall Hardware Status
+              {t('sh_overallStatus')}
             </span>
             <h2 className="text-2xl font-black text-slate-900 dark:text-white font-display mt-0.5">
-              {data.overallHealthPercent}% Healthy
+              {data.overallHealthPercent}% {t('status_healthy')}
             </h2>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              7 out of 8 hardware components operating within standard parameters.
+              {t('sh_componentsOk', { ok: data.healthyCount, total: data.totalComponents })}
             </p>
             <div className="flex items-center gap-1.5 mt-2 text-[11px] text-slate-400 font-mono">
               <Clock className="w-3.5 h-3.5 text-slate-400" />
-              <span>Last diagnostic: {new Date(data.lastDiagnosticTime).toLocaleTimeString()}</span>
+              <span>{t('sh_lastDiagnostic')}: {new Date(data.lastDiagnosticTime).toLocaleTimeString(locale)}</span>
             </div>
           </div>
         </div>
 
         {/* Status Breakdown Counts */}
         <div className="dark:bg-white/5 bg-white border dark:border-white/10 border-slate-200/90 rounded-xl p-5 shadow-sm flex flex-col justify-between">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Component Health Counts</span>
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">{t('sh_healthCounts')}</span>
           <div className="space-y-2 mt-2">
             <div className="flex items-center justify-between text-xs">
               <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-medium">
-                <CheckCircle2 className="w-3.5 h-3.5" /> Healthy
+                <CheckCircle2 className="w-3.5 h-3.5" /> {t('status_healthy')}
               </span>
               <span className="font-bold font-mono text-slate-900 dark:text-white">{data.healthyCount}</span>
             </div>
             <div className="flex items-center justify-between text-xs">
               <span className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400 font-medium">
-                <AlertTriangle className="w-3.5 h-3.5" /> Warning
+                <AlertTriangle className="w-3.5 h-3.5" /> {t('warning')}
               </span>
               <span className="font-bold font-mono text-slate-900 dark:text-white">{data.warningCount}</span>
             </div>
             <div className="flex items-center justify-between text-xs">
               <span className="flex items-center gap-1.5 text-rose-600 dark:text-rose-400 font-medium">
-                <AlertOctagon className="w-3.5 h-3.5" /> Critical
+                <AlertOctagon className="w-3.5 h-3.5" /> {t('status_critical')}
               </span>
               <span className="font-bold font-mono text-slate-900 dark:text-white">{data.criticalCount}</span>
             </div>
@@ -203,18 +203,18 @@ export default function SystemHealthDashboard() {
 
         {/* Quick Diagnostics Navigation Links */}
         <div className="dark:bg-white/5 bg-white border dark:border-white/10 border-slate-200/90 rounded-xl p-5 shadow-sm flex flex-col justify-between">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Diagnostics Sub-Modules</span>
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">{t('sh_subModules')}</span>
           <div className="space-y-1.5 mt-2">
             <Link to="/maintenance/esp32" className="flex items-center justify-between text-xs text-slate-700 dark:text-slate-300 hover:text-[#0EA5E9] font-medium p-1 rounded hover:bg-slate-100 dark:hover:bg-white/5 transition">
-              <span>ESP32 Controller</span>
+              <span>{t('esp32Diagnostics')}</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
             <Link to="/maintenance/sensors" className="flex items-center justify-between text-xs text-slate-700 dark:text-slate-300 hover:text-[#0EA5E9] font-medium p-1 rounded hover:bg-slate-100 dark:hover:bg-white/5 transition">
-              <span>Sensor Probes</span>
+              <span>{t('sh_sensorProbes')}</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
             <Link to="/maintenance/components" className="flex items-center justify-between text-xs text-slate-700 dark:text-slate-300 hover:text-[#0EA5E9] font-medium p-1 rounded hover:bg-slate-100 dark:hover:bg-white/5 transition">
-              <span>Pump, Valve & Relay</span>
+              <span>{t('sh_pumpValveRelay')}</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
@@ -225,9 +225,9 @@ export default function SystemHealthDashboard() {
       <div>
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-sm font-extrabold text-slate-900 dark:text-white font-display flex items-center gap-2">
-            <Layers className="w-4 h-4 text-[#0EA5E9]" /> Hardware Component Health Matrix ({data.components?.length || 8})
+            <Layers className="w-4 h-4 text-[#0EA5E9]" /> {t('sh_healthMatrix')} ({data.components?.length || 8})
           </h2>
-          <span className="text-xs text-slate-400">Continuous telemetry loop: 5s</span>
+          <span className="text-xs text-slate-400">{t('sh_telemetryLoop')}: 5s</span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -249,12 +249,12 @@ export default function SystemHealthDashboard() {
                   <div>
                     <h3 className="text-sm font-bold text-slate-900 dark:text-white">{c.name}</h3>
                     <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 capitalize">
-                      Category: {c.category}
+                      {t('category')}: {tStatus(c.category)}
                     </p>
                   </div>
 
                   <div className="pt-2 border-t dark:border-white/10 border-slate-100 flex items-center justify-between text-xs">
-                    <span className="text-slate-400">Health Rating</span>
+                    <span className="text-slate-400">{t('sh_healthRating')}</span>
                     <span className={`font-mono font-bold ${c.healthPercentage >= 90 ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'}`}>
                       {c.healthPercentage}%
                     </span>
@@ -262,14 +262,14 @@ export default function SystemHealthDashboard() {
 
                   {c.currentReading && (
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-slate-400">Live Reading</span>
+                      <span className="text-slate-400">{t('sh_liveReading')}</span>
                       <span className="font-mono font-bold text-[#0EA5E9]">{c.currentReading}</span>
                     </div>
                   )}
 
                   {c.operatingTemperatureC && (
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-slate-400">Core Temp</span>
+                      <span className="text-slate-400">{t('sh_coreTemp')}</span>
                       <span className="font-mono text-slate-600 dark:text-slate-300">{c.operatingTemperatureC}°C</span>
                     </div>
                   )}
@@ -278,7 +278,7 @@ export default function SystemHealthDashboard() {
             })
           ) : (
             <div className="col-span-4 py-8 text-center text-xs text-slate-400">
-              Loading hardware component matrix...
+              {t('sh_loadingMatrix')}
             </div>
           )}
         </div>

@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { io as socketIO } from 'socket.io-client';
+import { SOCKET_BASE_URL } from '../config/apiConfig';
 
 let socketInstance = null;
 
@@ -17,14 +18,7 @@ export function useSocket() {
 
   useEffect(() => {
     if (!socketInstance) {
-      const PROD_BACKEND_URL = 'https://suowmrs-server.onrender.com';
-      const serverUrl =
-        import.meta.env.VITE_SOCKET_URL ||
-        (import.meta.env.VITE_API_URL
-          ? import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '')
-          : window.location.hostname === 'localhost'
-          ? window.location.origin
-          : PROD_BACKEND_URL);
+      const serverUrl = SOCKET_BASE_URL;
 
       socketInstance = socketIO(serverUrl, {
         path: '/socket.io',
