@@ -170,13 +170,40 @@ export function stopSpeaking() {
 }
 
 // ─────────────────────────── Text preparation ───────────────────────────
-function cleanForSpeech(text) {
-  return String(text)
+// "&" and "%" spoken in the target language (an engine reading "&" as "ampersand" mid-sentence is jarring)
+const AND_WORD = { en: 'and', hi: 'और', or: 'ଓ', te: 'మరియు', ta: 'மற்றும்', bn: 'এবং' };
+const PERCENT_WORD = { en: 'percent', hi: 'प्रतिशत', or: 'ପ୍ରତିଶତ', te: 'శాతం', ta: 'சதவீதம்', bn: 'শতাংশ' };
+
+// Acronyms every voice otherwise tries to read as a word ("suomers", "yot") → spelled letter by letter.
+// Mirrors server/services/ttsService.js so the browser fallback sounds the same as the neural voice.
+const ACRONYMS = [
+  ['SUOWMRS', 'S U O W M R S'],
+  ['IoT', 'I o T'],
+  ['AI', 'A I'],
+  ['ESP32', 'E S P 32'],
+  ['SOS', 'S O S'],
+  ['GIS', 'G I S'],
+  ['TDS', 'T D S'],
+  ['PWA', 'P W A'],
+  ['LED', 'L E D'],
+  ['UPI', 'U P I'],
+];
+
+export function cleanForSpeech(text, langCode = 'en') {
+  let out = String(text)
     .replace(/<[^>]*>/g, ' ') // strip HTML tags
-    .replace(/[•●▪■◆|—–_*#`]/g, ' ') // strip bullets/markdown
-    .replace(NATIVE_DIGITS, toAsciiDigit)
-    .replace(/(\d)\s*%/g, '$1 percent')
+    .replace(NATIVE_DIGITS, toAsciiDigit);
+  for (const [abbr, spoken] of ACRONYMS) {
+    out = out.replace(new RegExp(`(?<![A-Za-z])${abbr}(?![A-Za-z])`, 'g'), spoken);
+  }
+  return out
+    .replace(/\s*&\s*/g, ` ${AND_WORD[langCode] || AND_WORD.en} `)
+    .replace(/(\d)\s*%/g, `$1 ${PERCENT_WORD[langCode] || PERCENT_WORD.en}`)
+    .replace(/\s*[—–/]\s*/g, ', ') // dashes and slashes → short pause instead of a run-on
+    .replace(/[•●▪■◆|_*#`<>"]/g, ' ') // strip bullets/markdown
+    .replace(/\s*,(\s*,)+/g, ',')
     .replace(/\s+/g, ' ')
+    .replace(/\s+([,.।॥!?])/g, '$1')
     .trim();
 }
 
@@ -310,7 +337,7 @@ export function speakText(text, langCode = 'en', speakerId = 'default', opts = {
 
   stopSpeaking();
   const session = currentSession;
-  const cleanText = cleanForSpeech(text);
+  const cleanText = cleanForSpeech(text, langCode);
   if (!cleanText) return Promise.resolve();
 
   // Reflect the "speaking" state immediately so buttons react even before playback starts
@@ -333,7 +360,9 @@ export function speakText(text, langCode = 'en', speakerId = 'default', opts = {
     try {
       url = await fetchServerAudio(cleanText, langCode, rate);
     } catch (e) {
-      if (!/server tts 4\d\d/.test(e.message)) serverDown = true; // network/5xx → don't keep trying this session
+      // Only a network failure marks the server down for the session; a 4xx/5xx for one phrase
+      // must not push every later phrase onto the browser voice
+      if (!/^server tts \d{3}$/.test(e.message)) serverDown = true;
       console.warn('[TTS] server voice unavailable, using browser voice:', e.message);
       return 'unsupported';
     }
