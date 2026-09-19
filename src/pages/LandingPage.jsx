@@ -55,63 +55,45 @@ export default function LandingPage() {
   const teamMembers = [
     {
       id: 'ananya-routray',
-      name: 'Ananya Routray',
+      name: t('ananya_name', 'Ananya Routray'),
       order: 1,
-      role: 'Faculty Mentor & Project Guide of SUOWMRS',
-      designation: 'Faculty Mentor & Project Guide',
-      institution: 'Madhusudan Law University',
-      department: 'Faculty of Law & Interdisciplinary Research',
-      badge: 'Faculty Mentor & Project Guide',
-      category: 'Academic & Project Guidance',
+      role: t('ananya_role', 'Faculty Mentor & Project Guide of SUOWMRS'),
+      qualification: t('ananya_qual', 'Faculty of Law & Research'),
+      institution: t('mlu_name', 'Madhusudan Law University'),
+      badge: t('facultyMentorBadge', 'Faculty Mentor'),
       image: '/team/ananya-routray.jpg',
-      bio: 'Visionary Faculty Mentor directing the research architecture, environmental compliance, and statutory alignment of SUOWMRS with municipal guidelines and ecological jurisprudence.',
-      vision: 'Harnessing the convergence of environmental jurisprudence and cutting-edge IoT automation to empower civic institutions with accountable, sustainable water management.',
-      expertise: ['Environmental Law', 'Project Guidance', 'Regulatory Policy', 'Ecological Governance'],
+      bio: t('ananya_bio', 'Directing the academic research architecture, environmental compliance, and statutory alignment of SUOWMRS with municipal guidelines and ecological jurisprudence.'),
       isMentor: true,
-      accentGlow: 'from-amber-500/20 via-emerald-500/10 to-transparent',
-      borderColor: 'group-hover:border-amber-500/60 dark:group-hover:border-amber-400/60',
-      badgeColor: 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/30',
-      quote: 'True urban sustainability is realized when statutory environmental mandates meet smart real-time technological execution.',
-    },
-    {
-      id: 'soubhaginee-nayak',
-      name: 'Soubhaginee Nayak',
-      order: 2,
-      role: 'Founding Partner of SUOWMRS',
-      qualification: '3-Year LL.B Student',
-      designation: 'Founding Partner',
-      institution: 'Madhusudan Law University',
-      badge: 'Founding Partner',
-      category: 'Founding Team',
-      image: '/team/soubhaginee-nayak.jpg',
-      bio: 'Co-innovator spearheading system conception, urban water rights policies, and IoT-driven drainage accountability to combat civic water logging and infrastructure challenges.',
-      vision: 'Transforming how urban municipalities treat drainage and water runoff by establishing smart legal and technological defenses against climate-induced flooding.',
-      expertise: ['Urban Water Policy', 'System Architecture', 'Civic Rights', 'Legal Frameworks'],
-      isMentor: false,
-      accentGlow: 'from-sky-500/20 via-teal-500/10 to-transparent',
-      borderColor: 'group-hover:border-sky-500/60 dark:group-hover:border-sky-400/60',
-      badgeColor: 'bg-sky-500/10 text-sky-700 dark:text-sky-300 border-sky-500/30',
-      quote: 'Equitable civic water access and flood protection are fundamental rights that technology and law must jointly secure.',
+      badgeColor: 'bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border-amber-300 dark:border-amber-700/60',
+      quote: t('ananya_quote', 'True urban sustainability is realized when statutory environmental mandates meet smart real-time technological execution.'),
     },
     {
       id: 'priyanka-bihari',
-      name: 'Priyanka Bihari',
-      order: 3,
-      role: 'Founding Partner of SUOWMRS',
-      qualification: '3-Year LL.B Student',
-      designation: 'Founding Partner',
-      institution: 'Madhusudan Law University',
-      badge: 'Founding Partner',
-      category: 'Founding Team',
+      name: t('priyanka_name', 'Priyanka Bihari'),
+      order: 2,
+      role: t('priyanka_role', 'Founding Partner of SUOWMRS'),
+      qualification: t('llbStudent', '3-Year LL.B Student'),
+      institution: t('mlu_name', 'Madhusudan Law University'),
+      badge: t('foundingPartnerBadge', 'Founding Partner'),
       image: '/team/priyanka-bihari.jpg',
-      bio: 'Co-innovator driving closed-loop water treatment integration, community equity standards, and policy frameworks for treated greywater reuse channels.',
-      vision: 'Ensuring that every drop of harvested and recycled water contributes to community sustainability and civic prosperity through innovative law and technology.',
-      expertise: ['Water Reuse Protocols', 'Community Governance', 'Environmental Advocacy', 'Sustainable IoT'],
+      bio: t('priyanka_bio', 'Co-innovator driving closed-loop water treatment integration, community equity standards, and policy frameworks for treated greywater reuse channels.'),
       isMentor: false,
-      accentGlow: 'from-emerald-500/20 via-teal-500/10 to-transparent',
-      borderColor: 'group-hover:border-emerald-500/60 dark:group-hover:border-emerald-400/60',
-      badgeColor: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/30',
-      quote: 'Reclaiming urban greywater into productive community life is the definitive key to climate-resilient cities of tomorrow.',
+      badgeColor: 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700/60',
+      quote: t('priyanka_quote', 'Reclaiming urban greywater into productive community life is the definitive key to climate-resilient cities of tomorrow.'),
+    },
+    {
+      id: 'soubhaginee-nayak',
+      name: t('soubhaginee_name', 'Soubhaginee Nayak'),
+      order: 3,
+      role: t('soubhaginee_role', 'Founding Partner of SUOWMRS'),
+      qualification: t('llbStudent', '3-Year LL.B Student'),
+      institution: t('mlu_name', 'Madhusudan Law University'),
+      badge: t('foundingPartnerBadge', 'Founding Partner'),
+      image: '/team/soubhaginee-nayak.jpg',
+      bio: t('soubhaginee_bio', 'Co-innovator spearheading system conception, urban water rights policies, and IoT-driven drainage accountability to combat civic water-logging.'),
+      isMentor: false,
+      badgeColor: 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700/60',
+      quote: t('soubhaginee_quote', 'Equitable civic water access and flood protection are fundamental rights that technology and law must jointly secure.'),
     },
   ];
 
@@ -748,15 +730,15 @@ export default function LandingPage() {
           <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-700/50 text-emerald-800 dark:text-emerald-300 text-xs font-bold mb-4 shadow-sm">
               <Users className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-              <span>{t('teamEyebrow', 'Leadership & Academic Innovation')}</span>
+              <span>{t('teamEyebrow', 'Leadership & Innovation')}</span>
               <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-              <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Madhusudan Law University</span>
+              <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">{t('mlu_name', 'Madhusudan Law University')}</span>
             </div>
 
             <h2 className="text-2xl sm:text-4xl lg:text-5xl font-black text-slate-900 dark:text-white tracking-tight font-display leading-[1.15]">
-              Meet Our{' '}
+              {t('meetOurTeamTitlePre', 'Meet Our')}{' '}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 via-teal-500 to-amber-500 dark:from-emerald-400 dark:via-teal-300 dark:to-amber-400">
-                Founders & Mentors
+                {t('meetOurTeamTitleHighlight', 'Founders & Mentors')}
               </span>
             </h2>
 
@@ -767,7 +749,7 @@ export default function LandingPage() {
             {/* Voice Audio Readout */}
             <div className="mt-4 flex justify-center">
               <VoiceSpeakerButton
-                text={`Meet Our Team: First, Ananya Routray, Faculty Mentor and Project Guide of SUOWMRS from Madhusudan Law University; Second, Soubhaginee Nayak, Founding Partner and LL.B Student; and Third, Priyanka Bihari, Founding Partner and LL.B Student.`}
+                text={t('teamSpeechText')}
                 label={t('tts_listenTeam', 'Listen to Team Introduction')}
                 size="xs"
                 variant="pill"
@@ -776,106 +758,74 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* 3 Team Cards Grid: 1st Ananya Routray, 2nd Soubhaginee Nayak, 3rd Priyanka Bihari */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 max-w-6xl mx-auto">
+          {/* 3 Team Cards Grid: 1st Ananya, 2nd Priyanka, 3rd Soubhaginee */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {teamMembers.map((member) => (
               <div
                 key={member.id}
-                className={`group relative rounded-3xl bg-white dark:bg-[#0F172A] border border-slate-200 dark:border-white/10 ${member.borderColor} shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 flex flex-col justify-between overflow-hidden`}
+                className="group relative rounded-2xl bg-white dark:bg-[#0F172A] border border-slate-200/90 dark:border-white/10 shadow-sm hover:shadow-xl hover:border-emerald-500/40 dark:hover:border-emerald-400/40 transition-all duration-300 flex flex-col justify-between overflow-hidden"
               >
-                {/* Image Showcase Frame with Top Overlays */}
-                <div className="relative h-80 sm:h-96 w-full overflow-hidden bg-slate-100 dark:bg-slate-900">
+                {/* Photo Frame (Compact Classic) */}
+                <div className="relative h-56 sm:h-64 w-full overflow-hidden bg-slate-100 dark:bg-slate-900">
                   <img
                     src={member.image}
                     alt={member.name}
-                    className="w-full h-full object-cover object-[center_20%] group-hover:scale-105 transition-transform duration-700 ease-out"
+                    className="w-full h-full object-cover object-[center_20%] group-hover:scale-105 transition-transform duration-500 ease-out"
                     loading="lazy"
                   />
 
-                  {/* Gradient Vignette */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/45 to-transparent pointer-events-none" />
-
                   {/* Top Badges */}
-                  <div className="absolute top-3.5 left-3.5 right-3.5 flex items-center justify-between pointer-events-none">
+                  <div className="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none">
                     {member.isMentor ? (
-                      <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-950/80 backdrop-blur-md border border-amber-400/60 text-amber-300 text-xs font-black shadow-lg">
+                      <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-950/80 backdrop-blur-md border border-amber-400/50 text-amber-300 text-[11px] font-bold shadow">
                         <Award className="w-3.5 h-3.5 text-amber-400" />
-                        <span>Faculty Mentor & Guide</span>
+                        <span>{t('facultyMentorBadge', 'Faculty Mentor')}</span>
                       </div>
                     ) : (
-                      <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-950/80 backdrop-blur-md border border-emerald-400/60 text-emerald-300 text-xs font-black shadow-lg">
+                      <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-950/80 backdrop-blur-md border border-emerald-400/50 text-emerald-300 text-[11px] font-bold shadow">
                         <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-                        <span>Founding Partner</span>
+                        <span>{t('foundingPartnerBadge', 'Founding Partner')}</span>
                       </div>
                     )}
 
-                    <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-950/75 backdrop-blur-md border border-white/20 text-slate-200 text-[11px] font-bold shadow-md">
+                    <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-950/70 backdrop-blur-md border border-white/20 text-slate-200 text-[10px] font-bold shadow">
                       <Scale className="w-3 h-3 text-amber-400" />
-                      <span>MLU</span>
+                      <span>{t('mlu_abbr', 'MLU')}</span>
                     </div>
-                  </div>
-
-                  {/* Bottom Image Overlay Details */}
-                  <div className="absolute bottom-4 left-4 right-4 text-left pointer-events-none">
-                    <span className="inline-block text-[10px] font-extrabold uppercase tracking-wider text-amber-300 drop-shadow">
-                      {member.category}
-                    </span>
-                    <h3 className="text-2xl font-black font-display text-white tracking-tight drop-shadow-md">
-                      {member.name}
-                    </h3>
-                    <p className="text-xs font-semibold text-emerald-300 drop-shadow line-clamp-1 mt-0.5">
-                      {member.role}
-                    </p>
                   </div>
                 </div>
 
-                {/* Card Body Details */}
-                <div className="p-5 sm:p-6 flex-1 flex flex-col justify-between">
-                  <div className="space-y-3">
-                    {/* Qualification & University Affiliation */}
-                    <div className="flex items-start gap-2.5 p-3 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-200/70 dark:border-white/5">
-                      <GraduationCap className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
-                      <div className="text-xs">
-                        <p className="font-bold text-slate-900 dark:text-white">
-                          {member.qualification || member.department}
-                        </p>
-                        <p className="text-slate-500 dark:text-slate-400 text-[11px] font-medium">
-                          {member.institution}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Bio Summary */}
-                    <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed line-clamp-3">
+                {/* Card Body (Clean & Classic) */}
+                <div className="p-5 flex-1 flex flex-col justify-between">
+                  <div>
+                    <h3 className="text-lg font-bold font-display text-slate-900 dark:text-white tracking-tight">
+                      {member.name}
+                    </h3>
+                    <p className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 mt-0.5">
+                      {member.role}
+                    </p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-1.5">
+                      <GraduationCap className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                      <span className="truncate">{member.qualification ? `${member.qualification}, ` : ''}{member.institution}</span>
+                    </p>
+                    <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mt-2.5 line-clamp-3">
                       {member.bio}
                     </p>
-
-                    {/* Expertise Skill Tags */}
-                    <div className="flex flex-wrap gap-1.5 pt-1">
-                      {member.expertise.map((skill, sIdx) => (
-                        <span
-                          key={sIdx}
-                          className="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/40"
-                        >
-                          {skill}
-                        </span>
-                      ))}
-                    </div>
                   </div>
 
                   {/* Card Action Row */}
-                  <div className="mt-5 pt-4 border-t border-slate-100 dark:border-white/10 flex items-center justify-between">
-                    <div className="flex items-center gap-1.5 text-[11px] font-bold text-emerald-700 dark:text-emerald-400">
-                      <ShieldCheck className="w-4 h-4 text-emerald-500" />
-                      <span>{member.isMentor ? 'Faculty Guide' : 'Core Innovator'}</span>
-                    </div>
+                  <div className="mt-4 pt-3 border-t border-slate-100 dark:border-white/10 flex items-center justify-between">
+                    <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
+                      <span>{member.isMentor ? t('projectGuide', 'Project Guide') : t('foundingTeam', 'Founding Team')}</span>
+                    </span>
 
                     <button
                       type="button"
                       onClick={() => setSelectedTeamMember(member)}
-                      className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold text-slate-800 dark:text-white bg-slate-100 dark:bg-white/10 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:text-emerald-700 dark:hover:text-emerald-300 transition"
+                      className="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 transition cursor-pointer"
                     >
-                      <span>View Vision</span>
+                      <span>{t('viewVision', 'View Vision')}</span>
                       <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
                     </button>
                   </div>
@@ -899,20 +849,20 @@ export default function LandingPage() {
                   <span>{t('teamAegis', 'Under the Academic & Research Aegis')}</span>
                 </div>
                 <h3 className="text-lg sm:text-xl font-black text-white font-display">
-                  Madhusudan Law University, Cuttack
+                  {t('mlu_cuttack', 'Madhusudan Law University, Cuttack')}
                 </h3>
                 <p className="mt-1.5 text-xs sm:text-sm text-slate-300 leading-relaxed">
                   {t('teamAegisDesc')}
                 </p>
                 <div className="mt-4 flex flex-wrap items-center justify-center sm:justify-start gap-4 text-xs font-semibold text-emerald-300">
                   <span className="flex items-center gap-1.5">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Environmental Jurisprudence
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> {t('aegisPill1', 'Environmental Jurisprudence')}
                   </span>
                   <span className="flex items-center gap-1.5">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-amber-400" /> Automated Flood Defense
+                    <CheckCircle2 className="w-3.5 h-3.5 text-amber-400" /> {t('aegisPill2', 'Automated Flood Defense')}
                   </span>
                   <span className="flex items-center gap-1.5">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-sky-400" /> SDG 6 Clean Water & Sanitation
+                    <CheckCircle2 className="w-3.5 h-3.5 text-sky-400" /> {t('aegisPill3', 'SDG 6 Clean Water & Sanitation')}
                   </span>
                 </div>
               </div>
@@ -921,111 +871,95 @@ export default function LandingPage() {
         </div>
 
         {/* Interactive Member Vision & Profile Modal */}
-        {selectedTeamMember && (
-          <div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-in fade-in duration-200"
-            onClick={() => setSelectedTeamMember(null)}
-          >
+        {selectedTeamMember && (() => {
+          const activeMember = teamMembers.find((m) => m.id === selectedTeamMember.id) || selectedTeamMember;
+          return (
             <div
-              className="relative w-full max-w-lg rounded-3xl bg-white dark:bg-[#0F172A] border border-slate-200 dark:border-white/10 shadow-2xl overflow-hidden"
-              onClick={(e) => e.stopPropagation()}
+              className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-in fade-in duration-200"
+              onClick={() => setSelectedTeamMember(null)}
             >
-              {/* Modal Header Cover with Profile */}
-              <div className="relative h-64 sm:h-72 w-full overflow-hidden bg-slate-900">
-                <img
-                  src={selectedTeamMember.image}
-                  alt={selectedTeamMember.name}
-                  className="w-full h-full object-cover object-[center_20%]"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/50 to-transparent" />
+              <div
+                className="relative w-full max-w-md rounded-2xl bg-white dark:bg-[#0F172A] border border-slate-200 dark:border-white/10 shadow-2xl overflow-hidden"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Modal Header Cover with Profile */}
+                <div className="relative h-56 sm:h-64 w-full overflow-hidden bg-slate-900">
+                  <img
+                    src={activeMember.image}
+                    alt={activeMember.name}
+                    className="w-full h-full object-cover object-[center_20%]"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
 
-                {/* Close Button */}
-                <button
-                  type="button"
-                  onClick={() => setSelectedTeamMember(null)}
-                  className="absolute top-4 right-4 p-2 rounded-full bg-slate-900/80 hover:bg-slate-800 text-white border border-white/20 transition cursor-pointer"
-                >
-                  <X className="w-4 h-4" />
-                </button>
+                  {/* Close Button */}
+                  <button
+                    type="button"
+                    onClick={() => setSelectedTeamMember(null)}
+                    className="absolute top-3 right-3 p-1.5 rounded-full bg-slate-900/80 hover:bg-slate-800 text-white border border-white/20 transition cursor-pointer"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
 
-                {/* Badges */}
-                <div className="absolute top-4 left-4 flex items-center gap-2">
-                  <span className="px-3 py-1 rounded-full bg-slate-950/80 backdrop-blur-md border border-white/20 text-xs font-bold text-amber-300">
-                    {selectedTeamMember.badge}
+                  {/* Badge */}
+                  <div className="absolute top-3 left-3">
+                    <span className="px-2.5 py-1 rounded-full bg-slate-950/80 backdrop-blur-md border border-white/20 text-[11px] font-bold text-amber-300">
+                      {activeMember.badge}
+                    </span>
+                  </div>
+
+                  {/* Name & Title */}
+                  <div className="absolute bottom-3 left-4 right-4 text-white">
+                    <h3 className="text-xl sm:text-2xl font-bold font-display">{activeMember.name}</h3>
+                    <p className="text-xs font-semibold text-emerald-300 mt-0.5">
+                      {activeMember.role}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Modal Body */}
+                <div className="p-5 space-y-3.5 max-h-[50vh] overflow-y-auto">
+                  <div className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200/70 dark:border-white/5 text-xs">
+                    <GraduationCap className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                    <div>
+                      <p className="font-bold text-slate-900 dark:text-white">
+                        {activeMember.qualification ? `${activeMember.qualification}, ` : ''}{activeMember.institution}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                      {t('roleAndContribution', 'Role & Contribution')}
+                    </h4>
+                    <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
+                      {activeMember.bio}
+                    </p>
+                  </div>
+
+                  <div className="p-3 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200/60 dark:border-emerald-800/40">
+                    <p className="text-xs italic text-emerald-900 dark:text-emerald-200 leading-relaxed">
+                      "{activeMember.quote}"
+                    </p>
+                  </div>
+                </div>
+
+                {/* Modal Footer */}
+                <div className="p-3.5 border-t border-slate-100 dark:border-white/10 bg-slate-50/50 dark:bg-[#090E17]/50 flex items-center justify-between">
+                  <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+                    {t('suowmrsInitiative', 'SUOWMRS Initiative')}
                   </span>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedTeamMember(null)}
+                    className="px-3.5 py-1.5 rounded-xl text-xs font-bold text-white bg-emerald-800 hover:bg-emerald-900 transition cursor-pointer"
+                  >
+                    {t('close', 'Close')}
+                  </button>
                 </div>
-
-                {/* Name & Title */}
-                <div className="absolute bottom-4 left-5 right-5 text-white">
-                  <h3 className="text-2xl sm:text-3xl font-black font-display">{selectedTeamMember.name}</h3>
-                  <p className="text-xs sm:text-sm font-semibold text-emerald-300 mt-1">
-                    {selectedTeamMember.role}
-                  </p>
-                </div>
-              </div>
-
-              {/* Modal Body */}
-              <div className="p-6 space-y-4 max-h-[50vh] overflow-y-auto">
-                <div className="flex items-center gap-2.5 p-3 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-200/70 dark:border-white/5">
-                  <GraduationCap className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                  <div className="text-xs">
-                    <p className="font-bold text-slate-900 dark:text-white">
-                      {selectedTeamMember.qualification || selectedTeamMember.department}
-                    </p>
-                    <p className="text-slate-500 dark:text-slate-400 text-[11px]">
-                      {selectedTeamMember.institution}
-                    </p>
-                  </div>
-                </div>
-
-                <div>
-                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">
-                    Leadership Vision & Role
-                  </h4>
-                  <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
-                    {selectedTeamMember.bio}
-                  </p>
-                </div>
-
-                <div className="p-3.5 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200/60 dark:border-emerald-800/40">
-                  <p className="text-xs italic text-emerald-900 dark:text-emerald-200 leading-relaxed">
-                    "{selectedTeamMember.quote}"
-                  </p>
-                </div>
-
-                <div>
-                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-                    Core Specializations
-                  </h4>
-                  <div className="flex flex-wrap gap-1.5">
-                    {selectedTeamMember.expertise.map((exp, eIdx) => (
-                      <span
-                        key={eIdx}
-                        className="text-xs font-semibold px-3 py-1 rounded-xl bg-slate-100 dark:bg-white/5 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-white/10"
-                      >
-                        {exp}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Modal Footer */}
-              <div className="p-4 border-t border-slate-100 dark:border-white/10 bg-slate-50/50 dark:bg-[#090E17]/50 flex items-center justify-between">
-                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
-                  SUOWMRS Core Initiative
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setSelectedTeamMember(null)}
-                  className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-emerald-800 hover:bg-emerald-900 transition"
-                >
-                  Close
-                </button>
               </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
       </section>
 
       {/* FAQ Accordion Section */}

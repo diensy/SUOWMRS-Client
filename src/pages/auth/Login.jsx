@@ -19,8 +19,8 @@ export default function Login() {
   const { t } = useLanguage();
 
   const [role, setRole] = useState('Resident');
-  const [email, setEmail] = useState('resident@suowmrs.org');
-  const [password, setPassword] = useState('password123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -46,16 +46,6 @@ export default function Login() {
     setRole(selectedRole);
     setErrorMessage('');
     setSignupSuccessMsg('');
-    if (selectedRole === 'Resident') {
-      setEmail('resident@suowmrs.org');
-      setPassword('password123');
-    } else if (selectedRole === 'Technician') {
-      setEmail('technician@suowmrs.org');
-      setPassword('password123');
-    } else {
-      setEmail('admin@suowmrs.gov.in');
-      setPassword('password123');
-    }
   };
 
   const handleSubmit = async (e) => {
@@ -134,7 +124,7 @@ export default function Login() {
           {[
             { id: 'Resident', label: t('role_resident') },
             { id: 'Technician', label: t('role_technician') },
-            { id: 'Admin', label: t('login_municipality') },
+            { id: 'Admin', label: t('role_admin') },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -177,7 +167,7 @@ export default function Login() {
               icon={Mail}
               value={email}
               onChange={(e) => { setEmail(e.target.value); setErrorMessage(''); }}
-              placeholder="user@suowmrs.org"
+              placeholder="name@example.com"
               required
             />
 
@@ -227,16 +217,9 @@ export default function Login() {
               icon={ArrowRight}
               iconPosition="right"
             >
-              {t('signInAs', { role: role === 'Admin' ? t('login_municipality') : t(`role_${role.toLowerCase()}`) })}
+              {t('signInAs', { role: role === 'Admin' ? t('role_admin') : t(`role_${role.toLowerCase()}`) })}
             </Button>
           </form>
-
-          {/* Demo tip */}
-          <div className="mt-5 p-2.5 rounded-xl dark:bg-white/5 bg-slate-50 border dark:border-white/10 border-slate-200 text-center">
-            <p className="text-[11px] text-slate-500 dark:text-slate-400">
-              💡 <strong>{t('login_quickDemo')}</strong> {t('login_quickDemoDesc')}
-            </p>
-          </div>
 
           <div className="mt-5 pt-4 border-t dark:border-white/10 border-slate-100 text-center text-xs text-slate-500 dark:text-slate-400">
             {t('noAccountYet')}{' '}

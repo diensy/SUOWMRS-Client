@@ -454,7 +454,7 @@ export default {
   // ── Auth pages ──
   login_title: 'మళ్ళీ స్వాగతం',
   login_subtitle: 'మీ నీటి పర్యవేక్షణ & వరద నిర్వహణ పోర్టల్‌ను యాక్సెస్ చేయడానికి సైన్ ఇన్ చేయండి',
-  login_municipality: 'మునిసిపాలిటీ',
+  login_municipality: 'అడ్మిన్',
   rememberMe: 'నన్ను గుర్తుంచుకో',
   forgotPasswordQ: 'పాస్‌వర్డ్ మర్చిపోయారా?',
   signInAs: '{role}గా సైన్ ఇన్',

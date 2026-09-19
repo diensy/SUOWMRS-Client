@@ -454,7 +454,7 @@ export default {
   // ── Auth pages ──
   login_title: 'மீண்டும் வருக',
   login_subtitle: 'உங்கள் நீர் கண்காணிப்பு & வெள்ள மேலாண்மை போர்டலை அணுக உள்நுழையவும்',
-  login_municipality: 'நகராட்சி',
+  login_municipality: 'நிர்வாகி',
   rememberMe: 'என்னை நினைவில் கொள்',
   forgotPasswordQ: 'கடவுச்சொல் மறந்துவிட்டதா?',
   signInAs: '{role} ஆக உள்நுழைக',

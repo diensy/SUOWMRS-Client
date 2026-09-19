@@ -18,9 +18,9 @@ export default function Register() {
   const navigate = useNavigate();
   const { theme, toggleTheme, isDark } = useTheme();
   const { t } = useLanguage();
-  const roleLabel = (r) => (r === 'Admin' ? t('login_municipality') : t(`role_${r.toLowerCase()}`));
+  const roleLabel = (r) => (r === 'Admin' ? t('role_admin') : t(`role_${r.toLowerCase()}`));
 
-  // Role: 'Resident' | 'Technician' | 'Admin' (Municipality)
+  // Role: 'Resident' | 'Technician' | 'Admin'
   const [activeRole, setActiveRole] = useState('Resident');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -169,7 +169,7 @@ export default function Register() {
           {[
             { id: 'Resident', label: t('reg_tabResident') },
             { id: 'Technician', label: t('role_technician') },
-            { id: 'Admin', label: t('login_municipality') },
+            { id: 'Admin', label: t('role_admin') },
           ].map((tab) => (
             <button
               key={tab.id}

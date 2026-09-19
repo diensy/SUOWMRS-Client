@@ -454,7 +454,7 @@ export default {
   // ── Auth pages ──
   login_title: 'আবার স্বাগতম',
   login_subtitle: 'আপনার জল পর্যবেক্ষণ ও বন্যা ব্যবস্থাপনা পোর্টালে প্রবেশ করতে সাইন ইন করুন',
-  login_municipality: 'পৌরসভা',
+  login_municipality: 'অ্যাডমিন',
   rememberMe: 'আমাকে মনে রাখুন',
   forgotPasswordQ: 'পাসওয়ার্ড ভুলে গেছেন?',
   signInAs: '{role} হিসেবে সাইন ইন',
